@@ -1,0 +1,29 @@
+{
+  "name": "project-reserve",
+  "version": "1.0.0",
+  "description": "Project Reserve",
+  "main": "./main/api/index.js",
+  "scripts": {
+    "db:makemigrations": "./node_modules/sequelize-auto-migrations/bin/makemigration.js",
+    "start": "node api/main/index.js",
+    "dev": "nodemon api/main/index.js",
+    "test": "jest"
+  },
+  "author": "Jack Ferguson",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "1.15.2",
+    "express": "4.14.0",
+    "jest": "^26.4.0",
+    "morgan": "1.7.0",
+    "mysql": "^2.18.1",
+    "sequelize": "3.24.3",
+    "sequelize-auto-migrations": "github:scimonster/sequelize-auto-migrations#a063aa6535a3f580623581bf866cef2d609531ba",
+    "sqlite3": "^5.0.0",
+    "supertest": "^4.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.10.2",
+    "sequelize-cli": "^2.4.0"
+  }
+}
