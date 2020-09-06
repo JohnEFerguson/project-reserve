@@ -15,7 +15,7 @@
     "body-parser": "1.15.2",
     "express": "4.14.0",
     "jest": "^26.4.0",
-    "morgan": "1.7.0",
+    "morgan": "1.9.1",
     "mysql": "^2.18.1",
     "sequelize": "3.24.3",
     "sequelize-auto-migrations": "github:scimonster/sequelize-auto-migrations#a063aa6535a3f580623581bf866cef2d609531ba",
