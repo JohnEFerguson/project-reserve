@@ -8,6 +8,7 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
+    "start:server": "nodemon start ./api/index.js",
     "generate": "nuxt generate",
     "lint": "yarn lint:js",
     "lint:js": "eslint --ext .js,.vue --ignore-path .gitignore ."
@@ -27,10 +28,11 @@
     "@nuxtjs/eslint-module": "^2.0.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.2.0",
-    "eslint-plugin-nuxt": "^1.0.0",
-    "prettier": "^2.1.2",
-    "supertest": "^4.0.2",
     "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-prettier": "^3.1.2"
+    "eslint-plugin-nuxt": "^1.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.1.2",
+    "supertest": "^4.0.2"
   }
 }
