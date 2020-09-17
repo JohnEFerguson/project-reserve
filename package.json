@@ -1,29 +1,36 @@
 {
-  "name": "project-reserve",
+  "name": "name",
   "version": "1.0.0",
-  "description": "Project Reserve",
-  "main": "./main/api/index.js",
+  "description": "project reserve nuxt",
+  "author": "Sam Grund <samuel.grund@1stdibs.com>",
+  "private": true,
   "scripts": {
-    "db:makemigrations": "./node_modules/sequelize-auto-migrations/bin/makemigration.js",
-    "start": "node api/main/index.js",
-    "dev": "nodemon api/main/index.js",
-    "test": "jest"
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "yarn lint:js",
+    "lint:js": "eslint --ext .js,.vue --ignore-path .gitignore ."
   },
-  "author": "Jack Ferguson",
-  "license": "MIT",
   "dependencies": {
-    "body-parser": "1.15.2",
-    "express": "4.14.0",
-    "jest": "^26.4.0",
-    "morgan": "1.7.0",
+    "@nuxt/http": "latest",
+    "body-parser": "^1.19.0",
+    "morgan": "^1.10.0",
     "mysql": "^2.18.1",
-    "sequelize": "3.24.3",
-    "sequelize-auto-migrations": "github:scimonster/sequelize-auto-migrations#a063aa6535a3f580623581bf866cef2d609531ba",
-    "sqlite3": "^5.0.0",
-    "supertest": "^4.0.2"
+    "nuxt": "latest",
+    "sequelize": "^6.3.5",
+    "sequelize-auto-migrations": "^1.0.3",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.10.2",
-    "sequelize-cli": "^2.4.0"
+    "@nuxtjs/eslint-config": "^3.0.0",
+    "@nuxtjs/eslint-module": "^2.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.2.0",
+    "eslint-plugin-nuxt": "^1.0.0",
+    "prettier": "^2.1.2",
+    "supertest": "^4.0.2",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2"
   }
 }
