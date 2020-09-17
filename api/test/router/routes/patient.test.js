@@ -1,5 +1,5 @@
 const supertest = require('supertest');
-const app = require('../../../../api/main');
+const app = require('../../../');
 
 describe("Testing the api", () => {
 

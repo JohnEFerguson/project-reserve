@@ -5,7 +5,9 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const env = require('./main/config/env.js')
 const db = require('./main/config/db.js')
+
 const patientsRoute = require('./main/routes/patients')
+const configurationsRoute = require('./main/routes/configurations')
 
 const app = express()
 const PORT = env.PORT
@@ -36,6 +38,7 @@ app.use(async (req, res, next) => {
 })
 
 app.use(patientsRoute)
+app.use(configurationsRoute)
 
 module.exports = app
 
