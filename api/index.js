@@ -1,0 +1,47 @@
+'use strict'
+
+const express = require('express')
+const bodyParser = require('body-parser')
+const morgan = require('morgan')
+const env = require('./main/config/env.js')
+const db = require('./main/config/db.js')
+const patientsRoute = require('./main/routes/patients')
+
+const app = express()
+const PORT = env.PORT
+
+app.use(morgan('combined'))
+app.use(bodyParser.json())
+
+app.use((req, res, next) => {
+  res.header('Content-Type', 'application/json')
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  )
+  next()
+})
+
+let database
+
+app.use(async (req, res, next) => {
+  if (!database) {
+    await db.sequelize.sync({ force: true })
+    database = db
+  }
+  req.db = database
+  next()
+})
+
+app.use(patientsRoute)
+
+module.exports = app
+
+if (require.main === module) {
+  const port = process.env.PORT || 8019
+  app.listen(PORT, () => {
+    console.log('listening on port:', port)
+  })
+}
