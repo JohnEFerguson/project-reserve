@@ -5,44 +5,24 @@ const { Router } = require('express')
 const router = Router()
 
 // GET all patients
-router.get('/patients', (req, res) => {
+router.get('/patients', async (req, res) => {
   const { db } = req
-  db.patient
-    .findAll({
-      order: ['id'],
-    })
-    .then((patients) => {
-      res.json(patients)
-    })
+  return res.json(await db.patient.findAll({ order: ['id'] }))
 })
 
 // GET one patient by id
-router.get('/patients/:id', (req, res) => {
+router.get('/patients/:id', async (req, res) => {
   const { db } = req
 
   const id = req.params.id
-  db.patient
-    .find({
-      where: { id },
-    })
-    .then((patient) => {
-      res.json(patient)
-    })
+  return res.json(await db.patient.find({ where: { id } }))
 })
 
 // POST single patient
-router.post('/patients', (req, res) => {
+router.post('/patients', async (req, res) => {
   const { db } = req
 
-  const task = req.body.task
-  db.patient
-    .create({
-      task,
-      urgency: null,
-    })
-    .then((newTodo) => {
-      res.json(newTodo)
-    })
+  return res.json(await db.patient.create(req.body))
 })
 
 module.exports = router

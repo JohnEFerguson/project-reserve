@@ -16,9 +16,10 @@
   "dependencies": {
     "@nuxt/http": "latest",
     "body-parser": "^1.19.0",
+    "jest": "^26.4.2",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
-    "nuxt": "latest",
+    "nuxt": "^2.14.6",
     "sequelize": "^6.3.5",
     "sequelize-auto-migrations": "^1.0.3",
     "sqlite3": "^5.0.0"

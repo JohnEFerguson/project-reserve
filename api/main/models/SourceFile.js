@@ -1,22 +1,24 @@
 'use strict'
 
-module.exports = (sequelize, DataTypes) => {
+const { INTEGER, STRING, DATE, ENUM, NOW } = require("sequelize");
+
+module.exports = (sequelize) => {
   const SourceFile = sequelize.define('source_file', {
     id: {
-      type: DataTypes.INTEGER,
+      type: INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
     name: {
-      type: DataTypes.STRING,
+      type: STRING,
     },
     state: {
-      type: DataTypes.ENUM('FINISHED','IN_PROGRESS'),
+      type: ENUM('FINISHED','IN_PROGRESS'),
     },
     dateLoaded: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
+      type: DATE,
+      defaultValue: NOW
     }
     }, {
     timestamps: false,
