@@ -1,26 +1,23 @@
 <template>
   <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">nuxt-express</h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+    <h1>Project Reserve</h1>
+    <div class="description">
+      <p>
+        This application implements a reserve system as described in a 2020
+        working paper authored by a team of market design researchers: Parag
+        Pathak (MIT), Tayfun Sönmez (Boston College), Utku Ünver (Boston
+        College), and Bumin Yenmez (Boston College). For more information on the
+        working paper, the basics of a reserve system, and how to contact the
+        authors, please refer to the buttons below. To begin using the reserve
+        system implementation, click the start buton.
+      </p>
+    </div>
+    <div class="buttons">
+      <button>About</button>
+      <button>Paper</button>
+      <button>Contact</button>
+      <button>Press</button>
+      <button>Start</button>
     </div>
   </div>
 </template>
@@ -35,14 +32,43 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .container {
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-around;
   align-items: center;
   text-align: center;
+}
+.description {
+  width: 50%;
+  padding: 45px;
+  font-size: 20px;
+  line-height: 1.25;
+  border: 2px solid #44546a;
+  border-radius: 18px;
+}
+.buttons {
+  display: flex;
+
+  width: 50%;
+  & > button {
+    cursor: pointer;
+    margin-right: 18px;
+    background: #44546a;
+    color: white;
+    border-radius: 18px;
+    outline: none;
+    font-size: 20px;
+    border: 0;
+    padding: 18px 27px;
+    &:last-child {
+      margin-left: auto;
+      margin-right: none;
+    }
+  }
 }
 
 .title {

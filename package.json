@@ -15,11 +15,14 @@
   },
   "dependencies": {
     "@nuxt/http": "latest",
+    "@nuxtjs/dotenv": "^1.4.1",
     "body-parser": "^1.19.0",
     "jest": "^26.4.2",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
-    "nuxt": "^2.14.6",
+    "node-sass": "^4.14.1",
+    "nuxt": "latest",
+    "sass-loader": "^10.0.2",
     "sequelize": "^6.3.5",
     "sequelize-auto-migrations": "^1.0.3",
     "sqlite3": "^5.0.0"
