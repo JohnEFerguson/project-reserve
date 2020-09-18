@@ -13,11 +13,11 @@
       </p>
     </div>
     <div class="buttons">
-      <button>About</button>
-      <button>Paper</button>
-      <button>Contact</button>
-      <button>Press</button>
-      <button>Start</button>
+      <button class="menuButton">About</button>
+      <button class="menuButton">Paper</button>
+      <button class="menuButton">Contact</button>
+      <button class="menuButton">Press</button>
+      <nuxt-link to="/create" class="menuButton">Start</nuxt-link>
     </div>
   </div>
 </template>
@@ -47,49 +47,33 @@ export default {
   padding: 45px;
   font-size: 20px;
   line-height: 1.25;
-  border: 2px solid #44546a;
+  border: 2px solid var(--dark-blue);
   border-radius: 18px;
 }
 .buttons {
   display: flex;
 
   width: 50%;
-  & > button {
+  & > .menuButton {
     cursor: pointer;
     margin-right: 18px;
-    background: #44546a;
+    background: var(--dark-blue);
+    border: 2px solid var(--dark-blue);
     color: white;
     border-radius: 18px;
     outline: none;
     font-size: 20px;
-    border: 0;
     padding: 18px 27px;
+    transition: 0.25s transform ease;
+    text-decoration: none;
     &:last-child {
       margin-left: auto;
       margin-right: none;
     }
+    &:hover {
+      background: white;
+      color: var(--dark-blue);
+    }
   }
-}
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
 }
 </style>
