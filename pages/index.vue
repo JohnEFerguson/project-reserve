@@ -9,7 +9,7 @@
         College), and Bumin Yenmez (Boston College). For more information on the
         working paper, the basics of a reserve system, and how to contact the
         authors, please refer to the buttons below. To begin using the reserve
-        system implementation, click the start buton.
+        system implementation, click the start button.
       </p>
     </div>
     <div class="buttons">
