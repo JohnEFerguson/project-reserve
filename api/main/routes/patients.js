@@ -6,7 +6,9 @@ const router = Router()
 
 // GET all patients
 router.get('/patients', (req, res) => {
+
   const { db } = req
+  
   db.patient
     .findAll({
       order: ['id'],
@@ -18,6 +20,7 @@ router.get('/patients', (req, res) => {
 
 // GET one patient by id
 router.get('/patients/:id', (req, res) => {
+  
   const { db } = req
 
   const id = req.params.id
@@ -32,6 +35,7 @@ router.get('/patients/:id', (req, res) => {
 
 // POST single patient
 router.post('/patients', (req, res) => {
+  
   const { db } = req
 
   const task = req.body.task
