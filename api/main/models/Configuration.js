@@ -4,17 +4,17 @@ const { INTEGER, STRING } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-  const Patient = sequelize.define('patient', {
+  const Configuration = sequelize.define('configuration', {
     id: {
       type: INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
-    public_id: {
-      type: STRING,
+    supply: {
+      type: INTEGER,
     },
-    name: {
+    unitType: {
       type: STRING,
     }
   }, {
@@ -24,5 +24,5 @@ module.exports = (sequelize) => {
     freezeTableName: true
   });
 
-  return Patient;
+  return Configuration;
 };

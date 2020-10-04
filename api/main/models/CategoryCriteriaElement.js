@@ -4,18 +4,18 @@ const { INTEGER, STRING } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-  const Patient = sequelize.define('patient', {
+  const CategoryCriteriaElement = sequelize.define('category_criteria_element', {
     id: {
       type: INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
-    public_id: {
-      type: STRING,
-    },
     name: {
       type: STRING,
+    },
+    order: {
+      type: INTEGER,
     }
   }, {
     timestamps: false,
@@ -24,5 +24,5 @@ module.exports = (sequelize) => {
     freezeTableName: true
   });
 
-  return Patient;
+  return CategoryCriteriaElement;
 };

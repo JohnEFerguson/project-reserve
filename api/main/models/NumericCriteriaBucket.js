@@ -4,18 +4,18 @@ const { INTEGER, STRING } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-  const Patient = sequelize.define('patient', {
+  const NumericCriteriaBucket = sequelize.define('numeric_criteria_bucket', {
     id: {
       type: INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
-    public_id: {
-      type: STRING,
+    min: {
+      type: INTEGER,
     },
-    name: {
-      type: STRING,
+    max: {
+      type: INTEGER,
     }
   }, {
     timestamps: false,
@@ -24,5 +24,5 @@ module.exports = (sequelize) => {
     freezeTableName: true
   });
 
-  return Patient;
+  return NumericCriteriaBucket;
 };
