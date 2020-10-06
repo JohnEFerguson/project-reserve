@@ -13,29 +13,22 @@
       </p>
     </div>
     <div class="buttons">
-      <button class="menuButton">About</button>
-      <button class="menuButton">Paper</button>
-      <button class="menuButton">Contact</button>
-      <button class="menuButton">Press</button>
-      <nuxt-link to="/create" class="menuButton">Start</nuxt-link>
+      <button class="menuButton navButton">About</button>
+      <button class="menuButton navButton">Paper</button>
+      <button class="menuButton navButton">Contact</button>
+      <button class="menuButton navButton">Press</button>
+      <nuxt-link to="/create" class="menuButton navButton">Start</nuxt-link>
     </div>
   </div>
 </template>
 <script>
-export default {
-  // async asyncData ({ $http }) {
-  //   // const test = await $http.$get('/api/test')
-  //   return {
-  //     test: null
-  //   }
-  // }
-}
+export default {}
 </script>
 
 <style scoped lang="scss">
 .container {
+  height: 100vh;
   margin: 0 auto;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -55,24 +48,10 @@ export default {
 
   width: 50%;
   & > .menuButton {
-    cursor: pointer;
     margin-right: 18px;
-    background: var(--dark-blue);
-    border: 2px solid var(--dark-blue);
-    color: white;
-    border-radius: 18px;
-    outline: none;
-    font-size: 20px;
-    padding: 18px 27px;
-    transition: 0.25s transform ease;
-    text-decoration: none;
     &:last-child {
       margin-left: auto;
       margin-right: none;
-    }
-    &:hover {
-      background: white;
-      color: var(--dark-blue);
     }
   }
 }

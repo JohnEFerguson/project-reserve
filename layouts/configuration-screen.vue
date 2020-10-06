@@ -1,13 +1,13 @@
 <template>
-  <div>
+  <div class="config-container">
     <div class="pageTabs">
-      <div :class="['pageTab', { isActive: pageUrl === 'unit-definition' }]">
+      <div :class="['pageTab', { isActive: pageUrl === '/unit-definition' }]">
         Unit Definition
       </div>
-      <div :class="['pageTab', { isActive: pageUrl === 'specify-reserve' }]">
+      <div :class="['pageTab', { isActive: pageUrl === '/specify-reserve' }]">
         Specify Reserve
       </div>
-      <div :class="['pageTab', { isActive: pageUrl === 'finish' }]">
+      <div :class="['pageTab', { isActive: pageUrl === '/finish' }]">
         Finish & Confirm
       </div>
     </div>
@@ -24,30 +24,18 @@ export default {
   },
 }
 </script>
-<style lang="scss">
-html {
-  font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 16px;
-  word-spacing: 1px;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  box-sizing: border-box;
-}
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
+<style scoped lang="scss">
+.config-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-
 .pageTabs {
   display: flex;
-  width: 100%;
-  padding: 36px;
+  width: 700px;
+  padding: 54px 0;
   justify-content: space-between;
 }
 .pageTab {
@@ -56,6 +44,8 @@ html {
   align-items: center;
   background-color: var(--light-grey);
   color: var(--dark-grey);
+  padding: 18px 36px;
+  border-radius: 18px;
   &.isActive {
     background-color: var(--dark-blue);
     color: white;
