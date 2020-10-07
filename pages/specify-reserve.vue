@@ -1,9 +1,10 @@
 <template>
   <div class="reserveContainer">
     <EditReserveCategoryModal
-      :is-open="editReserveCategoryModalOpen"
+      v-if="editReserveCategoryModalOpen"
       :on-close="closeEditReserveCategoryModal"
       :mode="editReserveCategoryModalMode"
+      :category-to-edit="categoryToEdit || undefined"
     />
     <div class="reserveTableContainer">
       <div class="reserveTableLabels">
@@ -16,7 +17,7 @@
       <div class="reserveTableRows">
         <div
           v-for="category in reserveCategories"
-          :key="category.name"
+          :key="`${category.name}${category.order}`"
           class="reserveTableRow"
         >
           <span class="rowCell">{{ category.order }}</span>
@@ -28,10 +29,22 @@
           <button>{{ 'Priority' }}</button>
           <span class="actionButtons">
             <font-awesome-icon icon="trash" class="icon" />
-            <font-awesome-icon icon="edit" class="icon" />
+            <font-awesome-icon
+              icon="edit"
+              class="icon"
+              @click="() => editCategory(category)"
+            />
             <div class="arrows">
-              <font-awesome-icon icon="arrow-up" class="topArrow" />
-              <font-awesome-icon icon="arrow-down" class="icon" />
+              <font-awesome-icon
+                icon="arrow-up"
+                class="topArrow icon"
+                @click="() => moveCategoryUp(category)"
+              />
+              <font-awesome-icon
+                icon="arrow-down"
+                class="icon"
+                @click="() => moveCategoryDown(category)"
+              />
             </div>
           </span>
         </div>
@@ -55,6 +68,11 @@
 
 <script>
 import EditReserveCategoryModal from '~/components/EditReserveCategoryModal.vue'
+
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+
 export default {
   layout: 'configuration-screen',
   middleware: 'has-category',
@@ -63,6 +81,7 @@ export default {
     return {
       editReserveCategoryModalOpen: false,
       editReserveCategoryModalMode: '',
+      categoryToEdit: null,
     }
   },
   computed: {
@@ -83,6 +102,20 @@ export default {
     },
     closeEditReserveCategoryModal() {
       this.editReserveCategoryModalOpen = false
+      this.categoryToEdit = null
+    },
+    editCategory(category) {
+      this.editReserveCategoryModalMode = 'edit'
+      this.categoryToEdit = deepClone(category)
+      this.$nextTick(() => {
+        this.editReserveCategoryModalOpen = true
+      })
+    },
+    moveCategoryUp(category) {
+      this.$store.commit('moveCategory', { category, direction: 'up' })
+    },
+    moveCategoryDown(category) {
+      this.$store.commit('moveCategory', { category, direction: 'down' })
     },
   },
 }
@@ -164,5 +197,8 @@ export default {
 }
 .allocationText {
   color: var(--dark-blue);
+}
+.icon {
+  cursor: pointer;
 }
 </style>

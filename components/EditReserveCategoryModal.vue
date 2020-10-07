@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isOpen" class="modalWrapper">
+  <div class="modalWrapper">
     <div class="modalInnerWrapper">
       <h2>{{ `${mode === 'add' ? 'Add' : 'Edit'} Reserve Category` }}</h2>
       <div class="modalBody">
@@ -301,24 +301,30 @@ const NUMERIC_TYPE = 'numeric'
 const defaultCriteria = {
   criteriaName: '',
   criteriaType: CATEGORY_TYPE,
-  order: 0,
+  order: null,
   ...deepClone(categoryFields),
   ...deepClone(numericFields),
 }
 export default {
   props: {
-    isOpen: { type: Boolean, required: true },
     onClose: { type: Function, required: true },
     mode: { type: String, required: true },
+    categoryToEdit: {
+      type: Object,
+      required: false,
+      default: function defaultCategory() {
+        return {
+          name: '',
+          description: '',
+          size: 0,
+          priority: [{ ...deepClone(defaultCriteria) }],
+        }
+      },
+    },
   },
   data() {
     return {
-      reserveCategory: {
-        name: '',
-        description: '',
-        size: 0,
-        priority: [{ ...deepClone(defaultCriteria) }],
-      },
+      reserveCategory: deepClone(this.categoryToEdit),
       currentCriteria: 0,
     }
   },
@@ -350,7 +356,8 @@ export default {
   },
   methods: {
     saveCategory() {
-      console.log(this.reserveCategory)
+      this.$store.commit('saveCategory', this.reserveCategory)
+      this.onClose()
     },
     updateCriteriaTab(newIndex) {
       this.currentCriteria = newIndex
