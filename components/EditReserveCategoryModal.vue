@@ -3,7 +3,7 @@
     <div class="modalInnerWrapper">
       <h2>{{ `${mode === 'add' ? 'Add' : 'Edit'} Reserve Category` }}</h2>
       <div class="modalBody">
-        <div class="modalTextFields">
+        <div class="flexcolumn">
           <div class="flexcolumn mb-27">
             <label class="ml-9 mb-9" for="categoryName"
               >Reserve category abbreviated name</label
@@ -43,224 +43,27 @@
           <h4 class="mb-9 fw-n">Specification of priority order</h4>
           <div class="modalCriteriaTabs flexrow">
             <span
-              v-for="(criteria, index) in reserveCategory.priority"
-              :key="`criteria-tab-${index}`"
+              v-for="(criteria, criteriaIndex) in reserveCategory.priority"
+              :key="`criteria-tab-${criteriaIndex}`"
               :class="[
                 'modalCriteriaTab',
-                { isActive: index === currentCriteria },
+                { isActive: criteriaIndex === currentCriteria },
               ]"
-              @click="() => updateCriteriaTab(index)"
-              >{{ `Criteria ${index + 1}` }}</span
+              @click="() => updateCriteriaTab(criteriaIndex)"
+              >{{ `Criteria ${criteriaIndex + 1}` }}</span
             >
             <button class="ml-9" @click="addNewCriteria">+</button>
           </div>
           <div class="modalCriteriaPanels">
             <div
-              v-for="(criteria, index) in reserveCategory.priority"
-              :key="`criteria-panel-${index}`"
-              :class="[
-                'modalCriteriaPanel',
-                { isCurrentPanel: index === currentCriteria },
-              ]"
+              v-for="(criteria, criteriaIndex) in reserveCategory.priority"
+              :key="`criteria-panel-${criteriaIndex}`"
             >
-              <div class="flexcolumn mb-27 mt-18">
-                <label class="ml-9 mb-9" for="criteriaName"
-                  >Criteria Name</label
-                >
-                <input
-                  v-model="criteria.name"
-                  class="textInput"
-                  name="criteriaName"
-                  placeholder="e.g., sofa_score"
-                />
-              </div>
-              <div class="flexcolumn mb-27 mt-18">
-                <label class="mb-9">Criteria Type</label>
-                <div class="flexrow">
-                  <div class="flexrow">
-                    <input
-                      v-model="criteria.criteriaType"
-                      class="textInput"
-                      :name="`criteriaTypeCategory${index}`"
-                      type="radio"
-                      :value="CATEGORY_TYPE"
-                    />
-                    <label class="ml-9" :for="`criteriaTypeCategory${index}`"
-                      >Categorical</label
-                    >
-                  </div>
-                  <div class="flexrow ml-18">
-                    <input
-                      v-model="criteria.criteriaType"
-                      class="textInput"
-                      :name="`criteriaTypeNumeric${index}`"
-                      type="radio"
-                      :value="NUMERIC_TYPE"
-                    />
-                    <label class="ml-9" :for="`criteriaTypeNumeric${index}`"
-                      >Numeric</label
-                    >
-                  </div>
-                </div>
-              </div>
-              <div v-if="criteria.criteriaType === CATEGORY_TYPE">
-                <div
-                  v-for="(element, elementIndex) in reserveCategory.priority[
-                    index
-                  ].elements"
-                  :key="`criteria${index}category${elementIndex}`"
-                >
-                  <input
-                    v-model="criteria.elements[elementIndex]"
-                    type="text"
-                    :name="`criteria${index}category${elementIndex}`"
-                    class="textInput mb-9"
-                    placeholder="e.g. Suffolk County"
-                  />
-                </div>
-                <div class="flexrow ml-9 mt-9">
-                  <button class="mr-9" @click="() => addNewElement(index)">
-                    +
-                  </button>
-                  Add new element
-                </div>
-              </div>
-              <div v-if="criteria.criteriaType === NUMERIC_TYPE">
-                <div class="flexrow">
-                  <div class="flexcolumn">
-                    <label class="ml-9" :for="`criteria${index}min`"
-                      >Criteria Minimum</label
-                    >
-                    <input
-                      v-model="criteria.min"
-                      type="number"
-                      class="textInput"
-                      :name="`criteria${index}min`"
-                    />
-                  </div>
-                  <div class="flexcolumn ml-18">
-                    <label class="ml-9" :for="`criteria${index}max`"
-                      >Criteria Maximum</label
-                    >
-                    <input
-                      v-model="criteria.max"
-                      type="number"
-                      class="textInput"
-                      :name="`criteria${index}max`"
-                    />
-                  </div>
-                </div>
-                <div class="flexcolumn mt-18">
-                  <label class="mb-9">Criteria Sorting Order</label>
-                  <div class="flexrow">
-                    <div class="flexrow">
-                      <input
-                        v-model="criteria.binOrder"
-                        class="textInput"
-                        :name="`criteriaBinOrderDesc${index}`"
-                        type="radio"
-                        value="desc"
-                      />
-                      <label class="ml-9" :for="`criteriaBinOrderDesc${index}`"
-                        >Lowest value prioritized</label
-                      >
-                    </div>
-                    <div class="flexrow ml-18">
-                      <input
-                        v-model="criteria.binOrder"
-                        class="textInput"
-                        :name="`criteriaBinOrderAsc${index}`"
-                        type="radio"
-                        value="asc"
-                      />
-                      <label class="ml-9" :for="`criteriaBinOrderAsc${index}`"
-                        >Highest value prioritized</label
-                      >
-                    </div>
-                  </div>
-                </div>
-                <div class="flexcolumn mt-18">
-                  <label class="mb-9">Coarsened Status</label>
-                  <div class="flexrow">
-                    <div class="flexrow">
-                      <input
-                        v-model="criteria.coarsened"
-                        class="textInput"
-                        :name="`criteriaCoarsenedYes${index}`"
-                        type="radio"
-                        :value="true"
-                      />
-                      <label class="ml-9" :for="`criteriaCoarsenedYes${index}`"
-                        >Yes</label
-                      >
-                    </div>
-                    <div class="flexrow ml-18">
-                      <input
-                        v-model="criteria.coarsened"
-                        class="textInput"
-                        :name="`criteriaCoarsenedNo${index}`"
-                        type="radio"
-                        :value="false"
-                      />
-                      <label class="ml-9" :for="`criteriaCoarsenedNo${index}`"
-                        >No</label
-                      >
-                    </div>
-                  </div>
-                </div>
-                <div class="flexcolumn mt-18">
-                  <label class="ml-9" :for="`criteriaNumBins${index}`"
-                    >Number of bins</label
-                  >
-                  <input
-                    v-model="criteria.numBins"
-                    class="textInput w25"
-                    :name="`criteriaNumBins${index}`"
-                    type="number"
-                    @input="
-                      (e) =>
-                        updateNumBins({
-                          priorityIndex: index,
-                          numBins: e.target.value,
-                        })
-                    "
-                  />
-                  <div class="divider mt-18 mb-18" />
-                  <div
-                    v-for="(bin, binIndex) in criteria.bins"
-                    :key="`criteria${index}bin${binIndex}`"
-                    class="flexrow-sa mb-9"
-                  >
-                    <label class="ml-9 mt-27 fw-b">{{
-                      `Bin ${binIndex + 1}`
-                    }}</label>
-                    <div class="flexcolumncenter mr-9 w25">
-                      <label
-                        class="mb-9"
-                        :for="`criteria${index}bin${binIndex}min`"
-                        >Min</label
-                      >
-                      <input
-                        v-model="criteria.bins[binIndex].min"
-                        class="textInput w100"
-                        :name="`criteria${index}bin${binIndex}min`"
-                      />
-                    </div>
-                    <div class="flexcolumncenter w25">
-                      <label
-                        class="mb-9"
-                        :for="`criteria${index}bin${binIndex}max`"
-                        >Max</label
-                      >
-                      <input
-                        v-model="criteria.bins[binIndex].max"
-                        class="textInput w100"
-                        :name="`criteria${index}bin${binIndex}max`"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PriorityOrderPanel
+                v-if="criteriaIndex === currentCriteria"
+                :criteria="criteria"
+                :criteria-index="criteriaIndex"
+              />
             </div>
           </div>
         </div>
@@ -276,6 +79,9 @@
 </template>
 
 <script>
+import PriorityOrderPanel from './PriorityOrderPanel'
+import { CATEGORY_TYPE, NUMERIC_TYPE } from './constants'
+
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
@@ -296,8 +102,7 @@ const numericFields = {
     },
   ],
 }
-const CATEGORY_TYPE = 'categorical'
-const NUMERIC_TYPE = 'numeric'
+
 const defaultCriteria = {
   criteriaName: '',
   criteriaType: CATEGORY_TYPE,
@@ -306,6 +111,7 @@ const defaultCriteria = {
   ...deepClone(numericFields),
 }
 export default {
+  components: { PriorityOrderPanel },
   props: {
     onClose: { type: Function, required: true },
     mode: { type: String, required: true },
@@ -367,24 +173,6 @@ export default {
         ...deepClone(defaultCriteria),
       })
     },
-    addNewElement(priorityIndex) {
-      this.reserveCategory.priority[priorityIndex].elements.push('')
-    },
-    updateNumBins({ priorityIndex, numBins }) {
-      if (numBins < 0) {
-        return
-      }
-      const newBins = []
-      const currentBins = this.reserveCategory.priority[priorityIndex].bins
-      for (let i = 0; i < numBins; i++) {
-        if (currentBins[i]) {
-          newBins.push({ ...currentBins[i] })
-        } else {
-          newBins.push({ min: 0, max: 0 })
-        }
-      }
-      this.reserveCategory.priority[priorityIndex].bins = newBins
-    },
   },
 }
 </script>
@@ -430,30 +218,6 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-
-.modalTextFields {
-  display: flex;
-  flex-direction: column;
-  //   justify-content: space-around;
-}
-.textInput {
-  cursor: pointer;
-  resize: none;
-  background-color: white;
-  border: 2px solid var(--dark-grey);
-  font-size: 20px;
-  padding: 9px 18px;
-  border-radius: 20px;
-  outline: none;
-  &::placeholder {
-    color: #ddd;
-  }
-}
-.textAreaInput {
-  height: 200px;
-}
-.modalCriteriaWrapper {
-}
 .modalCriteriaTab {
   cursor: pointer;
   padding: 9px;
@@ -474,16 +238,20 @@ export default {
   max-height: 55vh;
   overflow: scroll;
 }
-.modalCriteriaPanel {
-  display: none;
-  &.isCurrentPanel {
-    display: block;
+.textInput {
+  cursor: pointer;
+  resize: none;
+  background-color: white;
+  border: 2px solid var(--dark-grey);
+  font-size: 20px;
+  padding: 9px 18px;
+  border-radius: 20px;
+  outline: none;
+  &::placeholder {
+    color: #ddd;
   }
 }
-.divider {
-  height: 2px;
-  border-radius: 18px;
-  width: 100%;
-  background-color: var(--dark-blue);
+.textAreaInput {
+  height: 200px;
 }
 </style>

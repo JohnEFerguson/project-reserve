@@ -34,10 +34,10 @@
               class="icon"
               @click="() => editCategory(category)"
             />
-            <div class="arrows">
+            <div class="flexcolumn">
               <font-awesome-icon
                 icon="arrow-up"
-                class="topArrow icon"
+                class="icon mb-9"
                 @click="() => moveCategoryUp(category)"
               />
               <font-awesome-icon
@@ -49,7 +49,7 @@
           </span>
         </div>
         <div class="buttonWrapper">
-          <button class="addButton" @click="openAddReserveCategoryModal">
+          <button class="p-18" @click="openAddReserveCategoryModal">
             Add New Reserve Category
           </button>
         </div>
@@ -167,22 +167,12 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
-.arrows {
-  display: flex;
-  flex-direction: column;
-}
-.topArrow {
-  margin-bottom: 9px;
-}
 .buttonWrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 18px 0;
-}
-.addButton {
-  padding: 18px;
 }
 
 .navButtons {
