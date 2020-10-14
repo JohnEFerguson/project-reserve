@@ -1,11 +1,19 @@
 import arrayMove from 'array-move'
+import pick from 'lodash.pick'
+
+import {
+  categoryFields,
+  numericFields,
+  CATEGORY_TYPE,
+  NUMERIC_TYPE,
+} from '../components/constants'
 
 const generateDefaultCategory = (size) => ({
   name: 'Unreserved (auto-populated)',
   description: 'Default reserve category',
   size,
   order: 1,
-  priority: [{}],
+  priority: [],
 })
 
 const initialState = {
@@ -39,10 +47,7 @@ export const mutations = {
       state.currentConfig.reserveCategories[category.order - 1] = category
     } else {
       const order = state.currentConfig.reserveCategories.length + 1
-      state.currentConfig.reserveCategories = [
-        ...state.currentConfig.reserveCategories,
-        { ...category, order },
-      ]
+      state.currentConfig.reserveCategories.push({ ...category, order })
     }
   },
   moveCategory(state, { category, direction }) {
@@ -71,6 +76,62 @@ export const mutations = {
   deleteCategory(state, category) {},
 }
 
+function transformCriteria(priority) {
+  if (!priority) {
+    return null
+  }
+  const categoryCriteria = []
+  const numericCriteria = []
+
+  const priorityMap = {
+    [CATEGORY_TYPE]: {
+      bucket: categoryCriteria,
+      fields: categoryFields,
+    },
+    [NUMERIC_TYPE]: {
+      bucket: numericCriteria,
+      fields: numericFields,
+    },
+  }
+  priority.forEach((criteria, index) => {
+    const { bucket, fields } = priorityMap[criteria.criteriaType]
+    bucket.push({
+      order: index + 1,
+      ...pick(criteria, ['name', ...Object.keys(fields)]),
+    })
+  })
+  return {
+    categoryCriteria,
+    numericCriteria,
+  }
+}
+
 export const actions = {
   async nuxtServerInit({ commit }) {},
+  async postConfig({ commit, state }) {
+    const configPayload = {
+      unitType: state.currentConfig.unitType,
+      size: state.currentConfig.supply,
+      reserveCategories: state.currentConfig.reserveCategories.reduce(
+        (acc, category) => {
+          const formattedCategory = {
+            ...category,
+            priority: transformCriteria(category.priority),
+          }
+          acc.push(formattedCategory)
+          return acc
+        },
+        []
+      ),
+    }
+    const res = await fetch('/api/configurations', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(configPayload),
+    })
+    const result = await res.json()
+    console.log(result)
+  },
 }

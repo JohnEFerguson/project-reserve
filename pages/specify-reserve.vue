@@ -61,7 +61,7 @@
         Project Reserve | Allocation of
         <span class="allocationText">{{ allocationText }}</span> units
       </h3>
-      <nuxt-link :to="'/finish'" class="navButton"> Next </nuxt-link>
+      <button class="navButton" @click="postConfig">Next</button>
     </div>
   </div>
 </template>
@@ -116,6 +116,9 @@ export default {
     },
     moveCategoryDown(category) {
       this.$store.commit('moveCategory', { category, direction: 'down' })
+    },
+    postConfig() {
+      this.$store.dispatch('postConfig')
     },
   },
 }

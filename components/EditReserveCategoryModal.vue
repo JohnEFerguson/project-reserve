@@ -80,27 +80,15 @@
 
 <script>
 import PriorityOrderPanel from './PriorityOrderPanel'
-import { CATEGORY_TYPE, NUMERIC_TYPE } from './constants'
+import {
+  CATEGORY_TYPE,
+  NUMERIC_TYPE,
+  categoryFields,
+  numericFields,
+} from './constants'
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
-}
-
-const categoryFields = {
-  elements: [''],
-}
-const numericFields = {
-  min: 0,
-  max: 0,
-  binOrder: 'desc',
-  coarsened: true,
-  numBins: 1,
-  bins: [
-    {
-      min: 0,
-      max: 0,
-    },
-  ],
 }
 
 const defaultCriteria = {

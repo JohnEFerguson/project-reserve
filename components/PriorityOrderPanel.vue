@@ -48,7 +48,7 @@
         class="flexrow mb-9"
       >
         <input
-          v-model="criteria.elements[elementIndex]"
+          v-model="criteria.elements[elementIndex].name"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
@@ -58,12 +58,12 @@
           <font-awesome-icon
             icon="arrow-up"
             class="icon mb-9 cp fs-12"
-            @click="() => moveElementDown(elementIndex)"
+            @click="() => moveElementDown(element)"
           />
           <font-awesome-icon
             icon="arrow-down"
             class="icon cp fs-12"
-            @click="() => moveElementUp(elementIndex)"
+            @click="() => moveElementUp(element)"
           />
         </div>
       </div>
@@ -185,6 +185,7 @@
             <input
               v-model="criteria.bins[binIndex].min"
               class="textInput w100"
+              type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}min`"
             />
           </div>
@@ -197,6 +198,7 @@
             <input
               v-model="criteria.bins[binIndex].max"
               class="textInput w100"
+              type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}max`"
             />
           </div>
@@ -231,7 +233,10 @@ export default {
   },
   methods: {
     addNewElement() {
-      this.criteria.elements.push('')
+      this.criteria.elements.push({
+        name: '',
+        order: this.criteria.elements.length + 1,
+      })
     },
     updateNumBins(numBins) {
       if (numBins < 0) {
@@ -248,27 +253,28 @@ export default {
       }
       this.criteria.bins = newBins
     },
-    moveElementDown(elementIndex) {
-      let newIndex
+    moveElementDown(element) {
       const elements = this.criteria.elements
-      if (elementIndex === 0) {
-        newIndex = elements.length - 1
-      } else {
-        newIndex = elementIndex - 1
-      }
+      const newIndex =
+        element.order === 1 ? elements.length - 1 : element.order - 2
 
-      this.criteria.elements = arrayMove(elements, elementIndex, newIndex)
+      const movedElements = arrayMove(elements, element.order - 1, newIndex)
+      movedElements.forEach((element, index) => {
+        element.order = index + 1
+      })
+
+      this.criteria.elements = movedElements
     },
-    moveElementUp(elementIndex) {
-      let newIndex
+    moveElementUp(element) {
       const elements = this.criteria.elements
-      if (elementIndex === elements.length - 1) {
-        newIndex = 0
-      } else {
-        newIndex = elementIndex + 1
-      }
+      const newIndex = element.order === elements.length ? 0 : element.order
 
-      this.criteria.elements = arrayMove(elements, elementIndex, newIndex)
+      const movedElements = arrayMove(elements, element.order - 1, newIndex)
+      movedElements.forEach((element, index) => {
+        element.order = index + 1
+      })
+
+      this.criteria.elements = movedElements
     },
   },
 }
