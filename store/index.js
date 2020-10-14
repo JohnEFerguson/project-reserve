@@ -43,6 +43,12 @@ export const mutations = {
     ]
   },
   saveCategory(state, category) {
+    if (category.priority) {
+      category.priority = category.priority.map((criteria) => ({
+        ...criteria,
+        name: criteria.name.toLowerCase().replace(/ /g, '_'), // Sofa Score -> sofa_score
+      }))
+    }
     if (category.order) {
       state.currentConfig.reserveCategories[category.order - 1] = category
     } else {

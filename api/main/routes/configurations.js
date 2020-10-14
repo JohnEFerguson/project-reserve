@@ -58,7 +58,7 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
 
   const reserveCategoryNames = await db.reserveCategory.findAll({
     attributes: ['name'],
-    where: { configurationId: configurationId },
+    where: { configurationId },
   })
 
   const categoryCriteriaFields = await db.sequelize.query(
