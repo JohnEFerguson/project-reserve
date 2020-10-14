@@ -130,14 +130,18 @@ export const actions = {
         []
       ),
     }
-    const res = await fetch('/api/configurations', {
+    const configRes = await fetch('/api/configurations', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
       body: JSON.stringify(configPayload),
     })
-    const result = await res.json()
-    console.log(result)
+    const configResult = await configRes.json()
+    const requiredRes = await fetch(
+      `/api/configurations/${configResult.id}/fieldNames`
+    )
+    const requiredFields = await requiredRes.json()
+    console.log(requiredFields)
   },
 }
