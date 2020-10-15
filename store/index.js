@@ -14,6 +14,7 @@ const generateDefaultCategory = (size) => ({
   size,
   order: 1,
   priority: [],
+  isDefault: true,
 })
 
 const initialState = {
@@ -35,7 +36,7 @@ export const mutations = {
     state.currentConfig = config
   },
   setRequiredFields(state, requiredFields) {
-    state.requiredFields = requiredFields
+    state.currentConfig.requiredFields = requiredFields
   },
   updateUnitType(state, unitType) {
     state.currentConfig.unitType = unitType
@@ -124,7 +125,7 @@ export const actions = {
   async postConfig({ commit, state, ...props }) {
     const configPayload = {
       unitType: state.currentConfig.unitType,
-      size: state.currentConfig.supply,
+      supply: state.currentConfig.supply,
       reserveCategories: state.currentConfig.reserveCategories.reduce(
         (acc, category) => {
           const formattedCategory = {
