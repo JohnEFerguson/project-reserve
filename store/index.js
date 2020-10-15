@@ -21,6 +21,7 @@ const initialState = {
     unitType: '',
     supply: null,
     reserveCategories: [],
+    requiredFields: [],
   },
 }
 
@@ -29,6 +30,12 @@ export const state = () => initialState
 export const mutations = {
   resetConfig(state, list) {
     state = initialState
+  },
+  setConfig(state, config) {
+    state.currentConfig = config
+  },
+  setRequiredFields(state, requiredFields) {
+    state.requiredFields = requiredFields
   },
   updateUnitType(state, unitType) {
     state.currentConfig.unitType = unitType
@@ -114,7 +121,7 @@ function transformCriteria(priority) {
 
 export const actions = {
   async nuxtServerInit({ commit }) {},
-  async postConfig({ commit, state }) {
+  async postConfig({ commit, state, ...props }) {
     const configPayload = {
       unitType: state.currentConfig.unitType,
       size: state.currentConfig.supply,
@@ -137,11 +144,13 @@ export const actions = {
       },
       body: JSON.stringify(configPayload),
     })
-    const configResult = await configRes.json()
-    const requiredRes = await fetch(
-      `/api/configurations/${configResult.id}/fieldNames`
+    const config = await configRes.json()
+    commit('setConfig', config)
+    const requiredFieldsRes = await fetch(
+      `/api/configurations/${config.id}/fieldNames`
     )
-    const requiredFields = await requiredRes.json()
-    console.log(requiredFields)
+    const requiredFields = await requiredFieldsRes.json()
+    commit('setRequiredFields', requiredFields)
+    this.app.router.push('/finish')
   },
 }
