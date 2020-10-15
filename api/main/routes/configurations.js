@@ -66,7 +66,7 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
     SELECT name FROM category_criteria 
     WHERE priority_id IN (
       SELECT id FROM priority 
-      WHERE reserve_category_id = (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
+      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
     );
     `,
     { type: SELECT }
@@ -77,7 +77,7 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
     SELECT name FROM numeric_criteria 
     WHERE priority_id IN (
       SELECT id FROM priority 
-      WHERE reserve_category_id = (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
+      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
     );
     `,
     { type: SELECT }

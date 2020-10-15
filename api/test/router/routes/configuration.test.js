@@ -70,8 +70,6 @@ const configJson = {
     ]
 }
 
-
-
 describe("Testing positive cases for the configuration endpoints", () => {
 
 	it("POSTs a configuration object", async () => {
