@@ -9,6 +9,7 @@ const configJson = {
     "reserveCategories": [
         {
             "name": "clinical trial participant",
+            "isDefault": false,
             "description": "A clinical trial participant is defined as anyone who...",
             "size": 15,
             "order": 1,
@@ -54,7 +55,18 @@ const configJson = {
                     }
                 ]
             }
-        }
+        },
+        {
+            "name":"Unreserved (auto-populated)",
+            "isDefault": true,
+            "description":"Default reserve category",
+            "size":"120",
+            "order": 2,
+            "priority":{
+               "categoryCriteria":[],
+               "numericCriteria":[]
+            }
+         }
     ]
 }
 
@@ -68,7 +80,8 @@ describe("Testing positive cases for the configuration endpoints", () => {
 
     it("GET field names from config object by id", async () => {
         const response2 = await supertest(app).get('/configurations/1/fieldNames').expect(200)
-        assert(response2.text == '["recipient_id","is_clinical_trial_participant","county_of_residence","sofa_score"]')
+        console.log(response2.text)
+        assert(response2.text == '[{"name":"recipient_id","required":true},{"name":"is_clinical_trial_participant","required":true},{"name":"county_of_residence","required":false},{"name":"sofa_score","required":false}]')
     
     });
 });
