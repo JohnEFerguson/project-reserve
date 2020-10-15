@@ -1,6 +1,6 @@
 'use strict'
 
-const { INTEGER, STRING } = require("sequelize");
+const { INTEGER, STRING, BOOLEAN } = require("sequelize");
 
 module.exports = (sequelize) => {
 
@@ -13,6 +13,10 @@ module.exports = (sequelize) => {
     },
     name: {
       type: STRING,
+    },
+    isDefault: {
+      type: BOOLEAN,
+      defaultValue: false
     },
     description: {
       type: STRING,

@@ -58,7 +58,7 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
 
   const reserveCategoryNames = await db.reserveCategory.findAll({
     attributes: ['name'],
-    where: { configurationId },
+    where: { configurationId: configurationId, isDefault: false },
   })
 
   const categoryCriteriaFields = await db.sequelize.query(
@@ -83,15 +83,15 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
     { type: SELECT }
   )
 
-  const fieldNames = ['recipient_id']
+  const fieldNames = [{"name": "recipient_id", "required": true}]
   reserveCategoryNames.forEach((cat) =>
-    fieldNames.push('is_' + cat.name.toLowerCase().split(' ').join('_'))
+    fieldNames.push({"name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true})
   )
   categoryCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push(criteria.name.toLowerCase().split(' ').join('_'))
+    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false})
   )
   numericCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push(criteria.name.toLowerCase().split(' ').join('_'))
+    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false})
   )
 
   res.json(fieldNames)
