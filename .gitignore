@@ -94,3 +94,6 @@ sw.*
 
 # VS Code config
 .vscode
+
+
+api/main/data.sqlite

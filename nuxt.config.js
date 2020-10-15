@@ -30,7 +30,7 @@ export default {
   /*
    ** Global CSS
    */
-  css: [],
+  css: ['@/assets/main.scss'],
 
   /*
    ** Plugins to load before mounting the App
@@ -58,7 +58,17 @@ export default {
   modules: [
     // Doc: https://http.nuxtjs.org
     '@nuxt/http',
+    '@nuxtjs/dotenv',
+    'nuxt-fontawesome',
   ],
+  fontawesome: {
+    imports: [
+      {
+        set: '@fortawesome/free-solid-svg-icons',
+        icons: ['fas'],
+      },
+    ],
+  },
 
   /*
    ** Server Middleware

@@ -1,69 +1,58 @@
 <template>
   <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">nuxt-express</h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+    <h1>Project Reserve</h1>
+    <div class="description">
+      <p>
+        This application implements a reserve system as described in a 2020
+        working paper authored by a team of market design researchers: Parag
+        Pathak (MIT), Tayfun Sönmez (Boston College), Utku Ünver (Boston
+        College), and Bumin Yenmez (Boston College). For more information on the
+        working paper, the basics of a reserve system, and how to contact the
+        authors, please refer to the buttons below. To begin using the reserve
+        system implementation, click the start button.
+      </p>
+    </div>
+    <div class="buttons">
+      <button class="menuButton navButton">About</button>
+      <button class="menuButton navButton">Paper</button>
+      <button class="menuButton navButton">Contact</button>
+      <button class="menuButton navButton">Press</button>
+      <nuxt-link to="/create" class="menuButton navButton">Start</nuxt-link>
     </div>
   </div>
 </template>
 <script>
-export default {
-  // async asyncData ({ $http }) {
-  //   // const test = await $http.$get('/api/test')
-  //   return {
-  //     test: null
-  //   }
-  // }
-}
+export default {}
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .container {
+  height: 100vh;
   margin: 0 auto;
-  min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-around;
   align-items: center;
   text-align: center;
 }
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
+.description {
+  width: 50%;
+  padding: 45px;
+  font-size: 20px;
+  line-height: 1.25;
+  border: 2px solid var(--dark-blue);
+  border-radius: 18px;
 }
+.buttons {
+  display: flex;
 
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
+  width: 50%;
+  & > .menuButton {
+    margin-right: 18px;
+    &:last-child {
+      margin-left: auto;
+      margin-right: none;
+    }
+  }
 }
 </style>

@@ -26,14 +26,11 @@ app.use((req, res, next) => {
   next()
 })
 
-let database
+const sequelizePromise = db.sequelize.sync({ force: true })
 
 app.use(async (req, res, next) => {
-  if (!database) {
-    await db.sequelize.sync({ force: true })
-    database = db
-  }
-  req.db = database
+  await sequelizePromise
+  req.db = db
   next()
 })
 
