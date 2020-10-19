@@ -29,7 +29,7 @@
             <span class="rowCell">{{ category.order }}</span>
             <span class="rowCell">{{ category.name }}</span>
             <span class="rowCell">{{ category.size }}</span>
-            <button>{{ 'Priority' }}</button>
+            <button class="p9">{{ 'Priority' }}</button>
           </div>
         </div>
       </div>
@@ -52,8 +52,8 @@
       <div class="mt-18">*Not required for all recipients inputted</div>
     </div>
     <div class="navButtons">
-      <nuxt-link to="/create" class="navButton">Back</nuxt-link>
-      <button class="navButton">Next</button>
+      <nuxt-link to="/specify-reserve" class="navButton">Back</nuxt-link>
+      <nuxt-link to="/load-data" class="navButton">Next</nuxt-link>
     </div>
   </div>
 </template>

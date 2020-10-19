@@ -56,7 +56,7 @@
       </div>
     </div>
     <div class="navButtons">
-      <nuxt-link to="/create" class="navButton">Back</nuxt-link>
+      <nuxt-link to="/unit-definition" class="navButton">Back</nuxt-link>
       <h3 class="tableFooter">
         Project Reserve | Allocation of
         <span class="allocationText">{{ allocationText }}</span> units

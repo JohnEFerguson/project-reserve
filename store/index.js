@@ -90,7 +90,7 @@ export const mutations = {
   deleteCategory(state, category) {},
 }
 
-function transformCriteria(priority) {
+function transformCriteriaForPost(priority) {
   if (!priority) {
     return null
   }
@@ -120,6 +120,28 @@ function transformCriteria(priority) {
   }
 }
 
+function transformCriteriaForDisplay(priority) {
+  if (!priority) {
+    return null
+  }
+  const criterias = []
+  priority.categoryCriteria.forEach(
+    (crit) =>
+      (criterias[crit.order - 1] = {
+        ...crit,
+        criteriaType: CATEGORY_TYPE,
+      })
+  )
+  priority.numericCriteria.forEach(
+    (crit) =>
+      (criterias[crit.order - 1] = {
+        ...crit,
+        criteriaType: NUMERIC_TYPE,
+      })
+  )
+  return criterias
+}
+
 export const actions = {
   async nuxtServerInit({ commit }) {},
   async postConfig({ commit, state, ...props }) {
@@ -130,7 +152,7 @@ export const actions = {
         (acc, category) => {
           const formattedCategory = {
             ...category,
-            priority: transformCriteria(category.priority),
+            priority: transformCriteriaForPost(category.priority),
           }
           acc.push(formattedCategory)
           return acc
@@ -146,7 +168,17 @@ export const actions = {
       body: JSON.stringify(configPayload),
     })
     const config = await configRes.json()
-    commit('setConfig', config)
+    commit('setConfig', {
+      ...config,
+      reserveCategories: config.reserveCategories.reduce((acc, category) => {
+        const formattedCategory = {
+          ...category,
+          priority: transformCriteriaForDisplay(category.priority),
+        }
+        acc.push(formattedCategory)
+        return acc
+      }, []),
+    })
     const requiredFieldsRes = await fetch(
       `/api/configurations/${config.id}/fieldNames`
     )
