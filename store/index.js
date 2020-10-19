@@ -45,10 +45,20 @@ export const mutations = {
     state.currentConfig.supply = supply
   },
   generateDefaultCategory(state) {
-    state.currentConfig.reserveCategories = [
-      generateDefaultCategory(state.currentConfig.supply),
-      ...state.currentConfig.reserveCategories,
-    ]
+    const defaultCategoryIndex = state.currentConfig.reserveCategories.findIndex(
+      (el) => el.isDefault
+    )
+    if (defaultCategoryIndex >= 0) {
+      state.currentConfig.reserveCategories[defaultCategoryIndex] = {
+        ...generateDefaultCategory(state.currentConfig.supply),
+        order: defaultCategoryIndex + 1,
+      }
+    } else {
+      state.currentConfig.reserveCategories = [
+        generateDefaultCategory(state.currentConfig.supply),
+        ...state.currentConfig.reserveCategories,
+      ]
+    }
   },
   saveCategory(state, category) {
     if (category.priority) {

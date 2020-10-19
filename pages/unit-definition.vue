@@ -15,13 +15,12 @@
     </div>
     <div class="navButtons">
       <nuxt-link to="/create" class="navButton">Back</nuxt-link>
-      <nuxt-link
-        :to="isNextButtonDisabled ? '/unit-definition' : '/specify-reserve'"
+      <button
         :class="['navButton', { isDisabled: isNextButtonDisabled }]"
-        @click.native="generateDefaultCategory"
+        @click="generateDefaultCategory"
       >
         Next
-      </nuxt-link>
+      </button>
     </div>
   </div>
 </template>
@@ -56,6 +55,9 @@ export default {
         return
       }
       this.$store.commit('generateDefaultCategory')
+      this.$nextTick(() => {
+        this.$router.push('/specify-reserve')
+      })
     },
   },
 }
