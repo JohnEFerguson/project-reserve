@@ -14,6 +14,7 @@ const generateDefaultCategory = (size) => ({
   size,
   order: 1,
   priority: [],
+  isDefault: true,
 })
 
 const initialState = {
@@ -21,6 +22,7 @@ const initialState = {
     unitType: '',
     supply: null,
     reserveCategories: [],
+    requiredFields: [],
   },
 }
 
@@ -30,6 +32,12 @@ export const mutations = {
   resetConfig(state, list) {
     state = initialState
   },
+  setConfig(state, config) {
+    state.currentConfig = config
+  },
+  setRequiredFields(state, requiredFields) {
+    state.currentConfig.requiredFields = requiredFields
+  },
   updateUnitType(state, unitType) {
     state.currentConfig.unitType = unitType
   },
@@ -37,16 +45,26 @@ export const mutations = {
     state.currentConfig.supply = supply
   },
   generateDefaultCategory(state) {
-    state.currentConfig.reserveCategories = [
-      generateDefaultCategory(state.currentConfig.supply),
-      ...state.currentConfig.reserveCategories,
-    ]
+    const defaultCategoryIndex = state.currentConfig.reserveCategories.findIndex(
+      (el) => el.isDefault
+    )
+    if (defaultCategoryIndex >= 0) {
+      state.currentConfig.reserveCategories[defaultCategoryIndex] = {
+        ...generateDefaultCategory(state.currentConfig.supply),
+        order: defaultCategoryIndex + 1,
+      }
+    } else {
+      state.currentConfig.reserveCategories = [
+        generateDefaultCategory(state.currentConfig.supply),
+        ...state.currentConfig.reserveCategories,
+      ]
+    }
   },
   saveCategory(state, category) {
     if (category.priority) {
       category.priority = category.priority.map((criteria) => ({
         ...criteria,
-        name: criteria.name.toLowerCase().replace(/ /g, '_'), // Sofa Score -> sofa_score
+        name: (criteria.name || '').toLowerCase().replace(/ /g, '_'), // Sofa Score -> sofa_score
       }))
     }
     if (category.order) {
@@ -54,6 +72,19 @@ export const mutations = {
     } else {
       const order = state.currentConfig.reserveCategories.length + 1
       state.currentConfig.reserveCategories.push({ ...category, order })
+    }
+    const defaultCategory = state.currentConfig.reserveCategories.find(
+      (el) => el.isDefault
+    )
+    if (defaultCategory) {
+      const nonDefaultCategoriesAllocation = state.currentConfig.reserveCategories
+        .filter((cat) => !cat.isDefault)
+        .reduce((acc, cat) => {
+          return acc + parseInt(cat.size)
+        }, 0)
+      console.log(nonDefaultCategoriesAllocation)
+      defaultCategory.size =
+        state.currentConfig.supply - nonDefaultCategoriesAllocation
     }
   },
   moveCategory(state, { category, direction }) {
@@ -82,7 +113,7 @@ export const mutations = {
   deleteCategory(state, category) {},
 }
 
-function transformCriteria(priority) {
+function transformCriteriaForPost(priority) {
   if (!priority) {
     return null
   }
@@ -112,17 +143,39 @@ function transformCriteria(priority) {
   }
 }
 
+function transformCriteriaForDisplay(priority) {
+  if (!priority) {
+    return null
+  }
+  const criterias = []
+  priority.categoryCriteria.forEach(
+    (crit) =>
+      (criterias[crit.order - 1] = {
+        ...crit,
+        criteriaType: CATEGORY_TYPE,
+      })
+  )
+  priority.numericCriteria.forEach(
+    (crit) =>
+      (criterias[crit.order - 1] = {
+        ...crit,
+        criteriaType: NUMERIC_TYPE,
+      })
+  )
+  return criterias
+}
+
 export const actions = {
   async nuxtServerInit({ commit }) {},
-  async postConfig({ commit, state }) {
+  async postConfig({ commit, state, ...props }) {
     const configPayload = {
       unitType: state.currentConfig.unitType,
-      size: state.currentConfig.supply,
+      supply: state.currentConfig.supply,
       reserveCategories: state.currentConfig.reserveCategories.reduce(
         (acc, category) => {
           const formattedCategory = {
             ...category,
-            priority: transformCriteria(category.priority),
+            priority: transformCriteriaForPost(category.priority),
           }
           acc.push(formattedCategory)
           return acc
@@ -137,11 +190,23 @@ export const actions = {
       },
       body: JSON.stringify(configPayload),
     })
-    const configResult = await configRes.json()
-    const requiredRes = await fetch(
-      `/api/configurations/${configResult.id}/fieldNames`
+    const config = await configRes.json()
+    commit('setConfig', {
+      ...config,
+      reserveCategories: config.reserveCategories.reduce((acc, category) => {
+        const formattedCategory = {
+          ...category,
+          priority: transformCriteriaForDisplay(category.priority),
+        }
+        acc.push(formattedCategory)
+        return acc
+      }, []),
+    })
+    const requiredFieldsRes = await fetch(
+      `/api/configurations/${config.id}/fieldNames`
     )
-    const requiredFields = await requiredRes.json()
-    console.log(requiredFields)
+    const requiredFields = await requiredFieldsRes.json()
+    commit('setRequiredFields', requiredFields)
+    this.app.router.push('/finish')
   },
 }

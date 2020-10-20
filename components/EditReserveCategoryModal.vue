@@ -36,7 +36,11 @@
               name="categoryDescription"
               type="number"
               placeholder="e.g., 60"
+              @input="validateCategorySize"
             />
+            <span v-if="hasSizeError" class="fs-12 mt-9 ml-18 col-error">{{
+              `There are only ${availableSupply} units available. Please re-allocate from other reserve categories.`
+            }}</span>
           </div>
         </div>
         <div class="modalCriteriaWrapper">
@@ -70,7 +74,10 @@
       </div>
       <div class="modalButtons">
         <button class="navButton" @click="onClose">Cancel</button>
-        <button class="navButton" @click="saveCategory">
+        <button
+          :class="['navButton', { isDisabled: hasSizeError }]"
+          @click="saveCategory"
+        >
           {{ `${mode === 'add' ? 'Add' : 'Edit'}` }}
         </button>
       </div>
@@ -120,26 +127,19 @@ export default {
     return {
       reserveCategory: deepClone(this.categoryToEdit),
       currentCriteria: 0,
+      hasSizeError: false,
+      initialSize: this.categoryToEdit.size,
     }
   },
   computed: {
-    reserveCategoryFiltered() {
-      const priorities = this.reserveCategory.priority
-      const filteredPriorities = priorities.reduce((acc, priority) => {
-        const filteredPriority = {}
-        Object.keys(priority).forEach((key) => {
-          if (priority.criteriaType === CATEGORY_TYPE) {
-            if (categoryFields[key]) {
-              filteredPriority[key] = priority[key]
-            }
-          } else if (numericFields[key]) {
-            filteredPriority[key] = priority[key]
-          }
-        })
-        acc.push(filteredPriority)
-        return acc
-      }, [])
-      return filteredPriorities
+    availableSupply() {
+      const defaultCategory = this.$store.state.currentConfig.reserveCategories.find(
+        (cat) => !!cat.isDefault
+      )
+      if (defaultCategory) {
+        return parseInt(this.initialSize) + parseInt(defaultCategory.size)
+      }
+      return this.$store.state.currentConfig.supply
     },
     CATEGORY_TYPE() {
       return CATEGORY_TYPE
@@ -150,16 +150,24 @@ export default {
   },
   methods: {
     saveCategory() {
-      this.$store.commit('saveCategory', this.reserveCategory)
-      this.onClose()
+      if (!this.hasSizeError) {
+        this.$store.commit('saveCategory', this.reserveCategory)
+        this.onClose()
+      }
     },
     updateCriteriaTab(newIndex) {
       this.currentCriteria = newIndex
     },
     addNewCriteria() {
-      this.reserveCategory.priority.push({
-        ...deepClone(defaultCriteria),
-      })
+      if (this.reserveCategory.priority.length < 3) {
+        this.reserveCategory.priority.push({
+          ...deepClone(defaultCriteria),
+        })
+      }
+    },
+    validateCategorySize() {
+      this.hasSizeError =
+        parseInt(this.reserveCategory.size) > parseInt(this.availableSupply)
     },
   },
 }
