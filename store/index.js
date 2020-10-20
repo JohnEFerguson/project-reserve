@@ -64,7 +64,7 @@ export const mutations = {
     if (category.priority) {
       category.priority = category.priority.map((criteria) => ({
         ...criteria,
-        name: criteria.name.toLowerCase().replace(/ /g, '_'), // Sofa Score -> sofa_score
+        name: (criteria.name || '').toLowerCase().replace(/ /g, '_'), // Sofa Score -> sofa_score
       }))
     }
     if (category.order) {
@@ -72,6 +72,12 @@ export const mutations = {
     } else {
       const order = state.currentConfig.reserveCategories.length + 1
       state.currentConfig.reserveCategories.push({ ...category, order })
+    }
+    const defaultCategory = state.currentConfig.reserveCategories.find(
+      (el) => el.isDefault
+    )
+    if (defaultCategory) {
+      defaultCategory.size = defaultCategory.size - category.size
     }
   },
   moveCategory(state, { category, direction }) {

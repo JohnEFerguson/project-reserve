@@ -23,9 +23,7 @@
           <span class="rowCell">{{ category.order }}</span>
           <span class="rowCell">{{ category.name }}</span>
           <span class="rowCell">{{ category.size }}</span>
-          <span class="rowCell">{{
-            `${(category.size / totalSupply) * 100}%`
-          }}</span>
+          <span class="rowCell">{{ calcSupplyPercent(category.size) }}</span>
           <button>{{ 'Priority' }}</button>
           <span class="actionButtons">
             <font-awesome-icon icon="trash" class="icon" />
@@ -119,6 +117,12 @@ export default {
     },
     postConfig() {
       this.$store.dispatch('postConfig')
+    },
+    calcSupplyPercent(size) {
+      const percent = (size / this.totalSupply) * 100
+      return percent % 1 > 0.5
+        ? `${Math.ceil(percent)}%`
+        : `${Math.floor(percent)}%`
     },
   },
 }
