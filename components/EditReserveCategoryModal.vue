@@ -128,6 +128,7 @@ export default {
       reserveCategory: deepClone(this.categoryToEdit),
       currentCriteria: 0,
       hasSizeError: false,
+      initialSize: this.categoryToEdit.size,
     }
   },
   computed: {
@@ -136,7 +137,7 @@ export default {
         (cat) => !!cat.isDefault
       )
       if (defaultCategory) {
-        return defaultCategory.size
+        return parseInt(this.initialSize) + parseInt(defaultCategory.size)
       }
       return this.$store.state.currentConfig.supply
     },

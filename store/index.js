@@ -77,7 +77,14 @@ export const mutations = {
       (el) => el.isDefault
     )
     if (defaultCategory) {
-      defaultCategory.size = defaultCategory.size - category.size
+      const nonDefaultCategoriesAllocation = state.currentConfig.reserveCategories
+        .filter((cat) => !cat.isDefault)
+        .reduce((acc, cat) => {
+          return acc + parseInt(cat.size)
+        }, 0)
+      console.log(nonDefaultCategoriesAllocation)
+      defaultCategory.size =
+        state.currentConfig.supply - nonDefaultCategoriesAllocation
     }
   },
   moveCategory(state, { category, direction }) {
