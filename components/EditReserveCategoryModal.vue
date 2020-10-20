@@ -158,9 +158,11 @@ export default {
       this.currentCriteria = newIndex
     },
     addNewCriteria() {
-      this.reserveCategory.priority.push({
-        ...deepClone(defaultCriteria),
-      })
+      if (this.reserveCategory.priority.length < 3) {
+        this.reserveCategory.priority.push({
+          ...deepClone(defaultCriteria),
+        })
+      }
     },
     validateCategorySize() {
       this.hasSizeError =
