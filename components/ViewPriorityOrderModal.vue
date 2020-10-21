@@ -1,8 +1,10 @@
 <template>
   <div class="modalWrapper">
     <div class="modalInnerWrapper">
-      <h2>
-        {{ `Priority Order of ${reserveCategory.name} reserve category` }}
+      <h2 class="viewPriorityHeader">
+        Priority Order of
+        <span class="categoryName">{{ reserveCategory.name }}</span> reserve
+        category
       </h2>
       <div class="modalBody">
         <h4 class="w100 fw-n tac" v-html="sortByLabel" />
@@ -133,5 +135,11 @@ export default {
   border-radius: 18px;
   max-height: 55vh;
   overflow: scroll;
+}
+.viewPriorityHeader {
+  color: var(--dark-grey);
+}
+.categoryName {
+  color: var(--dark-blue);
 }
 </style>

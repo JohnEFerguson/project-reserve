@@ -98,6 +98,7 @@ export default {
       this.reserveCategoryToView = null
     },
     viewPriorityOrder(category) {
+      console.log(category)
       this.reserveCategoryToView = category
       this.$nextTick(() => {
         this.viewPriorityOrderModalOpen = true
