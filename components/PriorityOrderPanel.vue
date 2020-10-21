@@ -1,12 +1,13 @@
 <template>
   <div>
     <div class="flexcolumn mb-27 mt-18">
-      <label class="ml-9 mb-9" for="criteriaName">Criteria Name</label>
+      <label class="ml-9 mb-9" for="name">Criteria Name</label>
       <input
         v-model="criteria.name"
         class="textInput"
-        name="criteriaName"
+        name="name"
         placeholder="e.g., sofa_score"
+        :disabled="isReadOnly"
       />
     </div>
     <div class="flexcolumn mb-27 mt-18">
@@ -19,6 +20,7 @@
             :name="`criteriaTypeCategory${criteriaIndex}`"
             type="radio"
             :value="CATEGORY_TYPE"
+            :disabled="isReadOnly"
           />
           <label class="ml-9" :for="`criteriaTypeCategory${criteriaIndex}`"
             >Categorical</label
@@ -31,6 +33,7 @@
             :name="`criteriaTypeNumeric${criteriaIndex}`"
             type="radio"
             :value="NUMERIC_TYPE"
+            :disabled="isReadOnly"
           />
           <label class="ml-9" :for="`criteriaTypeNumeric${criteriaIndex}`"
             >Numeric</label
@@ -53,8 +56,9 @@
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
           placeholder="e.g. Suffolk County"
+          :disabled="isReadOnly"
         />
-        <div class="flexcolumn ml-9">
+        <div v-if="!isReadOnly" class="flexcolumn ml-9">
           <font-awesome-icon
             icon="arrow-up"
             class="icon mb-9 cp fs-12"
@@ -67,7 +71,7 @@
           />
         </div>
       </div>
-      <div class="flexrow ml-9 mt-9">
+      <div v-if="!isReadOnly" class="flexrow ml-9 mt-9">
         <button class="mr-9" @click="addNewElement">+</button>
         Add new element
       </div>
@@ -76,7 +80,7 @@
     <!-- NUMERIC FIELDS -->
 
     <div v-if="criteria.criteriaType === NUMERIC_TYPE">
-      <div class="flexrow">
+      <div :class="isReadOnly ? 'flexcolumn' : 'flexrow'">
         <div class="flexcolumn">
           <label class="ml-9" :for="`criteria${criteriaIndex}min`"
             >Criteria Minimum</label
@@ -86,9 +90,10 @@
             type="number"
             class="textInput"
             :name="`criteria${criteriaIndex}min`"
+            :disabled="isReadOnly"
           />
         </div>
-        <div class="flexcolumn ml-18">
+        <div :class="`flexcolumn ${isReadOnly ? 'mt-9' : 'ml-18'}`">
           <label class="ml-9" :for="`criteria${criteriaIndex}max`"
             >Criteria Maximum</label
           >
@@ -97,6 +102,7 @@
             type="number"
             class="textInput"
             :name="`criteria${criteriaIndex}max`"
+            :disabled="isReadOnly"
           />
         </div>
       </div>
@@ -110,6 +116,7 @@
               :name="`criteriaBinOrderDesc${criteriaIndex}`"
               type="radio"
               value="desc"
+              :disabled="isReadOnly"
             />
             <label class="ml-9" :for="`criteriaBinOrderDesc${criteriaIndex}`"
               >Lowest value prioritized</label
@@ -122,6 +129,7 @@
               :name="`criteriaBinOrderAsc${criteriaIndex}`"
               type="radio"
               value="asc"
+              :disabled="isReadOnly"
             />
             <label class="ml-9" :for="`criteriaBinOrderAsc${criteriaIndex}`"
               >Highest value prioritized</label
@@ -139,6 +147,7 @@
               :name="`criteriaCoarsenedYes${criteriaIndex}`"
               type="radio"
               :value="true"
+              :disabled="isReadOnly"
             />
             <label class="ml-9" :for="`criteriaCoarsenedYes${criteriaIndex}`"
               >Yes</label
@@ -151,6 +160,7 @@
               :name="`criteriaCoarsenedNo${criteriaIndex}`"
               type="radio"
               :value="false"
+              :disabled="isReadOnly"
             />
             <label class="ml-9" :for="`criteriaCoarsenedNo${criteriaIndex}`"
               >No</label
@@ -167,6 +177,7 @@
           class="textInput w25"
           :name="`criteriaNumBins${criteriaIndex}`"
           type="number"
+          :disabled="isReadOnly"
           @input="(e) => updateNumBins(e.target.value)"
         />
         <div class="divider mt-18 mb-18" />
@@ -187,6 +198,7 @@
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}min`"
+              :disabled="isReadOnly"
             />
           </div>
           <div class="flexcolumncenter w25">
@@ -200,6 +212,7 @@
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}max`"
+              :disabled="isReadOnly"
             />
           </div>
         </div>
@@ -221,6 +234,10 @@ export default {
     criteriaIndex: {
       type: Number,
       required: true,
+    },
+    isReadOnly: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

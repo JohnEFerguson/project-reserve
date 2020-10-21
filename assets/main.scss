@@ -57,6 +57,11 @@ button {
   display: flex;
   align-items: center;
 }
+.flexrowcenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .flexrow-sb {
   display: flex;
@@ -78,6 +83,9 @@ button {
   flex-direction: column;
   align-items: center;
 }
+.m-a {
+  margin: auto;
+}
 .mb-27 {
   margin-bottom: 27px;
 }
@@ -98,6 +106,9 @@ button {
 }
 .mr-9 {
   margin-right: 9px;
+}
+.mr-a {
+  margin-right: auto;
 }
 .ml-a {
   margin-left: auto;
@@ -135,8 +146,14 @@ button {
 .w50 {
   width: 50%;
 }
+.w33 {
+  width: 33.33%;
+}
 .w25 {
   width: 25%;
+}
+.h100 {
+  height: 100%;
 }
 .p9 {
   padding: 9px;
@@ -149,4 +166,7 @@ button {
 }
 .col-error {
   color: red;
+}
+.tac {
+  text-align: center;
 }

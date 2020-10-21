@@ -1,5 +1,10 @@
 <template>
   <div class="finishContainer">
+    <ViewPriorityOrderModal
+      v-if="viewPriorityOrderModalOpen"
+      :on-close="closeViewPriorityOrderModal"
+      :reserve-category="reserveCategoryToView"
+    />
     <h3 class="finishConfirmationText mb-18">
       Please confirm that the specified reserve configuration is correct before
       clicking Finish
@@ -29,7 +34,9 @@
             <span class="rowCell">{{ category.order }}</span>
             <span class="rowCell">{{ category.name }}</span>
             <span class="rowCell">{{ category.size }}</span>
-            <button class="p9">{{ 'Priority' }}</button>
+            <button class="p9" @click="() => viewPriorityOrder(category)">
+              {{ 'Priority' }}
+            </button>
           </div>
         </div>
       </div>
@@ -59,9 +66,18 @@
 </template>
 
 <script>
+import ViewPriorityOrderModal from '~/components/ViewPriorityOrderModal.vue'
+
 export default {
   layout: 'configuration-screen',
   middleware: 'has-category',
+  components: { ViewPriorityOrderModal },
+  data() {
+    return {
+      viewPriorityOrderModalOpen: false,
+      reserveCategoryToView: null,
+    }
+  },
   computed: {
     supply() {
       return this.$store.state.currentConfig.supply
@@ -74,6 +90,19 @@ export default {
     },
     requiredFields() {
       return this.$store.state.currentConfig.requiredFields
+    },
+  },
+  methods: {
+    closeViewPriorityOrderModal() {
+      this.viewPriorityOrderModalOpen = false
+      this.reserveCategoryToView = null
+    },
+    viewPriorityOrder(category) {
+      console.log(category)
+      this.reserveCategoryToView = category
+      this.$nextTick(() => {
+        this.viewPriorityOrderModalOpen = true
+      })
     },
   },
 }

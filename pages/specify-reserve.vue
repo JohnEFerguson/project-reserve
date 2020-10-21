@@ -6,6 +6,11 @@
       :mode="editReserveCategoryModalMode"
       :category-to-edit="categoryToEdit || undefined"
     />
+    <ViewPriorityOrderModal
+      v-if="viewPriorityOrderModalOpen"
+      :on-close="closeViewPriorityOrderModal"
+      :reserve-category="reserveCategoryToView"
+    />
     <div class="reserveTableContainer">
       <div class="reserveTableLabels">
         <span>Processing Order</span>
@@ -24,7 +29,9 @@
           <span class="rowCell">{{ category.name }}</span>
           <span class="rowCell">{{ category.size }}</span>
           <span class="rowCell">{{ calcSupplyPercent(category.size) }}</span>
-          <button>{{ 'Priority' }}</button>
+          <button @click="() => viewPriorityOrder(category)">
+            {{ 'Priority' }}
+          </button>
           <span class="actionButtons">
             <font-awesome-icon icon="trash" class="icon" />
             <font-awesome-icon
@@ -66,6 +73,7 @@
 
 <script>
 import EditReserveCategoryModal from '~/components/EditReserveCategoryModal.vue'
+import ViewPriorityOrderModal from '~/components/ViewPriorityOrderModal.vue'
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
@@ -74,12 +82,14 @@ function deepClone(obj) {
 export default {
   layout: 'configuration-screen',
   middleware: 'has-category',
-  components: { EditReserveCategoryModal },
+  components: { EditReserveCategoryModal, ViewPriorityOrderModal },
   data() {
     return {
       editReserveCategoryModalOpen: false,
       editReserveCategoryModalMode: '',
       categoryToEdit: null,
+      viewPriorityOrderModalOpen: false,
+      reserveCategoryToView: null,
     }
   },
   computed: {
@@ -101,6 +111,16 @@ export default {
     closeEditReserveCategoryModal() {
       this.editReserveCategoryModalOpen = false
       this.categoryToEdit = null
+    },
+    closeViewPriorityOrderModal() {
+      this.viewPriorityOrderModalOpen = false
+      this.reserveCategoryToView = null
+    },
+    viewPriorityOrder(category) {
+      this.reserveCategoryToView = category
+      this.$nextTick(() => {
+        this.viewPriorityOrderModalOpen = true
+      })
     },
     editCategory(category) {
       this.editReserveCategoryModalMode = 'edit'
