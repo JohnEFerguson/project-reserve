@@ -99,7 +99,7 @@ function deepClone(obj) {
 }
 
 const defaultCriteria = {
-  criteriaName: '',
+  name: '',
   criteriaType: CATEGORY_TYPE,
   order: null,
   ...deepClone(categoryFields),
