@@ -186,7 +186,7 @@ export default {
   backdrop-filter: blur(5px);
 }
 .modalInnerWrapper {
-  height: 90%;
+  height: calc(100% - 18px);
   width: 90%;
   border: 2px solid var(--dark-blue);
   background: white;
@@ -231,7 +231,7 @@ export default {
   padding: 18px;
   border: 2px solid var(--dark-blue);
   border-radius: 0 0 18px 18px;
-  max-height: 55vh;
+  max-height: 50vh;
   overflow: scroll;
 }
 .textInput {
