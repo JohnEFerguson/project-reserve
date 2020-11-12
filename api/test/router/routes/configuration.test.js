@@ -78,7 +78,6 @@ describe("Testing positive cases for the configuration endpoints", () => {
 
     it("GET field names from config object by id", async () => {
         const response2 = await supertest(app).get('/configurations/1/fieldNames').expect(200)
-        console.log(response2.text)
         assert(response2.text == '[{"name":"recipient_id","required":true},{"name":"is_clinical_trial_participant","required":true},{"name":"county_of_residence","required":false},{"name":"sofa_score","required":false}]')
     
     });
