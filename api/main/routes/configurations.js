@@ -85,13 +85,13 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
 
   const fieldNames = [{"name": "recipient_id", "required": true}]
   reserveCategoryNames.forEach((cat) =>
-    fieldNames.push({"name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true})
+    fieldNames.push({"name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true, "dataType": "BOOLEAN"})
   )
   categoryCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false})
+    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "STRING"})
   )
   numericCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false})
+    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "NUMBER"})
   )
 
   res.json(fieldNames)
