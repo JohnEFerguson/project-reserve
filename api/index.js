@@ -8,9 +8,13 @@ const db = require('./main/config/db.js')
 
 const patientsRoute = require('./main/routes/patients')
 const configurationsRoute = require('./main/routes/configurations')
+const sourceFilesRoute = require('./main/routes/source_files')
+
 
 const app = express()
 const PORT = env.PORT
+
+app.db = db
 
 app.use(morgan('combined'))
 app.use(bodyParser.json())
@@ -36,6 +40,7 @@ app.use(async (req, res, next) => {
 
 app.use(patientsRoute)
 app.use(configurationsRoute)
+app.use(sourceFilesRoute)
 
 module.exports = app
 
