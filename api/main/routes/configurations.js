@@ -83,7 +83,7 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
     { type: SELECT }
   )
 
-  const fieldNames = [{"name": "recipient_id", "required": true}]
+  const fieldNames = [{"name": "recipient_id", "required": true, "dataType": "STRING"}]
   reserveCategoryNames.forEach((cat) =>
     fieldNames.push({"name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true, "dataType": "BOOLEAN"})
   )
