@@ -13,8 +13,9 @@ module.exports = (sequelize) => {
     name: {
       type: STRING,
     },
-    state: {
-      type: ENUM('FINISHED','IN_PROGRESS'),
+    status: {
+      type: ENUM('READY_TO_PROCESS', 'FINISHED','IN_PROGRESS', 'ERROR'),
+      defaultValue: 'READY_TO_PROCESS'
     },
     dateLoaded: {
       type: DATE,

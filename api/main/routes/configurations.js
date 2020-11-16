@@ -20,9 +20,21 @@ router.get('/configurations/:id', async (req, res) => {
   return res.json(await db.configuration.find({ where: { id } }))
 })
 
+// DELETE one configuration by id
+router.delete('/configurations/:id', async (req, res) => {
+  const { db } = req
+
+  const id = req.params.id
+  await db.configuration.destroy({ where: { id } })
+  return res.status(200).json()
+})
+
+
 // POST single configuration
 router.post('/configurations', async (req, res) => {
   const { db } = req
+
+  
 
   try {
     const newConfig = await db.configuration.create(req.body, {
