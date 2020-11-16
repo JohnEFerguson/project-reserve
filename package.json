@@ -34,6 +34,8 @@
     "sass-loader": "^10.0.2",
     "sequelize": "^6.3.5",
     "sequelize-auto-migrations": "^1.0.3",
+    "socket.io": "^3.0.1",
+    "socket.io-client": "^3.0.1",
     "sqlite3": "^5.0.0"
   },
   "devDependencies": {

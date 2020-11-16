@@ -60,6 +60,7 @@ export default {
     '@nuxt/http',
     '@nuxtjs/dotenv',
     'nuxt-fontawesome',
+    '~/modules/io',
   ],
   fontawesome: {
     imports: [

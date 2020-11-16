@@ -1,5 +1,6 @@
 import arrayMove from 'array-move'
 import pick from 'lodash.pick'
+// import io from 'socket.io-client'
 
 import {
   categoryFields,
@@ -18,11 +19,13 @@ const generateDefaultCategory = (size) => ({
 })
 
 const initialState = {
+  socket: null,
   currentConfig: {
     unitType: '',
     supply: null,
     reserveCategories: [],
     requiredFields: [],
+    reserveInstances: [],
   },
 }
 
@@ -110,6 +113,9 @@ export const mutations = {
     state.currentConfig.reserveCategories = movedCategories
   },
   deleteCategory(state, category) {},
+  addReserveInstance(state, reserveInstance) {
+    state.reserveInstances = [...state.reserveInstances, reserveInstance]
+  },
 }
 
 function transformCriteriaForPost(priority) {
