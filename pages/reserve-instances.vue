@@ -10,10 +10,10 @@
       <div v-if="reserveInstances" class="reserveTableRows">
         <div
           v-for="instance in reserveInstances"
-          :key="`${instance.name}`"
+          :key="`${instance.id}`"
           class="reserveTableRow"
         >
-          <span class="rowCell">{{ instance.date }}</span>
+          <span class="rowCell">{{ instance.dateLoaded }}</span>
           <span class="rowCell">{{ instance.name }}</span>
           <span class="rowCell">{{ instance.status }}</span>
           <div class="actionButtons">

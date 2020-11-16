@@ -9,7 +9,7 @@
 <script>
 export default {
   beforeMount() {
-    this.$store.commit('initSocket')
+    this.$store.dispatch('initSocket')
   },
 }
 </script>

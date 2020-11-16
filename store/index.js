@@ -19,7 +19,7 @@ const generateDefaultCategory = (size) => ({
 })
 
 const initialState = {
-  socket: null,
+  isSocketConnected: false,
   reserveInstances: [],
   currentConfig: {
     unitType: '',
@@ -119,11 +119,13 @@ export const mutations = {
       reserveInstance,
     ]
   },
-  initSocket() {
-    state.socket = socket
-    socket.on(STATUS_UPDATE, (statusObj) => {
-      console.log(statusObj)
-    })
+  setReserveInstances(state, reserveInstances) {
+    state.reserveInstances = reserveInstances
+  },
+  setSocket(state) {
+    if (!state.isSocketConnected) {
+      state.isSocketConnected = true
+    }
   },
 }
 
@@ -181,11 +183,21 @@ function transformCriteriaForDisplay(priority) {
 
 export const actions = {
   async nuxtServerInit({ commit }) {},
-  async addReserveInstance({ commit }, reserveInstance) {
-    await fetch(`/api/sourceFiles/${reserveInstance.sourceFileId}/process`, {
+  initSocket({ commit, state }) {
+    if (!state.isSocketConnected) {
+      commit('setSocket')
+      socket.on(STATUS_UPDATE, (reserveInstances) => {
+        console.log(reserveInstances)
+        commit('setReserveInstances', reserveInstances)
+      })
+    }
+  },
+  async processSourceFile({ commit }, sourceFileId) {
+    await fetch(`/api/sourceFiles/${sourceFileId}/process`, {
       method: 'POST',
     })
-    commit('addReserveInstance', reserveInstance)
+    const sourceFilesRes = await fetch('/api/sourceFiles')
+    commit('setReserveInstances', await sourceFilesRes.json())
   },
   async postConfig({ commit, state, ...props }) {
     const configPayload = {
