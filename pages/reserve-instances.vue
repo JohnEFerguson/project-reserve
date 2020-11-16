@@ -2,12 +2,12 @@
   <div class="reserveContainer">
     <div class="reserveTableContainer">
       <div class="reserveTableLabels">
-        <span>Date Created</span>
-        <span>Name</span>
-        <span>Status</span>
-        <span>Action</span>
+        <label class="label">Date Created</label>
+        <label class="label">Name</label>
+        <label class="label">Status</label>
+        <label class="actionLabel">Action</label>
       </div>
-      <div class="reserveTableRows">
+      <div v-if="reserveInstances" class="reserveTableRows">
         <div
           v-for="instance in reserveInstances"
           :key="`${instance.name}`"
@@ -35,72 +35,29 @@
 </template>
 
 <script>
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj))
-}
+import socket from '~/plugins/socket.io.js'
+import { STATUS_UPDATE } from '~/socketConstants'
+// function deepClone(obj) {
+//   return JSON.parse(JSON.stringify(obj))
+// }
 
 export default {
   layout: 'configuration-screen',
   middleware: 'has-category',
   data() {
-    return {
-      viewReserveCategoryModalOpen: false,
-      reserveConfigToView: null,
-    }
+    return {}
   },
   computed: {
-    totalSupply() {
-      return this.$store.state.currentConfig.supply
-    },
-    allocationText() {
-      return `${this.$store.state.currentConfig.supply} ${this.$store.state.currentConfig.unitType}`
-    },
     reserveInstances() {
-      return this.$store.state.currentConfig.reserveInstances
+      return this.$store.state.reserveInstances
     },
   },
-  methods: {
-    openAddReserveCategoryModal() {
-      this.editReserveCategoryModalMode = 'add'
-      this.editReserveCategoryModalOpen = true
-    },
-    closeEditReserveCategoryModal() {
-      this.editReserveCategoryModalOpen = false
-      this.categoryToEdit = null
-    },
-    closeViewPriorityOrderModal() {
-      this.viewPriorityOrderModalOpen = false
-      this.reserveCategoryToView = null
-    },
-    viewPriorityOrder(category) {
-      this.reserveCategoryToView = category
-      this.$nextTick(() => {
-        this.viewPriorityOrderModalOpen = true
-      })
-    },
-    editCategory(category) {
-      this.editReserveCategoryModalMode = 'edit'
-      this.categoryToEdit = deepClone(category)
-      this.$nextTick(() => {
-        this.editReserveCategoryModalOpen = true
-      })
-    },
-    moveCategoryUp(category) {
-      this.$store.commit('moveCategory', { category, direction: 'up' })
-    },
-    moveCategoryDown(category) {
-      this.$store.commit('moveCategory', { category, direction: 'down' })
-    },
-    postConfig() {
-      this.$store.dispatch('postConfig')
-    },
-    calcSupplyPercent(size) {
-      const percent = (size / this.totalSupply) * 100
-      return percent % 1 > 0.5
-        ? `${Math.ceil(percent)}%`
-        : `${Math.floor(percent)}%`
-    },
+  mounted() {
+    socket.on(STATUS_UPDATE, (message) => {
+      console.log(message)
+    })
   },
+  methods: {},
 }
 </script>
 
@@ -120,7 +77,7 @@ export default {
 }
 .reserveTableLabels {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(12, 1fr);
   grid-gap: 18px;
   padding: 18px;
   border-bottom: 2px solid var(--dark-blue);
@@ -133,22 +90,31 @@ export default {
 .reserveTableRow {
   display: grid;
   padding: 18px;
-  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(12, 1fr);
   grid-gap: 18px;
   border-radius: 18px;
   text-align: center;
 }
 .rowCell {
+  grid-column: span 3;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+.label {
+  grid-column: span 3;
+}
+.actionLabel {
+  grid-column: span 3;
+}
 .actionButtons {
-  width: 75%;
-  margin-left: auto;
+  grid-column: span 3;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
+  button {
+    padding: 18px;
+  }
 }
 .buttonWrapper {
   width: 100%;

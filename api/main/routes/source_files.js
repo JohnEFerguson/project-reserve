@@ -1,13 +1,13 @@
 'use strict'
 
 const { Router } = require('express')
-const { SELECT } = require("sequelize");
-//const { STATUS_UPDATE } = require('../../../socketConstants')
-//const { emitter } = require('../../../modules/io')
+const { SELECT } = require('sequelize')
+// const { STATUS_UPDATE } = require('../../../socketConstants')
+// const { emitter } = require('../../../modules/io')
 
 const router = Router()
 
-// GET all source files  
+// GET all source files
 router.get('/sourceFiles', async (req, res) => {
   const { db } = req
   return res.json(await db.sourceFile.findAll({ order: ['id'] }))
@@ -21,7 +21,6 @@ router.get('/sourceFiles/:id', async (req, res) => {
   return res.json(await db.sourceFile.find({ where: { id } }))
 })
 
-
 // GET all patients for a source file
 router.get('/sourceFiles/:id/patients', async (req, res) => {
   const { db } = req
@@ -32,98 +31,90 @@ router.get('/sourceFiles/:id/patients', async (req, res) => {
 
 // process all patients in a source file
 router.post('/sourceFiles/:id/process', async (req, res) => {
-
   const { db } = req
   const id = req.params.id
 
   try {
-
-    // update status of file to be processing 
-    const sourceFile = await db.sourceFile.findOne({ where: { id: id } })
+    // update status of file to be processing
+    const sourceFile = await db.sourceFile.findOne({ where: { id } })
     sourceFile.status = 'PROCESSING'
-    await sourceFile.save() 
+    await sourceFile.save()
 
     const configId = sourceFile.dataValues.configurationId
-    const reserveCategories = (await db.reserveCategory.findAll({ where: { configurationId: configId } })).map(ent => ent.dataValues)
+    const reserveCategories = (
+      await db.reserveCategory.findAll({ where: { configurationId: configId } })
+    ).map((ent) => ent.dataValues)
 
-    const orderedPatientsByReserve = await Promise.all(reserveCategories.map((rc) => {
-      return orderPatientsInReserveCategory(db, rc.id, rc.size)
-    }))
+    const orderedPatientsByReserve = await Promise.all(
+      reserveCategories.map((rc) => {
+        return orderPatientsInReserveCategory(db, rc.id, rc.size)
+      })
+    )
 
-    var leftOver = 0 // handle this!
+    let leftOver = 0 // handle this!
     const selectedPatients = new Set()
     const notSelectedPatients = new Set()
 
-    orderedPatientsByReserve.forEach(
-      f => {
-
-        if (f.size > f.patients.length) {
-          leftOver += f.size - f.patients.length
-        } else {
-
-          var given = 0
-          var i = 0
-          while (given < f.size) {
-
-            if (!selectedPatients.has(f.patients[i])) {
-              selectedPatients.add(f.patients[i])
-              given += 1
-              notSelectedPatients.delete(f.patients[i])
-            }
-            i += 1
+    orderedPatientsByReserve.forEach((f) => {
+      if (f.size > f.patients.length) {
+        leftOver += f.size - f.patients.length
+      } else {
+        let given = 0
+        let i = 0
+        while (given < f.size) {
+          if (!selectedPatients.has(f.patients[i])) {
+            selectedPatients.add(f.patients[i])
+            given += 1
+            notSelectedPatients.delete(f.patients[i])
           }
+          i += 1
+        }
 
-          while (i < f.patients.length) {
-            if (!selectedPatients.has(f.patients[i])) {
-              notSelectedPatients.add(f.patients[i])
-            }
-            i += 1
+        while (i < f.patients.length) {
+          if (!selectedPatients.has(f.patients[i])) {
+            notSelectedPatients.add(f.patients[i])
           }
+          i += 1
         }
       }
-    )
+    })
 
     // update patients
-    selectedPatients.forEach(
-      async pId => {
-        const patient = await db.patient.findOne({ where: { id: pId } })
-        patient.given_unit = true
-        await patient.save()
-      }
-    )
-   
-     // update sourceFile 
-    sourceFile.status = 'FINISHED' 
+    selectedPatients.forEach(async (pId) => {
+      const patient = await db.patient.findOne({ where: { id: pId } })
+      patient.given_unit = true
+      await patient.save()
+    })
+
+    // update sourceFile
+    sourceFile.status = 'FINISHED'
     const finished = await sourceFile.save()
 
     // if (finished) emmiter.emit(STATUS_UPDATE, (await db.sourceFile.findAll()).map(sf => sf.dataValues))
-
   } catch (err) {
-
-    // update status of file to be error processing 
-    const sourceFile = await db.sourceFile.findOne({ where: { id: id } })
-    sourceFile.status = 'ERROR' 
+    // update status of file to be error processing
+    const sourceFile = await db.sourceFile.findOne({ where: { id } })
+    sourceFile.status = 'ERROR'
     await sourceFile.save()
   }
 
   return res.json() // return 200 no matter WHAT
 })
 
-// POST a source file   
+// POST a source file
 router.post('/sourceFiles', async (req, res) => {
-    const { db } = req
-  
-    try {
-      const newSourceFile = await db.sourceFile.create(req.body)
-  
-      return res.status(201).json(newSourceFile.dataValues)
-    } catch (err) {
-      return res.status(400)
-    }
+  const { db } = req
+
+  try {
+    const newSourceFile = await db.sourceFile.create(req.body)
+
+    return res.status(201).json(newSourceFile.dataValues)
+  } catch (err) {
+    return res.status(400)
+  }
 })
 
 async function orderPatientsInReserveCategory(db, reserveCategoryId, size) {
-
   const orderedPatientIds = db.sequelize.query(
     `
     select p.id
@@ -315,7 +306,11 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size) {
     { type: SELECT }
   )
 
-  return { id: reserveCategoryId, size: size, patients: (await orderedPatientIds)[0].map(ent => ent.id) }
+  return {
+    id: reserveCategoryId,
+    size: size,
+    patients: (await orderedPatientIds)[0].map((ent) => ent.id),
+  }
 }
 
 module.exports = router

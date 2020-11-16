@@ -20,12 +20,12 @@ const generateDefaultCategory = (size) => ({
 
 const initialState = {
   socket: null,
+  reserveInstances: [],
   currentConfig: {
     unitType: '',
     supply: null,
     reserveCategories: [],
     requiredFields: [],
-    reserveInstances: [],
   },
 }
 
@@ -114,7 +114,11 @@ export const mutations = {
   },
   deleteCategory(state, category) {},
   addReserveInstance(state, reserveInstance) {
-    state.reserveInstances = [...state.reserveInstances, reserveInstance]
+    console.log(reserveInstance)
+    state.reserveInstances = [
+      ...(state.reserveInstances || []),
+      reserveInstance,
+    ]
   },
 }
 

@@ -1,37 +1,28 @@
-import { isModuleSpecifier } from '../../node_modules/@babel/types';
+import { createServer } from 'http'
+import socketio from 'socket.io'
+import { STATUS_UPDATE, emitter } from '../../socketConstants'
 
-const http = require('http')
-const { EventEmitter } = require('events')
-const socketIO = require('socket.io')
-const { STATUS_UPDATE } = require('../../socketConstants')
+export default function () {
+  this.nuxt.hook('render:before', (renderer) => {
+    const server = createServer(this.nuxt.renderer.app)
+    const io = socketio(server)
 
-class SocketEmitter extends EventEmitter {}
+    // overwrite nuxt.server.listen()
+    this.nuxt.server.listen = (port, host) =>
+      new Promise((resolve) =>
+        server.listen(port || 8019, host || 'localhost', resolve)
+      )
+    // close this server on 'close' event
+    this.nuxt.hook('close', () => new Promise(server.close))
 
-module.exports = {
-  emitter: new SocketEmitter(),
-  default: function () {
-    this.nuxt.hook('render:before', (renderer) => {
-      const server = http.createServer(this.nuxt.renderer.app)
-      const io = socketIO(server)
-  
-      // overwrite nuxt.server.listen()
-      this.nuxt.server.listen = (port, host) =>
-        new Promise((resolve) =>
-          server.listen(port || 8019, host || 'localhost', resolve)
-        )
-      // close this server on 'close' event
-      this.nuxt.hook('close', () => new Promise(server.close))
-  
-      const clientSocket = io.of('/connection/client')
-      emitter.on(STATUS_UPDATE, (statusObj) => {
-        clientSocket.emit(STATUS_UPDATE, statusObj)
-      })
-      clientSocket.on('connection', (socket) => {
-        socket.on(STATUS_UPDATE, (statusObj) => {
-          socket.emit(STATUS_UPDATE, statusObj)
-        })
+    const clientSocket = io.of('/connection/client')
+    emitter.on(STATUS_UPDATE, (statusObj) => {
+      clientSocket.emit(STATUS_UPDATE, statusObj)
+    })
+    clientSocket.on('connection', (socket) => {
+      socket.on(STATUS_UPDATE, (statusObj) => {
+        socket.emit(STATUS_UPDATE, statusObj)
       })
     })
-  }
+  })
 }
-
