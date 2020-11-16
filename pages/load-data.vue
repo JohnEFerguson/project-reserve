@@ -30,13 +30,10 @@
 <script>
 import { unparse, parse } from 'papaparse'
 
-const download = (
-  content,
-  fileName = 'csv_template',
-  mimeType = 'text/csv;encoding:utf-8'
-) => {
+function download(content) {
   const a = document.createElement('a')
-  mimeType = mimeType || 'application/octet-stream'
+  const fileName = 'csv_template'
+  const mimeType = 'text/csv;encoding:utf-8'
 
   if (navigator.msSaveBlob) {
     // IE10
@@ -65,9 +62,18 @@ const download = (
 
 export default {
   middleware: 'has-category',
+  data() {
+    return {
+      errorMessage: null,
+      successMessage: null,
+    }
+  },
   computed: {
     requiredFields() {
       return this.$store.state.currentConfig.requiredFields
+    },
+    currentConfig() {
+      return this.$store.state.currentConfig
     },
   },
   mounted() {
@@ -75,94 +81,8 @@ export default {
       const file = this.$refs.fileUpload.files[0]
       if (file) {
         parse(file, {
-          complete: async (res, file) => {
-            // validate data
-            const { data, errors } = res
-            if (errors.length) {
-              alert(errors[0])
-            }
-            const [fieldNames, ...patients] = data
-            const dataTypeMap = this.requiredFields.reduce(
-              (acc, { name, dataType }) => {
-                const fieldIndex = fieldNames.indexOf(name)
-                acc[fieldIndex] = { name, dataType }
-                return acc
-              },
-              {}
-            )
-            let patientObjs
-            try {
-              patientObjs = patients.map((patient) => {
-                patient.reduce((acc, field, index) => {
-                  const { name, dataType } = dataTypeMap[index]
-                  const errorMessage = `Patient ${index} has an invalid value for ${name}.`
-                  let realFieldValue = field
-                  switch (dataType) {
-                    case 'BOOLEAN': {
-                      const fieldUC = field.toUpperCase()
-                      if (!['TRUE', 'FALSE'].includes(fieldUC)) {
-                        throw new Error(
-                          `${errorMessage} Please ensure this is a true/false value`
-                        )
-                      }
-                      realFieldValue = fieldUC === 'TRUE'
-                      break
-                    }
-                    case 'NUMBER': {
-                      let numberVal
-                      try {
-                        numberVal = parseFloat(field)
-                      } catch {
-                        throw new Error(
-                          `${errorMessage} Please ensure this is a real number`
-                        )
-                      }
-                      realFieldValue = numberVal
-                      break
-                    }
-                    default:
-                    case 'STRING':
-                      // data will always be a string?
-                      break
-                  }
-                  acc[name] = realFieldValue
-                  return acc
-                }, {})
-              })
-            } catch (e) {
-              alert(e)
-              return
-            }
-
-            console.log(patientObjs)
-
-            // POST { name: file name }
-            const sourceFileRes = await fetch('/api/sourceFile', {
-              method: 'POST',
-              headers: {
-                'content-type': 'application/json',
-              },
-              body: JSON.stringify({
-                name: file.name,
-              }),
-            })
-            const sourceFile = await sourceFileRes.json()
-            // return { name: file name, id: 1 }
-            const patientsRes = await fetch('/api/patients', {
-              method: 'POST',
-              headers: {
-                'content-type': 'application/json',
-              },
-              body: JSON.stringify(
-                patientObjs.map((patientInfo) => ({
-                  configId: this.$store.state.currentConfig.id,
-                  sourceFileId: sourceFile.id,
-                  ...patientInfo,
-                }))
-              ),
-            })
-            const patientList = patientsRes.json()
-            console.log(patientList)
+          complete: (res, file) => {
+            this.parseUploadedCsv(res, file)
           },
         })
       }
@@ -174,6 +94,105 @@ export default {
         fields: this.requiredFields.map(({ name }) => name),
       })
       download(csv)
+    },
+    async parseUploadedCsv(res, file) {
+      // validate data
+      const { data, errors } = res
+      if (errors.length) {
+        alert(errors[0])
+      }
+      const [fieldNames, ...patients] = data
+      let patientObjs
+      try {
+        const dataTypeMap = this.requiredFields.reduce(
+          (acc, { name, dataType }) => {
+            const fieldIndex = fieldNames.indexOf(name)
+            if (fieldIndex < 0) {
+              throw new Error(
+                `Could not find column for ${name} in ${fieldNames.join(', ')}`
+              )
+            }
+            acc[fieldIndex] = { name, dataType }
+            return acc
+          },
+          {}
+        )
+        patientObjs = patients.map((patient) => {
+          return patient.reduce((acc, field, index) => {
+            const { name, dataType, required } = dataTypeMap[index]
+            const errorMessage = `Patient ${index} has an invalid value for ${name}: ${field}.`
+            let realFieldValue = field
+            if (required && !realFieldValue) {
+              throw new Error(
+                `${errorMessage} This field is required but it empty.`
+              )
+            }
+            switch (dataType) {
+              case 'BOOLEAN': {
+                const fieldUC = field.toUpperCase()
+                if (!['TRUE', 'FALSE'].includes(fieldUC)) {
+                  throw new Error(
+                    `${errorMessage} Please ensure this is a true/false value`
+                  )
+                }
+                realFieldValue = fieldUC === 'TRUE'
+                break
+              }
+              case 'NUMBER': {
+                let numberVal
+                try {
+                  numberVal = parseFloat(field)
+                } catch {
+                  throw new Error(
+                    `${errorMessage} Please ensure this is a real number`
+                  )
+                }
+                realFieldValue = numberVal
+                break
+              }
+              default:
+              case 'STRING':
+                // data will always be a string?
+                break
+            }
+            acc[name] = realFieldValue
+            return acc
+          }, {})
+        })
+      } catch (e) {
+        alert(e)
+        this.$refs.fileUpload.value = ''
+        return
+      }
+
+      // POST { name: file name }
+      const sourceFileRes = await fetch('/api/sourceFiles', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          configurationId: this.currentConfig.id,
+          name: file.name,
+        }),
+      })
+      const sourceFile = await sourceFileRes.json()
+      // return { name: file name, id: 1 }
+      const patientsRes = await fetch('/api/patients', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(
+          patientObjs.map((patientInfo) => ({
+            configurationId: this.currentConfig.id,
+            sourceFileId: sourceFile.id,
+            ...patientInfo,
+          }))
+        ),
+      })
+      const patientList = await patientsRes.json()
+      console.log(patientList)
     },
   },
 }
