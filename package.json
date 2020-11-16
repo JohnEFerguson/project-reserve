@@ -21,6 +21,7 @@
     "@nuxtjs/dotenv": "^1.4.1",
     "array-move": "^3.0.1",
     "body-parser": "^1.19.0",
+    "http": "^0.0.1-security",
     "jest": "^26.4.2",
     "lodash.get": "^4.4.2",
     "lodash.omit": "^4.5.0",

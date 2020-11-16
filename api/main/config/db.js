@@ -44,7 +44,7 @@ db.patient.belongsTo(db.configuration)
 db.configuration.hasMany(db.sourceFile, { foreignKey: { allowNull: false } })
 db.sourceFile.belongsTo(db.configuration)
 
-db.patient.hasMany(db.reserveCategory)
+// db.patient.hasMany(db.reserveCategory)
 db.configuration.reserveCategories = db.configuration.hasMany(db.reserveCategory, { as: "reserveCategories" })
 db.reserveCategory.priority = db.reserveCategory.hasOne(db.priority)
 db.patient.reserveCategories = db.patient.belongsToMany(db.reserveCategory, { through: db.patientReserveCategory, as: 'reserveCategories' })
@@ -53,6 +53,7 @@ db.patient.belongsToMany(db.numericCriteriaBucket, { through: db.numericCriteria
 db.patient.belongsToMany(db.categoryCriteriaElement, { through: db.categoryCriteriaPatientValue })
 db.categoryCriteriaElement.belongsToMany(db.patient, { through: db.categoryCriteriaPatientValue})
 db.numericCriteriaBucket.belongsToMany(db.patient, { through: db.numericCriteriaPatientValue })
+
 db.priority.categoryCriteria = db.priority.hasMany(db.categoryCriteria, { as: "categoryCriteria" })
 db.priority.numericCriteria = db.priority.hasMany(db.numericCriteria, { as: "numericCriteria" })
 db.categoryCriteria.categoryCriteriaElement = db.categoryCriteria.hasMany(db.categoryCriteriaElement, { as: 'elements' })

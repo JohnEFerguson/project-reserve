@@ -11,6 +11,9 @@ module.exports = (sequelize) => {
       autoIncrement: true,
       allowNull: false
     },
+    order: {
+      type: INTEGER,
+    },
     min: {
       type: INTEGER,
     },
