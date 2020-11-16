@@ -22,7 +22,14 @@
   </div>
 </template>
 <script>
-export default {}
+import socket from '~/plugins/socket.io.js'
+export default {
+  beforeMount() {
+    socket.on('STATUS_UPDATE', (message) => {
+      console.log(message)
+    })
+  },
+}
 </script>
 
 <style scoped lang="scss">

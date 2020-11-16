@@ -10,7 +10,6 @@ const patientsRoute = require('./main/routes/patients')
 const configurationsRoute = require('./main/routes/configurations')
 const sourceFilesRoute = require('./main/routes/source_files')
 
-
 const app = express()
 const PORT = env.PORT
 

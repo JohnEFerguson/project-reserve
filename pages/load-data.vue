@@ -15,12 +15,20 @@
       />
       <label class="navButton ml-18 fs-16" for="fileUpload">Upload</label>
     </div>
+    <div
+      v-if="errorMessage || successMessage"
+      :class="['pageMessageWrapper', { isError: errorMessage }]"
+    >
+      <div class="pageMessage">
+        {{ errorMessage || successMessage }}
+      </div>
+    </div>
     <div class="navButtons">
       <nuxt-link to="/finish" class="navButton">Back</nuxt-link>
       <nuxt-link
-        to="/unit-definition"
-        class="navButton"
-        @click.native="initConfig"
+        :to="!successMessage ? '/load-data' : '/reserve-instances'"
+        :class="['navButton', { isDisabled: !successMessage }]"
+        @click.native="setReserveInstance"
         >Next</nuxt-link
       >
     </div>
@@ -66,6 +74,7 @@ export default {
     return {
       errorMessage: null,
       successMessage: null,
+      sourceFile: null,
     }
   },
   computed: {
@@ -89,6 +98,14 @@ export default {
     })
   },
   methods: {
+    setReserveInstance() {
+      this.$store.commit('addReserveInstance', {
+        name: this.sourceFile.name,
+        date: new Date(),
+        status: 'unprocessed',
+        configId: this.currentConfig.id,
+      })
+    },
     downloadCsvTemplate() {
       const csv = unparse({
         fields: this.requiredFields.map(({ name }) => name),
@@ -160,7 +177,7 @@ export default {
           }, {})
         })
       } catch (e) {
-        alert(e)
+        this.errorMessage = e
         this.$refs.fileUpload.value = ''
         return
       }
@@ -177,8 +194,7 @@ export default {
         }),
       })
       const sourceFile = await sourceFileRes.json()
-      // return { name: file name, id: 1 }
-      const patientsRes = await fetch('/api/patients', {
+      await fetch('/api/patients', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -191,8 +207,9 @@ export default {
           }))
         ),
       })
-      const patientList = await patientsRes.json()
-      console.log(patientList)
+      this.errorMessage = null
+      this.sourceFile = sourceFile
+      this.successMessage = `Successfully loaded ${sourceFile.name}`
     },
   },
 }
@@ -222,5 +239,18 @@ export default {
   border: 2px solid var(--dark-blue);
   border-radius: 18px;
   width: 50%;
+}
+.pageMessageWrapper {
+  width: 50%;
+  padding: 18px 27px;
+  border-radius: 18px;
+  border: 2px solid green;
+  background-color: rgba(green, 0.1);
+  color: green;
+  &.isError {
+    border: 2px solid red;
+    color: red;
+    background-color: rgba(red, 0.1);
+  }
 }
 </style>
