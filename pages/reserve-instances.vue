@@ -35,8 +35,6 @@
 </template>
 
 <script>
-import socket from '~/plugins/socket.io.js'
-import { STATUS_UPDATE } from '~/socketConstants'
 // function deepClone(obj) {
 //   return JSON.parse(JSON.stringify(obj))
 // }
@@ -51,11 +49,6 @@ export default {
     reserveInstances() {
       return this.$store.state.reserveInstances
     },
-  },
-  mounted() {
-    socket.on(STATUS_UPDATE, (message) => {
-      console.log(message)
-    })
   },
   methods: {},
 }

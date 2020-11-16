@@ -2,8 +2,7 @@
 
 const { Router } = require('express')
 const { SELECT } = require('sequelize')
-// const { STATUS_UPDATE } = require('../../../socketConstants')
-// const { emitter } = require('../../../modules/io')
+const { STATUS_UPDATE, emitter } = require('../../../socketConstants')
 
 const router = Router()
 
@@ -90,7 +89,11 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
     sourceFile.status = 'FINISHED'
     const finished = await sourceFile.save()
 
-    // if (finished) emmiter.emit(STATUS_UPDATE, (await db.sourceFile.findAll()).map(sf => sf.dataValues))
+    if (finished)
+      emitter.emit(
+        STATUS_UPDATE,
+        (await db.sourceFile.findAll()).map((sf) => sf.dataValues)
+      )
   } catch (err) {
     // update status of file to be error processing
     const sourceFile = await db.sourceFile.findOne({ where: { id } })
@@ -308,7 +311,7 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size) {
 
   return {
     id: reserveCategoryId,
-    size: size,
+    size,
     patients: (await orderedPatientIds)[0].map((ent) => ent.id),
   }
 }

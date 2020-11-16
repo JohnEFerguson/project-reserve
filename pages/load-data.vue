@@ -99,11 +99,12 @@ export default {
   },
   methods: {
     setReserveInstance() {
-      this.$store.commit('addReserveInstance', {
+      this.$store.dispatch('addReserveInstance', {
         name: this.sourceFile.name,
         date: new Date(),
         status: 'unprocessed',
         configId: this.currentConfig.id,
+        sourceFileId: this.sourceFile.id,
       })
     },
     downloadCsvTemplate() {

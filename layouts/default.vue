@@ -6,4 +6,10 @@
 
 <style></style>
 
-<script></script>
+<script>
+export default {
+  beforeMount() {
+    this.$store.commit('initSocket')
+  },
+}
+</script>
