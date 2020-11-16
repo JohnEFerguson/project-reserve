@@ -22,6 +22,9 @@ export default {
       return this.$nuxt.$route.path
     },
   },
+  beforeMount() {
+    this.$store.commit('initSocket')
+  },
 }
 </script>
 

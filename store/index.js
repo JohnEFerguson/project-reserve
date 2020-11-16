@@ -1,13 +1,13 @@
 import arrayMove from 'array-move'
 import pick from 'lodash.pick'
-// import io from 'socket.io-client'
-
 import {
   categoryFields,
   numericFields,
   CATEGORY_TYPE,
   NUMERIC_TYPE,
 } from '../components/constants'
+import socket from '~/plugins/socket.io.js'
+import { STATUS_UPDATE } from '~/socketConstants'
 
 const generateDefaultCategory = (size) => ({
   name: 'Unreserved (auto-populated)',
@@ -20,12 +20,12 @@ const generateDefaultCategory = (size) => ({
 
 const initialState = {
   socket: null,
+  reserveInstances: [],
   currentConfig: {
     unitType: '',
     supply: null,
     reserveCategories: [],
     requiredFields: [],
-    reserveInstances: [],
   },
 }
 
@@ -114,7 +114,16 @@ export const mutations = {
   },
   deleteCategory(state, category) {},
   addReserveInstance(state, reserveInstance) {
-    state.reserveInstances = [...state.reserveInstances, reserveInstance]
+    state.reserveInstances = [
+      ...(state.reserveInstances || []),
+      reserveInstance,
+    ]
+  },
+  initSocket() {
+    state.socket = socket
+    socket.on(STATUS_UPDATE, (statusObj) => {
+      console.log(statusObj)
+    })
   },
 }
 
@@ -172,6 +181,12 @@ function transformCriteriaForDisplay(priority) {
 
 export const actions = {
   async nuxtServerInit({ commit }) {},
+  async addReserveInstance({ commit }, reserveInstance) {
+    await fetch(`/api/sourceFiles/${reserveInstance.sourceFileId}/process`, {
+      method: 'POST',
+    })
+    commit('addReserveInstance', reserveInstance)
+  },
   async postConfig({ commit, state, ...props }) {
     const configPayload = {
       unitType: state.currentConfig.unitType,

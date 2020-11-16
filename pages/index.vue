@@ -21,16 +21,7 @@
     </div>
   </div>
 </template>
-<script>
-import socket from '~/plugins/socket.io.js'
-export default {
-  beforeMount() {
-    socket.on('STATUS_UPDATE', (message) => {
-      console.log(message)
-    })
-  },
-}
-</script>
+<script></script>
 
 <style scoped lang="scss">
 .container {

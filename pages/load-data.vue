@@ -99,11 +99,12 @@ export default {
   },
   methods: {
     setReserveInstance() {
-      this.$store.commit('addReserveInstance', {
+      this.$store.dispatch('addReserveInstance', {
         name: this.sourceFile.name,
         date: new Date(),
         status: 'unprocessed',
         configId: this.currentConfig.id,
+        sourceFileId: this.sourceFile.id,
       })
     },
     downloadCsvTemplate() {
@@ -141,7 +142,7 @@ export default {
             let realFieldValue = field
             if (required && !realFieldValue) {
               throw new Error(
-                `${errorMessage} This field is required but it empty.`
+                `${errorMessage} This field is required but is empty.`
               )
             }
             switch (dataType) {
