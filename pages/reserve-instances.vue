@@ -25,7 +25,20 @@
             <button @click="() => viewPriorityOrder(instance)">
               View Configuration
             </button>
-            <button>Export Results</button>
+            <button class="exportResultsBtn">
+              Export Results ▼
+              <span class="resultsOptions">
+                <button @click="() => exportAll(instance.id)">
+                  Export all participants as CSV
+                </button>
+                <button @click="() => exportWinners(instance.id)">
+                  Export list of allocation winners as csv
+                </button>
+                <button @click="() => exportLosers(instance.id)">
+                  Export list of allocation losers as csv
+                </button>
+              </span>
+            </button>
           </div>
         </div>
         <div class="buttonWrapper">
@@ -75,6 +88,25 @@ export default {
       this.$nextTick(() => {
         this.viewPriorityOrderModalOpen = true
       })
+    },
+    async exportAll(id) {
+      const patientsRes = await fetch(`/api/sourceFiles/${id}/patients`)
+      const patients = await patientsRes.json()
+      console.log(patients)
+    },
+    async exportWinners(id) {
+      const winnersRes = await fetch(
+        `/api/sourceFiles/${id}/patients?givenUnit=true`
+      )
+      const winners = await winnersRes.json()
+      console.log(winners)
+    },
+    async exportLosers(id) {
+      const losersRes = await fetch(
+        `/api/sourceFiles/${id}/patients?givenUnit=false`
+      )
+      const losers = await losersRes.json()
+      console.log(losers)
     },
   },
 }
@@ -133,7 +165,8 @@ export default {
   justify-content: space-around;
   align-items: center;
   button {
-    padding: 18px;
+    padding: 9px;
+    margin-bottom: 4.5px;
   }
 }
 .buttonWrapper {
@@ -159,5 +192,24 @@ export default {
 }
 .icon {
   cursor: pointer;
+}
+
+.resultsOptions {
+  z-index: 1000;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  padding-top: 9px;
+  background-color: rgba(white, 0.75);
+  display: none;
+}
+.exportResultsBtn {
+  position: relative;
+  &:hover {
+    & > .resultsOptions {
+      display: block;
+    }
+  }
 }
 </style>
