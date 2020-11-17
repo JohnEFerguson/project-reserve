@@ -15,7 +15,6 @@ router.get('/sourceFiles', async (req, res) => {
 // GET one source file id
 router.get('/sourceFiles/:id', async (req, res) => {
   const { db } = req
-
   const id = req.params.id
   return res.json(await db.sourceFile.find({ where: { id } }))
 })
@@ -23,9 +22,11 @@ router.get('/sourceFiles/:id', async (req, res) => {
 // GET all patients for a source file
 router.get('/sourceFiles/:id/patients', async (req, res) => {
   const { db } = req
-
   const id = req.params.id
-  return res.json(await db.patient.findAll({ where: { sourceFileId: id } }))
+  if (req.query.givenUnit)
+    return res.json(await db.patient.findAll({ where: { sourceFileId: id, given_unit: (req.query.givenUnit === 'true') } }))
+  else
+    return res.json(await db.patient.findAll({ where: { sourceFileId: id } }))
 })
 
 // process all patients in a source file
