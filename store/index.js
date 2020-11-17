@@ -187,7 +187,6 @@ export const actions = {
     if (!state.isSocketConnected) {
       commit('setSocket')
       socket.on(STATUS_UPDATE, (reserveInstances) => {
-        console.log(reserveInstances)
         commit('setReserveInstances', reserveInstances)
       })
     }
