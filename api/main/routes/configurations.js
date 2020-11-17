@@ -17,7 +17,25 @@ router.get('/configurations/:id', async (req, res) => {
   const { db } = req
 
   const id = req.params.id
-  return res.json(await db.configuration.find({ where: { id } }))
+  return res.json(await db.configuration.findOne({
+    where: { id },
+    include: [{
+      model: db.reserveCategory,
+      as: 'reserveCategories',
+      include: [{
+        model: db.priority,
+        include: [{
+          model: db.categoryCriteria,
+          as: 'categoryCriteria'
+        },
+        {
+          model: db.numericCriteria,
+          as: 'numericCriteria'
+        }
+        ]
+      }]
+    }]
+  }))
 })
 
 // DELETE one configuration by id
@@ -34,7 +52,7 @@ router.delete('/configurations/:id', async (req, res) => {
 router.post('/configurations', async (req, res) => {
   const { db } = req
 
-  
+
 
   try {
     const newConfig = await db.configuration.create(req.body, {
@@ -95,15 +113,15 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
     { type: SELECT }
   )
 
-  const fieldNames = [{"name": "recipient_id", "required": true, "dataType": "STRING"}]
+  const fieldNames = [{ "name": "recipient_id", "required": true, "dataType": "STRING" }]
   reserveCategoryNames.forEach((cat) =>
-    fieldNames.push({"name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true, "dataType": "BOOLEAN"})
+    fieldNames.push({ "name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true, "dataType": "BOOLEAN" })
   )
   categoryCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "STRING"})
+    fieldNames.push({ "name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "STRING" })
   )
   numericCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({"name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "NUMBER"})
+    fieldNames.push({ "name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "NUMBER" })
   )
 
   res.json(fieldNames)
