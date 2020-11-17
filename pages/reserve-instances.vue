@@ -32,10 +32,10 @@
                   Export all participants as CSV
                 </button>
                 <button @click="() => exportWinners(instance.id)">
-                  Export list of allocation winners as csv
+                  Export list of allocation winners as CSV
                 </button>
                 <button @click="() => exportLosers(instance.id)">
-                  Export list of allocation losers as csv
+                  Export list of allocation losers as CSV
                 </button>
               </span>
             </button>
@@ -55,6 +55,7 @@
 </template>
 
 <script>
+// import { downloadCSV } from '../plugins/helpers'
 import ViewPriorityOrderModal from '~/components/ViewPriorityOrderModal.vue'
 
 export default {
@@ -92,6 +93,7 @@ export default {
     async exportAll(id) {
       const patientsRes = await fetch(`/api/sourceFiles/${id}/patients`)
       const patients = await patientsRes.json()
+      // downloadCSV({ content: '', fileName: 'patients' })
       console.log(patients)
     },
     async exportWinners(id) {
@@ -99,6 +101,7 @@ export default {
         `/api/sourceFiles/${id}/patients?givenUnit=true`
       )
       const winners = await winnersRes.json()
+      // downloadCSV({ content: '', fileName: 'patients_winners' })
       console.log(winners)
     },
     async exportLosers(id) {
@@ -106,6 +109,7 @@ export default {
         `/api/sourceFiles/${id}/patients?givenUnit=false`
       )
       const losers = await losersRes.json()
+      // downloadCSV({ content: '', fileName: 'patients_losers' })
       console.log(losers)
     },
   },
