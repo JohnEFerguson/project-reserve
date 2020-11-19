@@ -23,10 +23,11 @@ router.get('/sourceFiles/:id', async (req, res) => {
 router.get('/sourceFiles/:id/patients', async (req, res) => {
   const { db } = req
   const id = req.params.id
+  let filterLosers = ''
   if (req.query.givenUnit)
-    return res.json(await db.patient.findAll({ where: { sourceFileId: id, given_unit: (req.query.givenUnit === 'true') } }))
-  else
-    return res.json(await db.patient.findAll({ where: { sourceFileId: id } }))
+    filterLosers += `and ${req.query.givenUnit === 'false' ? 'not' : ''} given_unit`
+
+  return res.json(await getPatientsWithAttributes(db, id, filterLosers))
 })
 
 // process all patients in a source file
@@ -117,6 +118,26 @@ router.post('/sourceFiles', async (req, res) => {
     return res.status(400)
   }
 })
+
+async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
+
+  const patients = await Promise.all((await db.sequelize.query(
+    `
+    select name, given_unit, rand_number, info
+    from patient 
+    where source_file_id = ${sourceFileId} ${filterLosers};
+    `,
+    { type: SELECT }
+  ))[0].map(p => {
+
+    let patObj = JSON.parse(p.info)
+    patObj["random_number"] = p.rand_number
+    patObj["alocated_status"] = p.given_unit === 1
+    return patObj
+  }))
+
+  return patients
+}
 
 async function orderPatientsInReserveCategory(db, reserveCategoryId, size) {
   const orderedPatientIds = db.sequelize.query(

@@ -36,6 +36,7 @@ router.post('/patients', async (req, res) => {
           sourceFileId: rawPat.sourceFileId,
           configurationId,
           rand_number: Math.random() * 100000,
+          info: JSON.stringify(rawPat)
         }
 
         const fields = Object.keys(rawPat)
