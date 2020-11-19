@@ -1,13 +1,11 @@
 import arrayMove from 'array-move'
-import pick from 'lodash.pick'
-import {
-  categoryFields,
-  numericFields,
-  CATEGORY_TYPE,
-  NUMERIC_TYPE,
-} from '../components/constants'
 import socket from '~/plugins/socket.io.js'
 import { STATUS_UPDATE } from '~/socketConstants'
+import {
+  transformCriteriaForDisplay,
+  transformCriteriaForPost,
+  removeIds,
+} from '~/plugins/helpers'
 
 const generateDefaultCategory = (size) => ({
   name: 'Unreserved (auto-populated)',
@@ -19,7 +17,7 @@ const generateDefaultCategory = (size) => ({
 })
 
 const initialState = {
-  socket: null,
+  isSocketConnected: false,
   reserveInstances: [],
   currentConfig: {
     unitType: '',
@@ -119,73 +117,43 @@ export const mutations = {
       reserveInstance,
     ]
   },
-  initSocket() {
-    state.socket = socket
-    socket.on(STATUS_UPDATE, (statusObj) => {
-      console.log(statusObj)
-    })
+  setReserveInstances(state, reserveInstances) {
+    state.reserveInstances = reserveInstances
   },
-}
-
-function transformCriteriaForPost(priority) {
-  if (!priority) {
-    return null
-  }
-  const categoryCriteria = []
-  const numericCriteria = []
-
-  const priorityMap = {
-    [CATEGORY_TYPE]: {
-      bucket: categoryCriteria,
-      fields: categoryFields,
-    },
-    [NUMERIC_TYPE]: {
-      bucket: numericCriteria,
-      fields: numericFields,
-    },
-  }
-  priority.forEach((criteria, index) => {
-    const { bucket, fields } = priorityMap[criteria.criteriaType]
-    bucket.push({
-      order: index + 1,
-      ...pick(criteria, ['name', ...Object.keys(fields)]),
-    })
-  })
-  return {
-    categoryCriteria,
-    numericCriteria,
-  }
-}
-
-function transformCriteriaForDisplay(priority) {
-  if (!priority) {
-    return null
-  }
-  const criterias = []
-  priority.categoryCriteria.forEach(
-    (crit) =>
-      (criterias[crit.order - 1] = {
-        ...crit,
-        criteriaType: CATEGORY_TYPE,
-      })
-  )
-  priority.numericCriteria.forEach(
-    (crit) =>
-      (criterias[crit.order - 1] = {
-        ...crit,
-        criteriaType: NUMERIC_TYPE,
-      })
-  )
-  return criterias
+  setSocketConnected(state) {
+    if (!state.isSocketConnected) {
+      state.isSocketConnected = true
+    }
+  },
+  deleteConfigIds(state) {
+    removeIds(state)
+  },
 }
 
 export const actions = {
   async nuxtServerInit({ commit }) {},
-  async addReserveInstance({ commit }, reserveInstance) {
-    await fetch(`/api/sourceFiles/${reserveInstance.sourceFileId}/process`, {
+  initSocket({ commit, state }) {
+    if (!state.isSocketConnected) {
+      commit('setSocketConnected')
+      socket.on(STATUS_UPDATE, (reserveInstances) => {
+        commit('setReserveInstances', reserveInstances)
+      })
+    }
+  },
+  async deleteCurrentConfig({ commit, state }) {
+    if (state.currentConfig.id) {
+      await fetch(`/api/configurations/${state.currentConfig.id}`, {
+        method: 'DELETE',
+      })
+      commit('deleteConfigIds')
+    }
+  },
+  async processSourceFile({ commit }, sourceFileId) {
+    await fetch(`/api/sourceFiles/${sourceFileId}/process`, {
       method: 'POST',
     })
-    commit('addReserveInstance', reserveInstance)
+    const sourceFilesRes = await fetch('/api/sourceFiles')
+    commit('setReserveInstances', await sourceFilesRes.json())
   },
   async postConfig({ commit, state, ...props }) {
     const configPayload = {

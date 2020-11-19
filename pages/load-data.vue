@@ -37,36 +37,7 @@
 
 <script>
 import { unparse, parse } from 'papaparse'
-
-function download(content) {
-  const a = document.createElement('a')
-  const fileName = 'csv_template'
-  const mimeType = 'text/csv;encoding:utf-8'
-
-  if (navigator.msSaveBlob) {
-    // IE10
-    navigator.msSaveBlob(
-      new Blob([content], {
-        type: mimeType,
-      }),
-      fileName
-    )
-  } else if (URL && 'download' in a) {
-    // html5 A[download]
-    a.href = URL.createObjectURL(
-      new Blob([content], {
-        type: mimeType,
-      })
-    )
-    a.setAttribute('download', fileName)
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-  } else {
-    location.href =
-      'data:application/octet-stream,' + encodeURIComponent(content) // only this mime type is supported
-  }
-}
+import { downloadCSV } from '../plugins/helpers'
 
 export default {
   middleware: 'has-category',
@@ -99,19 +70,18 @@ export default {
   },
   methods: {
     setReserveInstance() {
-      this.$store.dispatch('addReserveInstance', {
-        name: this.sourceFile.name,
-        date: new Date(),
-        status: 'unprocessed',
-        configId: this.currentConfig.id,
-        sourceFileId: this.sourceFile.id,
-      })
+      this.$store.dispatch('processSourceFile', this.sourceFile.id)
     },
     downloadCsvTemplate() {
       const csv = unparse({
         fields: this.requiredFields.map(({ name }) => name),
       })
-      download(csv)
+      downloadCSV({
+        content: csv,
+        fileName: `${new Date().toLocaleDateString()}_${
+          this.currentConfig.unitType
+        }_${this.currentConfig.supply}`,
+      })
     },
     async parseUploadedCsv(res, file) {
       // validate data

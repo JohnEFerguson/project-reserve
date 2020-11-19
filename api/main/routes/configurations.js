@@ -17,25 +17,32 @@ router.get('/configurations/:id', async (req, res) => {
   const { db } = req
 
   const id = req.params.id
-  return res.json(await db.configuration.findOne({
-    where: { id },
-    include: [{
-      model: db.reserveCategory,
-      as: 'reserveCategories',
-      include: [{
-        model: db.priority,
-        include: [{
-          model: db.categoryCriteria,
-          as: 'categoryCriteria'
-        },
+  return res.json(
+    await db.configuration.findOne({
+      where: { id },
+      include: [
         {
-          model: db.numericCriteria,
-          as: 'numericCriteria'
-        }
-        ]
-      }]
-    }]
-  }))
+          model: db.reserveCategory,
+          as: 'reserveCategories',
+          include: [
+            {
+              model: db.priority,
+              include: [
+                {
+                  model: db.categoryCriteria,
+                  as: 'categoryCriteria',
+                },
+                {
+                  model: db.numericCriteria,
+                  as: 'numericCriteria',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+  )
 })
 
 // DELETE one configuration by id
@@ -47,13 +54,9 @@ router.delete('/configurations/:id', async (req, res) => {
   return res.status(200).json()
 })
 
-
 // POST single configuration
 router.post('/configurations', async (req, res) => {
   const { db } = req
-
-
-
   try {
     const newConfig = await db.configuration.create(req.body, {
       include: {
@@ -88,7 +91,7 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
 
   const reserveCategoryNames = await db.reserveCategory.findAll({
     attributes: ['name'],
-    where: { configurationId: configurationId, isDefault: false },
+    where: { configurationId, isDefault: false },
   })
 
   const categoryCriteriaFields = await db.sequelize.query(
@@ -113,15 +116,29 @@ router.get('/configurations/:id/fieldNames', async (req, res) => {
     { type: SELECT }
   )
 
-  const fieldNames = [{ "name": "recipient_id", "required": true, "dataType": "STRING" }]
+  const fieldNames = [
+    { name: 'recipient_id', required: true, dataType: 'STRING' },
+  ]
   reserveCategoryNames.forEach((cat) =>
-    fieldNames.push({ "name": 'is_' + cat.name.toLowerCase().split(' ').join('_'), "required": true, "dataType": "BOOLEAN" })
+    fieldNames.push({
+      name: 'is_' + cat.name.toLowerCase().split(' ').join('_'),
+      required: true,
+      dataType: 'BOOLEAN',
+    })
   )
   categoryCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({ "name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "STRING" })
+    fieldNames.push({
+      name: criteria.name.toLowerCase().split(' ').join('_'),
+      required: false,
+      dataType: 'STRING',
+    })
   )
   numericCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({ "name": criteria.name.toLowerCase().split(' ').join('_'), "required": false, "dataType": "NUMBER" })
+    fieldNames.push({
+      name: criteria.name.toLowerCase().split(' ').join('_'),
+      required: false,
+      dataType: 'NUMBER',
+    })
   )
 
   res.json(fieldNames)

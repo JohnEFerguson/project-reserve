@@ -2,7 +2,7 @@
   <div class="container">
     <div class="inputRow">
       <label for="unitTypeInput">What unit is being allocated?</label>
-      <input v-model="unitType" name="unitTypeInput" placeholder="Vaccine" />
+      <input v-model="unitType" name="unitTypeInput" placeholder="Antibodies" />
     </div>
     <div class="inputRow">
       <label for="supplyInput">How many units are being allocated?</label>
