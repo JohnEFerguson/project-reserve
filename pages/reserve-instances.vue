@@ -1,10 +1,12 @@
 <template>
   <div class="reserveContainer">
+    <h1 class="header">Project Reserve</h1>
     <ViewPriorityOrderModal
       v-if="viewPriorityOrderModalOpen"
       :on-close="closeViewPriorityOrderModal"
       :reserve-category="reserveCategoryToView"
     />
+    <h2 class="tableLabel mb-9 fs-16 fw-n">Database of reserve instances</h2>
     <div class="reserveTableContainer">
       <div class="reserveTableLabels">
         <label class="label">Date Created</label>
@@ -28,23 +30,25 @@
             <button class="exportResultsBtn">
               Export Results ▼
               <span class="resultsOptions">
-                <button @click="() => exportAll(instance.id)">
+                <button @click="() => exportAll(instance)">
                   Export all participants as CSV
                 </button>
-                <button @click="() => exportWinners(instance.id)">
-                  Export list of allocation winners as CSV
+                <button @click="() => exportWinners(instance)">
+                  Export list of allocation recipients as CSV
                 </button>
-                <button @click="() => exportLosers(instance.id)">
-                  Export list of allocation losers as CSV
+                <button @click="() => exportLosers(instance)">
+                  Export list of allocation non-recipients as CSV
                 </button>
               </span>
             </button>
           </div>
         </div>
         <div class="buttonWrapper">
-          <nuxt-link to="/create" class="p-18">
-            Add New Reserve Instance
-          </nuxt-link>
+          <button class="p-18">
+            <nuxt-link to="/create" class="addButton">
+              Add New Reserve Instance
+            </nuxt-link>
+          </button>
         </div>
       </div>
     </div>
@@ -55,7 +59,9 @@
 </template>
 
 <script>
-// import { downloadCSV } from '../plugins/helpers'
+import path from 'path'
+import { unparse } from 'papaparse'
+import { transformCriteriaForDisplay, downloadCSV } from '../plugins/helpers'
 import ViewPriorityOrderModal from '~/components/ViewPriorityOrderModal.vue'
 
 export default {
@@ -82,41 +88,102 @@ export default {
       this.reserveCategoryToView = null
     },
     async viewPriorityOrder(instance) {
-      const config = await fetch(
+      const configRes = await fetch(
         `/api/configurations/${instance.configurationId}`
       )
-      this.reserveCategoryToView = config
+      const config = await configRes.json()
+      this.reserveCategoryToView = {
+        ...config,
+        reserveCategories: config.reserveCategories.reduce((acc, category) => {
+          const formattedCategory = {
+            ...category,
+            priority: transformCriteriaForDisplay(category.priority),
+          }
+          acc.push(formattedCategory)
+          return acc
+        }, []),
+      }
+      console.log(this.reserveCategoryToView)
       this.$nextTick(() => {
         this.viewPriorityOrderModalOpen = true
       })
     },
-    async exportAll(id) {
-      const patientsRes = await fetch(`/api/sourceFiles/${id}/patients`)
+    sortByLabel(priority) {
+      const sortOrders = (priority || []).map((cat) => `by ${cat.name}`)
+      if ((sortOrders || []).length < 3) {
+        sortOrders.push('by random lottery tiebreaker')
+      }
+      return `Sort ${(sortOrders || []).join(', ')}`
+    },
+    async export({ instance, patients, suffix }) {
+      const configurationRes = await fetch(
+        `/api/configurations/${instance.configurationId}`
+      )
+      const configuration = await configurationRes.json()
+      const parsedFileName = path.parse(instance.name).name
+      const today = new Date()
+      downloadCSV({
+        content: unparse([
+          [
+            `${today.toLocaleDateString()} ${today.toLocaleTimeString()} Allocation of ${
+              configuration.unitType
+            } using ${parsedFileName}`,
+          ],
+          [],
+          [`Number Allocated: ${configuration.supply}`],
+          ['Reserve Categories'],
+          ...configuration.reserveCategories.map((category) => [
+            '',
+            `${category.name} (size = ${
+              category.size
+            }, priority order: ${this.sortByLabel(
+              transformCriteriaForDisplay(category.priority)
+            )})`,
+          ]),
+          [],
+          [],
+          [],
+          patients.length
+            ? Object.keys(patients[0])
+            : ['No patients to display'],
+          ...patients.map(Object.values),
+        ]),
+        fileName: `${parsedFileName}${suffix}`,
+      })
+    },
+    async exportAll(instance) {
+      const patientsRes = await fetch(
+        `/api/sourceFiles/${instance.id}/patients`
+      )
       const patients = await patientsRes.json()
-      // downloadCSV({ content: '', fileName: 'patients' })
-      console.log(patients)
+      this.export({ instance, patients, suffix: '_all_patients' })
     },
-    async exportWinners(id) {
+    async exportWinners(instance) {
       const winnersRes = await fetch(
-        `/api/sourceFiles/${id}/patients?givenUnit=true`
+        `/api/sourceFiles/${instance.id}/patients?givenUnit=true`
       )
-      const winners = await winnersRes.json()
-      // downloadCSV({ content: '', fileName: 'patients_winners' })
-      console.log(winners)
+      const patients = await winnersRes.json()
+      this.export({ instance, patients, suffix: '_recipients' })
     },
-    async exportLosers(id) {
+    async exportLosers(instance) {
       const losersRes = await fetch(
-        `/api/sourceFiles/${id}/patients?givenUnit=false`
+        `/api/sourceFiles/${instance.id}/patients?givenUnit=false`
       )
-      const losers = await losersRes.json()
-      // downloadCSV({ content: '', fileName: 'patients_losers' })
-      console.log(losers)
+      const patients = await losersRes.json()
+      this.export({ instance, patients, suffix: '_non_recipients' })
     },
   },
 }
 </script>
 
 <style scoped lang="scss">
+.header {
+  padding: 18px 45px;
+  color: var(--dark-blue);
+  background-color: var(--light-grey);
+  border-radius: 36px;
+  margin-bottom: 36px;
+}
 .reserveContainer {
   height: 100vh;
   width: 100vw;
@@ -215,5 +282,9 @@ export default {
       display: block;
     }
   }
+}
+.addButton {
+  text-decoration: none;
+  color: black;
 }
 </style>

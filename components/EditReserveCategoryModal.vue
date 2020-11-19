@@ -148,10 +148,21 @@ export default {
       return NUMERIC_TYPE
     },
   },
+  mounted() {
+    if (!this.reserveCategory.priority.length) {
+      this.reserveCategory.priority = [{ ...deepClone(defaultCriteria) }]
+    }
+  },
   methods: {
     saveCategory() {
       if (!this.hasSizeError) {
-        this.$store.commit('saveCategory', this.reserveCategory)
+        const filteredPriorities = this.reserveCategory.priority.filter(
+          (criteria) => criteria.name
+        )
+        this.$store.commit('saveCategory', {
+          ...this.reserveCategory,
+          priority: filteredPriorities,
+        })
         this.onClose()
       }
     },

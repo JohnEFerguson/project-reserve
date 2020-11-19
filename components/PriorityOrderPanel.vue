@@ -263,9 +263,9 @@ export default {
       const currentBins = this.criteria.bins
       for (let i = 0; i < numBins; i++) {
         if (currentBins[i]) {
-          newBins.push({ ...currentBins[i] })
+          newBins.push({ ...currentBins[i], order: i + 1 })
         } else {
-          newBins.push({ min: 0, max: 0 })
+          newBins.push({ min: 0, max: 0, order: i + 1 })
         }
       }
       this.criteria.bins = newBins

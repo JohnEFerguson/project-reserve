@@ -76,7 +76,12 @@ export default {
       const csv = unparse({
         fields: this.requiredFields.map(({ name }) => name),
       })
-      downloadCSV({ content: csv, fileName: 'csv_template' })
+      downloadCSV({
+        content: csv,
+        fileName: `${new Date().toLocaleDateString()}_${
+          this.currentConfig.unitType
+        }_${this.currentConfig.supply}`,
+      })
     },
     async parseUploadedCsv(res, file) {
       // validate data

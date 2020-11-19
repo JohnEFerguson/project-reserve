@@ -12,6 +12,7 @@ export const numericFields = {
   numBins: 1,
   bins: [
     {
+      order: 1,
       min: 0,
       max: 0,
     },
