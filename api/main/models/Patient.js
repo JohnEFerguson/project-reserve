@@ -17,19 +17,22 @@ module.exports = (sequelize) => {
     name: {
       type: STRING,
     },
+    info: {
+      type: STRING,
+    },
     given_unit: {
       type: BOOLEAN,
-      defaultValue: false 
+      defaultValue: false
     },
     rand_number: {
       type: INTEGER,
     }
   }, {
-    timestamps: false,
-    paranoid: true,
-    underscored: true,
-    freezeTableName: true
-  });
+      timestamps: false,
+      paranoid: true,
+      underscored: true,
+      freezeTableName: true
+    });
 
   return Patient;
 };
