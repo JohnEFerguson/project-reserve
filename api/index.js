@@ -3,14 +3,29 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
-const env = require('./main/config/env.js')
-const db = require('./main/config/db.js')
+const { Nuxt, Builder } = require('nuxt')
+
+const config = require('../nuxt.config')
+const env = require('./main/config/env')
+const db = require('./main/config/db')
 
 const patientsRoute = require('./main/routes/patients')
 const configurationsRoute = require('./main/routes/configurations')
 const sourceFilesRoute = require('./main/routes/source_files')
 
 const app = express()
+// We instantiate Nuxt.js with the options
+const isProd = process.env.NODE_ENV === 'production'
+config.dev = !isProd
+
+const nuxt = new Nuxt(config)
+// Start build process in dev mode
+if (config.dev) {
+  const builder = new Builder(nuxt)
+  builder.build()
+}
+app.use(nuxt.render)
+
 const PORT = env.PORT
 
 app.db = db

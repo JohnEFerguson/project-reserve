@@ -77,10 +77,12 @@ export function transformCriteriaForPost(priority) {
         (filteredCriteria.criteriaType =
           NUMERIC_TYPE && !filteredCriteria.coarsened)
       ) {
-        filteredCriteria.bins = generateBins({
+        const bins = generateBins({
           min: filteredCriteria.min,
           max: filteredCriteria.max,
         })
+        filteredCriteria.bins = bins
+        filteredCriteria.numBins = bins.length
       }
       bucket.push(filteredCriteria)
       order = order + 1

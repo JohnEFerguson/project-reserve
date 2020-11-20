@@ -10,7 +10,7 @@
       clicking Finish
     </h3>
     <ConfigSummary
-      :on-priority-click="() => viewPriorityOrder(category)"
+      :on-priority-click="viewPriorityOrder"
       :config="currentConfig"
     />
     <div class="navButtons">
@@ -27,11 +27,12 @@
 
 <script>
 import ViewPriorityOrderModal from '~/components/ViewPriorityOrderModal.vue'
+import ConfigSummary from '~/components/ConfigSummary.vue'
 
 export default {
   layout: 'configuration-screen',
   middleware: 'has-category',
-  components: { ViewPriorityOrderModal },
+  components: { ViewPriorityOrderModal, ConfigSummary },
   data() {
     return {
       viewPriorityOrderModalOpen: false,
