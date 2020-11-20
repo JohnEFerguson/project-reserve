@@ -1,44 +1,29 @@
 <template>
   <div class="modalWrapper">
     <div class="modalInnerWrapper">
-      <h2 class="viewPriorityHeader">
-        Priority Order of
-        <span class="categoryName">{{ reserveCategory.name }}</span> reserve
-        category
-      </h2>
-      <div class="modalBody">
-        <h4 class="w100 fw-n tac" v-html="sortByLabel" />
-        <div class="criteriaPanels mt-27">
-          <div
-            v-for="(criteria, criteriaIndex) in reserveCategory.priority"
-            :key="`criteria-panel-${criteriaIndex}`"
-            class="criteriaPanelWrapper w33 ml-9 mr-9"
-          >
-            <PriorityOrderPanel
-              :criteria="criteria"
-              :criteria-index="criteriaIndex"
-              :is-read-only="true"
-            />
-          </div>
-          <div
-            v-if="reserveCategory.priority.length < 3"
-            class="criteriaPanelWrapper w33 tac flexrowcenter ml-9 mr-9"
-          >
-            All remaining ties will be broken by a random lottery tiebreaker
-          </div>
-        </div>
-      </div>
+      <PrioritySummary
+        v-if="priorityToView"
+        :reserve-category="priorityToView"
+      />
+      <ConfigSummary
+        v-if="!priorityToView"
+        :config="config"
+        :on-priority-click="goToPrioritySummary"
+      />
       <div class="modalButtons">
-        <button class="navButton ml-a" @click="onClose">Close</button>
+        <button class="navButton" @click="handleOnClose">Back</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import PrioritySummary from './PrioritySummary'
+import ConfigSummary from './ConfigSummary'
 export default {
+  components: { PrioritySummary, ConfigSummary },
   props: {
-    reserveCategory: {
+    config: {
       type: Object,
       required: true,
     },
@@ -46,6 +31,11 @@ export default {
       type: Function,
       required: true,
     },
+  },
+  data() {
+    return {
+      priorityToView: null,
+    }
   },
   computed: {
     sortByLabel() {
@@ -56,6 +46,18 @@ export default {
         sortOrders.push('by <strong>random lottery tiebreaker</strong>')
       }
       return `Sort ${(sortOrders || []).join(', ')}`
+    },
+  },
+  methods: {
+    handleOnClose() {
+      if (this.priorityToView) {
+        this.priorityToView = null
+      } else {
+        this.onClose()
+      }
+    },
+    goToPrioritySummary(category) {
+      this.priorityToView = category
     },
   },
 }
@@ -72,6 +74,7 @@ export default {
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(5px);
+  z-index: 100;
 }
 .modalInnerWrapper {
   height: 90%;
@@ -85,61 +88,9 @@ export default {
   justify-content: center;
   padding: 27px;
 }
-.modalBody {
-  flex: 1;
-  width: 100%;
-  //   display: grid;
-  //   grid-template-columns: 1fr 1fr;
-  //   grid-gap: 27px;
-  padding: 45px;
-  margin: 27px;
-  background: var(--light-grey);
-  border-radius: 18px;
-}
 .modalButtons {
   width: 100%;
   margin-top: auto;
   display: flex;
-  justify-content: space-between;
-}
-.textInput {
-  cursor: pointer;
-  resize: none;
-  background-color: white;
-  border: 2px solid var(--dark-grey);
-  font-size: 20px;
-  padding: 9px 18px;
-  border-radius: 20px;
-  outline: none;
-  &::placeholder {
-    color: #ddd;
-  }
-}
-.textAreaInput {
-  height: 200px;
-}
-.divider {
-  height: 2px;
-  border-radius: 18px;
-  width: 100%;
-  background-color: var(--dark-blue);
-}
-.criteriaPanels {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-}
-.criteriaPanelWrapper {
-  padding: 18px;
-  border: 2px solid var(--dark-blue);
-  border-radius: 18px;
-  max-height: 55vh;
-  overflow: scroll;
-}
-.viewPriorityHeader {
-  color: var(--dark-grey);
-}
-.categoryName {
-  color: var(--dark-blue);
 }
 </style>

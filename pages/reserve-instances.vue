@@ -1,10 +1,10 @@
 <template>
   <div class="reserveContainer">
     <h1 class="header">Project Reserve</h1>
-    <ViewPriorityOrderModal
-      v-if="viewPriorityOrderModalOpen"
-      :on-close="closeViewPriorityOrderModal"
-      :reserve-category="reserveCategoryToView"
+    <ViewConfigModal
+      v-if="viewConfigModalOpen"
+      :on-close="closeViewConfigModal"
+      :config="configToView"
     />
     <h2 class="tableLabel mb-9 fs-16 fw-n">Database of reserve instances</h2>
     <div class="reserveTableContainer">
@@ -24,7 +24,7 @@
           <span class="rowCell">{{ instance.name }}</span>
           <span class="rowCell">{{ instance.status }}</span>
           <div class="actionButtons">
-            <button @click="() => viewPriorityOrder(instance)">
+            <button @click="() => viewConfig(instance)">
               View Configuration
             </button>
             <button class="exportResultsBtn">
@@ -59,19 +59,19 @@
 </template>
 
 <script>
-import path from 'path'
+import path from 'path-browserify'
 import { unparse } from 'papaparse'
 import { transformCriteriaForDisplay, downloadCSV } from '../plugins/helpers'
-import ViewPriorityOrderModal from '~/components/ViewPriorityOrderModal.vue'
+import ViewConfigModal from '~/components/ViewConfigModal.vue'
 
 export default {
   layout: 'default',
   middleware: 'has-category',
-  components: { ViewPriorityOrderModal },
+  components: { ViewConfigModal },
   data() {
     return {
-      viewPriorityOrderModalOpen: false,
-      reserveCategoryToView: null,
+      viewConfigModalOpen: false,
+      configToView: null,
     }
   },
   computed: {
@@ -83,17 +83,22 @@ export default {
     },
   },
   methods: {
-    closeViewPriorityOrderModal() {
-      this.viewPriorityOrderModalOpen = false
-      this.reserveCategoryToView = null
+    closeViewConfigModal() {
+      this.viewConfigModalOpen = false
+      this.configToView = null
     },
-    async viewPriorityOrder(instance) {
+    async viewConfig(instance) {
       const configRes = await fetch(
         `/api/configurations/${instance.configurationId}`
       )
       const config = await configRes.json()
-      this.reserveCategoryToView = {
+      const requiredFieldsRes = await fetch(
+        `/api/configurations/${config.id}/fieldNames`
+      )
+      const requiredFields = await requiredFieldsRes.json()
+      this.configToView = {
         ...config,
+        requiredFields,
         reserveCategories: config.reserveCategories.reduce((acc, category) => {
           const formattedCategory = {
             ...category,
@@ -104,7 +109,7 @@ export default {
         }, []),
       }
       this.$nextTick(() => {
-        this.viewPriorityOrderModalOpen = true
+        this.viewConfigModalOpen = true
       })
     },
     sortByLabel(priority) {

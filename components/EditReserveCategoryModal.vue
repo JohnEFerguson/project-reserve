@@ -218,6 +218,8 @@ export default {
   margin: 27px;
   background: var(--light-grey);
   border-radius: 18px;
+  max-height: 75%;
+  overflow: auto;
 }
 .modalButtons {
   width: 100%;
@@ -260,5 +262,6 @@ export default {
 }
 .textAreaInput {
   height: 200px;
+  font-family: courier;
 }
 </style>

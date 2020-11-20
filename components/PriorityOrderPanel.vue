@@ -168,7 +168,7 @@
           </div>
         </div>
       </div>
-      <div class="flexcolumn mt-18">
+      <div v-if="criteria.coarsened" class="flexcolumn mt-18">
         <label class="ml-9" :for="`criteriaNumBins${criteriaIndex}`"
           >Number of bins</label
         >

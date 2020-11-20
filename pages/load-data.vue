@@ -87,7 +87,7 @@ export default {
       // validate data
       const { data, errors } = res
       if (errors.length) {
-        alert(errors[0])
+        this.errorMessage = errors
       }
       const [fieldNames, ...patients] = data
       let patientObjs

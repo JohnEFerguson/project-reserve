@@ -25,7 +25,7 @@
             <span class="rowCell">{{ category.order }}</span>
             <span class="rowCell">{{ category.name }}</span>
             <span class="rowCell">{{ category.size }}</span>
-            <button class="p9" @click="onPriorityClick">
+            <button class="p9" @click="() => onPriorityClick(category)">
               {{ 'Priority' }}
             </button>
           </div>
@@ -51,6 +51,34 @@
     </div>
   </div>
 </template>
+<script>
+export default {
+  props: {
+    onPriorityClick: {
+      type: Function,
+      required: true,
+    },
+    config: {
+      type: Object,
+      required: true,
+    },
+  },
+  computed: {
+    reserveCategories() {
+      return this.config.reserveCategories || []
+    },
+    unitType() {
+      return this.config.unitType
+    },
+    supply() {
+      return this.config.supply
+    },
+    requiredFields() {
+      return this.config.requiredFields || []
+    },
+  },
+}
+</script>
 <style>
 .finishContainer {
   margin: auto;
@@ -105,31 +133,3 @@
   padding: 9px 18px;
 }
 </style>
-<script>
-export default {
-  props: {
-    onPriorityClick: {
-      type: Function,
-      required: true,
-    },
-    config: {
-      type: Object,
-      required: true,
-    },
-  },
-  computed: {
-    reserveCategories() {
-      return this.config.reserveCategories || []
-    },
-    unitType() {
-      return this.config.unitType
-    },
-    supply() {
-      return this.config.supply
-    },
-    requiredFields() {
-      return this.config.requiredFields || []
-    },
-  },
-}
-</script>
