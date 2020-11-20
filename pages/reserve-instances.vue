@@ -103,7 +103,6 @@ export default {
           return acc
         }, []),
       }
-      console.log(this.reserveCategoryToView)
       this.$nextTick(() => {
         this.viewPriorityOrderModalOpen = true
       })
