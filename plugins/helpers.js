@@ -74,8 +74,8 @@ export function transformCriteriaForPost(priority) {
         ...pick(criteria, ['name', ...Object.keys(fields)]),
       }
       if (
-        (filteredCriteria.criteriaType =
-          NUMERIC_TYPE && !filteredCriteria.coarsened)
+        filteredCriteria.criteriaType === NUMERIC_TYPE &&
+        !filteredCriteria.coarsened
       ) {
         const bins = generateBins({
           min: filteredCriteria.min,
@@ -118,7 +118,15 @@ export function transformCriteriaForDisplay(priority) {
 
 export function removeIds(obj) {
   for (const prop in obj) {
-    if (['id', 'configurationId', 'sourceFileId'].includes(prop))
+    if (
+      [
+        'id',
+        'configurationId',
+        'sourceFileId',
+        'reserveCategoryId',
+        'priorityId',
+      ].includes(prop)
+    )
       delete obj[prop]
     else if (typeof obj[prop] === 'object') removeIds(obj[prop])
   }

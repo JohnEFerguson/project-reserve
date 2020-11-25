@@ -17,7 +17,9 @@
       <button class="menuButton navButton">Paper</button>
       <button class="menuButton navButton">Contact</button>
       <button class="menuButton navButton">Press</button>
-      <nuxt-link to="/create" class="menuButton navButton">Start</nuxt-link>
+      <nuxt-link to="/reserve-instances" class="menuButton navButton"
+        >Start</nuxt-link
+      >
     </div>
   </div>
 </template>

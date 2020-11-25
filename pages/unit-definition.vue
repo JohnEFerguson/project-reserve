@@ -14,7 +14,7 @@
       />
     </div>
     <div class="navButtons">
-      <nuxt-link to="/create" class="navButton">Back</nuxt-link>
+      <nuxt-link to="/reserve-instances" class="navButton">Back</nuxt-link>
       <button
         :class="['navButton', { isDisabled: isNextButtonDisabled }]"
         @click="generateDefaultCategory"

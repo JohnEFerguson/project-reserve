@@ -148,6 +148,10 @@ export const actions = {
       commit('deleteConfigIds')
     }
   },
+  async getReserveInstances({ commit }) {
+    const sourceFilesRes = await fetch('/api/sourceFiles')
+    commit('setReserveInstances', await sourceFilesRes.json())
+  },
   async processSourceFile({ commit }, sourceFileId) {
     await fetch(`/api/sourceFiles/${sourceFileId}/process`, {
       method: 'POST',

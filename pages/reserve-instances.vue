@@ -11,7 +11,7 @@
       <div class="reserveTableLabels">
         <label class="label">Date Created</label>
         <label class="label">Name</label>
-        <label class="label">Status</label>
+        <label class="label status">Status</label>
         <label class="actionLabel">Action</label>
       </div>
       <div v-if="reserveInstances" class="reserveTableRows">
@@ -22,8 +22,23 @@
         >
           <span class="rowCell">{{ instance.dateLoaded }}</span>
           <span class="rowCell">{{ instance.name }}</span>
-          <span class="rowCell">{{ instance.status }}</span>
+          <span class="rowCell status"
+            ><span
+              :class="[
+                'statusText',
+                {
+                  inProgress: instance.status === 'IN_PROGRESS',
+                  finished: instance.status === 'FINISHED',
+                  error: instance.status === 'ERROR',
+                },
+              ]"
+              >{{ toTitleCase(instance.status) }}</span
+            ></span
+          >
           <div class="actionButtons">
+            <button @click="() => startFromOldConfig(instance)">
+              Start New Batch from Config
+            </button>
             <button @click="() => viewConfig(instance)">
               View Configuration
             </button>
@@ -44,11 +59,13 @@
           </div>
         </div>
         <div class="buttonWrapper">
-          <button class="p-18">
-            <nuxt-link to="/create" class="addButton">
-              Add New Reserve Instance
-            </nuxt-link>
-          </button>
+          <nuxt-link
+            to="/unit-definition"
+            class="addButton p-18 fs-12"
+            @click.native="initConfig"
+          >
+            Add New Reserve Instance
+          </nuxt-link>
         </div>
       </div>
     </div>
@@ -61,12 +78,15 @@
 <script>
 import path from 'path-browserify'
 import { unparse } from 'papaparse'
-import { transformCriteriaForDisplay, downloadCSV } from '../plugins/helpers'
+import {
+  transformCriteriaForDisplay,
+  downloadCSV,
+  removeIds,
+} from '../plugins/helpers'
 import ViewConfigModal from '~/components/ViewConfigModal.vue'
 
 export default {
   layout: 'default',
-  middleware: 'has-category',
   components: { ViewConfigModal },
   data() {
     return {
@@ -76,29 +96,38 @@ export default {
   },
   computed: {
     reserveInstances() {
-      return (this.$store.state.reserveInstances || []).map((instance) => ({
-        ...instance,
-        dateLoaded: new Date(instance.dateLoaded).toLocaleDateString(),
-      }))
+      return (this.$store.state.reserveInstances || []).map((instance) => {
+        const dateLoaded = new Date(instance.dateLoaded)
+        return {
+          ...instance,
+          dateLoaded: `${dateLoaded.toLocaleDateString()} ${dateLoaded.toLocaleTimeString()}`,
+        }
+      })
     },
   },
+  beforeMount() {
+    this.$store.dispatch('getReserveInstances')
+  },
   methods: {
+    initConfig() {
+      this.$store.commit('resetConfig')
+    },
     closeViewConfigModal() {
       this.viewConfigModalOpen = false
       this.configToView = null
     },
-    async viewConfig(instance) {
+    toTitleCase(str) {
+      return str.replace(/\w\S*/g, function (txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      })
+    },
+    async fetchConfig(instance) {
       const configRes = await fetch(
         `/api/configurations/${instance.configurationId}`
       )
       const config = await configRes.json()
-      const requiredFieldsRes = await fetch(
-        `/api/configurations/${config.id}/fieldNames`
-      )
-      const requiredFields = await requiredFieldsRes.json()
-      this.configToView = {
+      return {
         ...config,
-        requiredFields,
         reserveCategories: config.reserveCategories.reduce((acc, category) => {
           const formattedCategory = {
             ...category,
@@ -108,6 +137,17 @@ export default {
           return acc
         }, []),
       }
+    },
+    async startFromOldConfig(instance) {
+      const config = await this.fetchConfig(instance)
+      removeIds(config)
+      this.$store.commit('setConfig', config)
+      this.$nextTick(() => {
+        this.$store.dispatch('postConfig')
+      })
+    },
+    async viewConfig(instance) {
+      this.configToView = await this.fetchConfig(instance)
       this.$nextTick(() => {
         this.viewConfigModalOpen = true
       })
@@ -227,21 +267,43 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  &.status {
+    grid-column: span 2;
+  }
+}
+.statusText {
+  padding: 9px 18px;
+  border-radius: 9px;
+  text-transform: capitalize;
+  &.finished {
+    background-color: #00b456;
+    color: white;
+  }
+  &.error {
+    background-color: #ff4242;
+    color: white;
+  }
+  &.inProgress {
+    background-color: #ffa947;
+  }
 }
 .label {
   grid-column: span 3;
+  &.status {
+    grid-column: span 2;
+  }
 }
 .actionLabel {
-  grid-column: span 3;
+  grid-column: span 4;
 }
 .actionButtons {
-  grid-column: span 3;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
+  grid-column: span 4;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 9px;
   button {
-    padding: 9px;
-    margin-bottom: 4.5px;
+    padding: 9px 4.5px;
+    font-size: 12px;
   }
 }
 .buttonWrapper {
@@ -278,6 +340,9 @@ export default {
   padding-top: 9px;
   background-color: rgba(white, 0.75);
   display: none;
+  button {
+    margin-bottom: 4.5px;
+  }
 }
 .exportResultsBtn {
   position: relative;
@@ -288,7 +353,13 @@ export default {
   }
 }
 .addButton {
+  border: 1px solid black;
+  background-color: var(--light-grey);
   text-decoration: none;
   color: black;
+  border-radius: 2px;
+  &:hover {
+    background-color: var(--dark-grey);
+  }
 }
 </style>
