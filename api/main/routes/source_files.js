@@ -16,7 +16,14 @@ router.get('/sourceFiles', async (req, res) => {
 router.get('/sourceFiles/:id', async (req, res) => {
   const { db } = req
   const id = req.params.id
-  return res.json(await db.sourceFile.find({ where: { id } }))
+  return res.json(await db.sourceFile.findOne({ where: { id } }))
+})
+
+// GET one source file id
+router.get('/sourceFiles/:id/nthReservePatients', async (req, res) => {
+  const { db } = req
+  const id = req.params.id
+  return res.json(JSON.parse((await db.sourceFile.findOne({ where: { id } })).nth_reserve_patients))
 })
 
 // GET all patients for a source file
@@ -48,26 +55,44 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
 
     const orderedPatientsByReserve = await Promise.all(
       reserveCategories.map((rc) => {
-        return orderPatientsInReserveCategory(db, rc.id, rc.size)
+        return orderPatientsInReserveCategory(db, rc.id, rc.size, rc.name)
       })
     )
 
     let leftOver = 0 // handle this!
     const selectedPatients = new Set()
+    const allocatedPatientGroups = new Map()
     const notSelectedPatients = new Set()
+    const nthReservePatients = []
 
     orderedPatientsByReserve.forEach((f) => {
+
       if (f.size > f.patients.length) {
         leftOver += f.size - f.patients.length
       } else {
+
         let given = 0
         let i = 0
         while (given < f.size) {
+
           if (!selectedPatients.has(f.patients[i])) {
             selectedPatients.add(f.patients[i])
+            allocatedPatientGroups[f.patients[i]] = f.name
             given += 1
             notSelectedPatients.delete(f.patients[i])
+
+            if (given == f.size - 1) {
+              nthReservePatients.push(
+                {
+                  name: f.name,
+                  nthRecipientPrimaryId: f.patients[i]
+                }
+              )
+            }
           }
+
+          console.log(i, given, f.size)
+
           i += 1
         }
 
@@ -84,11 +109,20 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
     selectedPatients.forEach(async (pId) => {
       const patient = await db.patient.findOne({ where: { id: pId } })
       patient.given_unit = true
+      patient.group_allocated_under = allocatedPatientGroups[pId]
       await patient.save()
     })
 
+
+
+    const nthReservePatientsWithNames = await Promise.all(nthReservePatients.map(async f => {
+      let name = (await db.patient.findOne({ where: { id: f.nthRecipientPrimaryId } })).recipient_id
+      return { name: f.name, nthRecipientId: name }
+    }))
+
     // update sourceFile
     sourceFile.status = 'FINISHED'
+    sourceFile.nth_reserve_patients = JSON.stringify(nthReservePatientsWithNames)
     const finished = await sourceFile.save()
 
     if (finished)
@@ -123,7 +157,7 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
 
   const patients = await Promise.all((await db.sequelize.query(
     `
-    select name, given_unit, rand_number, info
+    select name, given_unit, rand_number, info, group_allocated_under
     from patient 
     where source_file_id = ${sourceFileId} ${filterLosers};
     `,
@@ -132,14 +166,15 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
 
     let patObj = JSON.parse(p.info)
     patObj["random_number"] = p.rand_number
-    patObj["alocated_status"] = p.given_unit === 1
+    patObj["allocated_status"] = p.given_unit === 1
+    patObj['group_allocated_under'] = p.group_allocated_under
     return patObj
   }))
 
   return patients
 }
 
-async function orderPatientsInReserveCategory(db, reserveCategoryId, size) {
+async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name) {
   const orderedPatientIds = db.sequelize.query(
     `
     select p.id
@@ -334,6 +369,7 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size) {
   return {
     id: reserveCategoryId,
     size,
+    name,
     patients: (await orderedPatientIds)[0].map((ent) => ent.id),
   }
 }
