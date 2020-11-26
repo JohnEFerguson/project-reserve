@@ -13,19 +13,22 @@ module.exports = (sequelize) => {
     name: {
       type: STRING,
     },
+    nth_reserve_patients: {
+      type: STRING,
+    },
     status: {
-      type: ENUM('READY_TO_PROCESS', 'FINISHED','IN_PROGRESS', 'ERROR'),
+      type: ENUM('READY_TO_PROCESS', 'FINISHED', 'IN_PROGRESS', 'ERROR'),
       defaultValue: 'READY_TO_PROCESS'
     },
     dateLoaded: {
       type: DATE,
       defaultValue: NOW
     }
-    }, {
-    timestamps: false,
-    paranoid: true,
-    underscored: true
-  });
+  }, {
+      timestamps: false,
+      paranoid: true,
+      underscored: true
+    });
 
   return SourceFile;
 };

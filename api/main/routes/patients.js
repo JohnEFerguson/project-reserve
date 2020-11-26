@@ -31,11 +31,13 @@ router.post('/patients', async (req, res) => {
       rawPatients.map(async (rawPat) => {
         const configurationId = rawPat.configurationId
 
+        let rand_number = (rawPat.random_number) && Number.isInteger(rawPat.random_number) ? rawPat.random_number : Math.random() * 100000
+
         const newPatient = {
           name: rawPat.name,
           sourceFileId: rawPat.sourceFileId,
           configurationId,
-          rand_number: Math.random() * 100000,
+          rand_number: rand_number,
           info: JSON.stringify(rawPat)
         }
 

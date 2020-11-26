@@ -17,6 +17,9 @@ module.exports = (sequelize) => {
     name: {
       type: STRING,
     },
+    group_allocated_under: {
+      type: STRING,
+    },
     info: {
       type: STRING,
     },

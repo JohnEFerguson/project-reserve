@@ -31,10 +31,22 @@ router.get('/configurations/:id', async (req, res) => {
                 {
                   model: db.categoryCriteria,
                   as: 'categoryCriteria',
+                  include: [
+                    {
+                      model: db.categoryCriteriaElement,
+                      as: 'elements'
+                    }
+                  ]
                 },
                 {
                   model: db.numericCriteria,
                   as: 'numericCriteria',
+                  include: [
+                    {
+                      model: db.numericCriteriaBucket,
+                      as: 'bins'
+                    }
+                  ]
                 },
               ],
             },
