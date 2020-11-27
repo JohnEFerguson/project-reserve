@@ -50,7 +50,7 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
 
     const configId = sourceFile.dataValues.configurationId
     const reserveCategories = (
-      await db.reserveCategory.findAll({ where: { configurationId: configId } })
+      await db.reserveCategory.findAll({ where: { configurationId: configId }, order: [['order', 'ASC']] })
     ).map((ent) => ent.dataValues)
 
     const orderedPatientsByReserve = await Promise.all(
@@ -59,51 +59,57 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       })
     )
 
+    const patients = await Promise.all(
+      (await db.patient.findAll({ where: { sourceFileId: id }, order: [['rand_number', 'ASC']] })).map(f => f.id)
+    )
+
     let leftOver = 0 // handle this!
     const selectedPatients = new Set()
     const allocatedPatientGroups = new Map()
-    const notSelectedPatients = new Set()
+    const notSelectedPatients = new Set(patients)
     const nthReservePatients = []
+
+
+    console.log(orderedPatientsByReserve)
 
     orderedPatientsByReserve.forEach((f) => {
 
-      if (f.size > f.patients.length) {
-        leftOver += f.size - f.patients.length
-      } else {
 
-        let given = 0
-        let i = 0
-        while (given < f.size) {
+      let given = 0
+      let i = 0
+      while (i < f.patients.length) {
 
-          if (!selectedPatients.has(f.patients[i])) {
-            selectedPatients.add(f.patients[i])
-            allocatedPatientGroups[f.patients[i]] = f.name
-            given += 1
-            notSelectedPatients.delete(f.patients[i])
+        if (given < f.size && !selectedPatients.has(f.patients[i])) {
+          selectedPatients.add(f.patients[i])
+          allocatedPatientGroups[f.patients[i]] = f.name
+          given += 1
+          notSelectedPatients.delete(f.patients[i])
 
-            if (given == f.size - 1) {
-              nthReservePatients.push(
-                {
-                  name: f.name,
-                  nthRecipientPrimaryId: f.patients[i]
-                }
-              )
-            }
+          if (given == f.size) {
+            nthReservePatients.push(
+              {
+                name: f.name,
+                nthRecipientPrimaryId: f.patients[i]
+              }
+            )
           }
-
-          console.log(i, given, f.size)
-
-          i += 1
         }
-
-        while (i < f.patients.length) {
-          if (!selectedPatients.has(f.patients[i])) {
-            notSelectedPatients.add(f.patients[i])
-          }
-          i += 1
-        }
+        i += 1
       }
+
+      leftOver += f.size - given
     })
+
+
+
+    // give left over to unallocated patients if there are any
+    while (leftOver > 0 && notSelectedPatients.size > 0) {
+      let pat = notSelectedPatients.next()
+      notSelectedPatients.delete(pat)
+      selectedPatients.add(pat)
+      allocatedPatientGroups[pat] = "None"
+      leftOver -= 1
+    }
 
     // update patients
     selectedPatients.forEach(async (pId) => {
@@ -113,8 +119,6 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       await patient.save()
     })
 
-
-
     const nthReservePatientsWithNames = await Promise.all(nthReservePatients.map(async f => {
       let name = (await db.patient.findOne({ where: { id: f.nthRecipientPrimaryId } })).recipient_id
       return { name: f.name, nthRecipientId: name }
@@ -123,6 +127,7 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
     // update sourceFile
     sourceFile.status = 'FINISHED'
     sourceFile.nth_reserve_patients = JSON.stringify(nthReservePatientsWithNames)
+    sourceFile.left_over = leftOver
     const finished = await sourceFile.save()
 
     if (finished)
@@ -135,6 +140,8 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
     const sourceFile = await db.sourceFile.findOne({ where: { id } })
     sourceFile.status = 'ERROR'
     await sourceFile.save()
+    console.log(err)
+    return res.status(500).json()
   }
 
   return res.json() // return 200 no matter WHAT
@@ -157,7 +164,7 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
 
   const patients = await Promise.all((await db.sequelize.query(
     `
-    select name, given_unit, rand_number, info, group_allocated_under
+    select name, given_unit, rand_number, info, group_allocated_under, id
     from patient 
     where source_file_id = ${sourceFileId} ${filterLosers};
     `,
@@ -168,6 +175,7 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
     patObj["random_number"] = p.rand_number
     patObj["allocated_status"] = p.given_unit === 1
     patObj['group_allocated_under'] = p.group_allocated_under
+    patObj['id'] = p.id
     return patObj
   }))
 
@@ -191,13 +199,15 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
           select a.patient_id, nc_1 
           from 		
           (
-            select patient_id 
-            from patient_reserve_category prc 
-            where reserve_category_id = ${reserveCategoryId}
+			select p.id as priority_id, prc.patient_id 
+			from patient_reserve_category prc 
+			inner join priority p 
+			on prc.reserve_category_id = p.reserve_category_id 
+			where p.reserve_category_id = ${reserveCategoryId} 
           ) a
           left join
           (
-            select bucket_order as nc_1, patient_id
+            select bucket_order as nc_1, patient_id, nc.priority_id 
             from numeric_criteria nc 
             inner join
             (
@@ -210,7 +220,7 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
             on nc.id = a.numeric_criterium_id
             where \`order\` = 1		
           ) b
-          on a.patient_id = b.patient_id
+          on a.patient_id = b.patient_id and a.priority_id = b.priority_id
         ) a
         left join 
         (
@@ -220,13 +230,15 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
             select a.patient_id, nc_2 
             from 		
             (
-              select patient_id 
-              from patient_reserve_category prc 
-              where reserve_category_id = ${reserveCategoryId}
+			    select p.id as priority_id, prc.patient_id 
+			    from patient_reserve_category prc 
+			    inner join priority p 
+			    on prc.reserve_category_id = p.reserve_category_id 
+			    where p.reserve_category_id = ${reserveCategoryId} 
             ) a
             left join
             (
-              select bucket_order as nc_2, patient_id
+              select bucket_order as nc_2, patient_id, nc.priority_id 
               from numeric_criteria nc 
               inner join
               (
@@ -239,20 +251,22 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
               on nc.id = a.numeric_criterium_id
               where \`order\` = 2		
             ) b
-            on a.patient_id = b.patient_id
+            on a.patient_id = b.patient_id and a.priority_id = b.priority_id
           ) a
           left join 
           (
             select a.patient_id, nc_3
             from 		
             (
-              select patient_id 
-              from patient_reserve_category prc 
-              where reserve_category_id = ${reserveCategoryId}
+			    select p.id as priority_id, prc.patient_id 
+			    from patient_reserve_category prc 
+			    inner join priority p 
+			    on prc.reserve_category_id = p.reserve_category_id 
+			    where p.reserve_category_id = ${reserveCategoryId} 
             ) a
             left join
             (
-              select bucket_order as nc_3, patient_id
+              select bucket_order as nc_3, patient_id, nc.priority_id 
               from numeric_criteria nc 
               inner join
               (
@@ -265,7 +279,7 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
               on nc.id = a.numeric_criterium_id
               where \`order\` = 3		
             ) b
-            on a.patient_id = b.patient_id
+            on a.patient_id = b.patient_id and a.priority_id = b.priority_id
           ) b
           on a.patient_id = b.patient_id
         ) b
@@ -281,13 +295,15 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
           select a.patient_id, cc_1 
           from 		
           (
-            select patient_id 
-            from patient_reserve_category prc 
-            where reserve_category_id = ${reserveCategoryId} 
+			select p.id as priority_id, prc.patient_id 
+			from patient_reserve_category prc 
+			inner join priority p 
+			on prc.reserve_category_id = p.reserve_category_id 
+			where p.reserve_category_id = ${reserveCategoryId} 
           ) a
           left join
           (
-            select patient_id, element_order as cc_1
+            select patient_id, element_order as cc_1, priority_id
             from category_criteria cc 
             inner join
             (
@@ -299,7 +315,7 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
             on cc.id = c.category_criterium_id
             where \`order\` = 1		
           ) b
-          on a.patient_id = b.patient_id
+          on a.patient_id = b.patient_id and a.priority_id = b.priority_id
         ) a
         left join 
         (
@@ -309,13 +325,15 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
             select a.patient_id, cc_2
             from 		
             (
-              select patient_id 
-              from patient_reserve_category prc 
-              where reserve_category_id = ${reserveCategoryId}
+			    select p.id as priority_id, prc.patient_id 
+			    from patient_reserve_category prc 
+			    inner join priority p 
+			    on prc.reserve_category_id = p.reserve_category_id 
+			    where p.reserve_category_id = ${reserveCategoryId} 
             ) a
             left join
             (
-              select patient_id, element_order as cc_2
+              select patient_id, element_order as cc_2, cc.priority_id
               from category_criteria cc 
               inner join
               (
@@ -327,20 +345,22 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
               on cc.id = c.category_criterium_id
               where \`order\` = 2	
             ) b
-            on a.patient_id = b.patient_id
+            on a.patient_id = b.patient_id and a.priority_id = b.priority_id
           ) a
           inner join
           (
             select a.patient_id, cc_3
             from 		
             (
-              select patient_id 
-              from patient_reserve_category prc 
-              where reserve_category_id = ${reserveCategoryId}
+			    select p.id as priority_id, prc.patient_id 
+			    from patient_reserve_category prc 
+			    inner join priority p 
+			    on prc.reserve_category_id = p.reserve_category_id 
+			    where p.reserve_category_id = ${reserveCategoryId} 
             ) a
             left join
             (
-              select patient_id, element_order as cc_3
+              select patient_id, element_order as cc_3, cc.priority_id 
               from category_criteria cc 
               inner join
               (
@@ -352,7 +372,7 @@ async function orderPatientsInReserveCategory(db, reserveCategoryId, size, name)
               on cc.id = c.category_criterium_id
               where \`order\` = 3	
             ) b
-            on a.patient_id = b.patient_id
+            on a.patient_id = b.patient_id and a.priority_id = b.priority_id
           ) b
           on a.patient_id = b.patient_id
         ) b

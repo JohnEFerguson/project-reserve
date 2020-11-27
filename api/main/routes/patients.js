@@ -31,7 +31,7 @@ router.post('/patients', async (req, res) => {
       rawPatients.map(async (rawPat) => {
         const configurationId = rawPat.configurationId
 
-        let rand_number = (rawPat.random_number) && Number.isInteger(rawPat.random_number) ? rawPat.random_number : Math.random() * 100000
+        let rand_number = (rawPat.random_number) && (Number.isInteger(rawPat.random_number) || Number.isFloat(rawPat.random_number)) ? rawPat.random_number : Math.random() * 100000
 
         const newPatient = {
           name: rawPat.name,
@@ -89,15 +89,31 @@ router.post('/patients', async (req, res) => {
           const fieldName = crit.dataValues.name
           const value = rawPat[fieldName]
 
-          const bucket = await db.numericCriteriaBucket.findOne({
-            where: {
-              numeric_criterium_id: critId,
-              [Op.and]: [
-                { min: { [Op.lte]: value } },
-                { max: { [Op.gt]: value } },
-              ],
-            },
-          })
+
+
+
+          let bucket = null
+
+          if (crit.coarsened) {
+
+            bucket = await db.numericCriteriaBucket.findOne({
+              where: {
+                numeric_criterium_id: critId,
+                [Op.and]: [
+                  { min: { [Op.lte]: value } },
+                  { max: { [Op.gt]: value } },
+                ],
+              },
+            })
+
+          } else {
+
+            bucket = await db.numericCriteriaBucket.create({
+              numericCriteriumId: critId,
+              order: crit.ascending ? value : value * -1
+            })
+          }
+
 
           // TODO: alias to avoid weird naming?
           await createdPatient.addNumeric_criteria_bucket(bucket, {
@@ -137,7 +153,7 @@ router.post('/patients', async (req, res) => {
 
     return res.status(201).json(await createdPatients)
   } catch (err) {
-    return res.status(400)
+    return res.status(400).json(err)
   }
 })
 module.exports = router
