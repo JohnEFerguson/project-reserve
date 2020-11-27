@@ -16,6 +16,9 @@ module.exports = (sequelize) => {
     nth_reserve_patients: {
       type: STRING,
     },
+    left_over: {
+      type: INTEGER,
+    },
     status: {
       type: ENUM('READY_TO_PROCESS', 'FINISHED', 'IN_PROGRESS', 'ERROR'),
       defaultValue: 'READY_TO_PROCESS'

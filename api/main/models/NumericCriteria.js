@@ -13,28 +13,32 @@ module.exports = (sequelize) => {
     },
     name: {
       type: STRING,
-    },   
+    },
     description: {
       type: STRING,
     },
     order: {
       type: INTEGER,
-    },   
+    },
     min: {
       type: INTEGER,
     },
     max: {
       type: INTEGER,
-    },   
+    },
     ascending: {
       type: BOOLEAN,
+    },
+    coarsened: {
+      type: BOOLEAN,
     }
+
   }, {
-    timestamps: false,
-    paranoid: true,
-    underscored: true,
-    freezeTableName: true
-  });
+      timestamps: false,
+      paranoid: true,
+      underscored: true,
+      freezeTableName: true
+    });
 
   return NumericCriteria;
 };
