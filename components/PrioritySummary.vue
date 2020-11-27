@@ -19,10 +19,7 @@
             :is-read-only="true"
           />
         </div>
-        <div
-          v-if="reserveCategory.priority.length < 3"
-          class="criteriaPanelWrapper w33 tac flexrowcenter ml-9 mr-9"
-        >
+        <div class="criteriaPanelWrapper w33 tac flexrowcenter ml-9 mr-9">
           All remaining ties will be broken by a random lottery tiebreaker
         </div>
       </div>
@@ -44,9 +41,7 @@ export default {
       const sortOrders = (this.reserveCategory.priority || []).map(
         (cat) => `by <strong>${cat.name}</strong>`
       )
-      if ((sortOrders || []).length < 3) {
-        sortOrders.push('by <strong>random lottery tiebreaker</strong>')
-      }
+      sortOrders.push('by <strong>random lottery tiebreaker</strong>')
       return `Sort ${(sortOrders || []).join(', ')}`
     },
   },
@@ -72,8 +67,9 @@ export default {
 
 .criteriaPanels {
   width: 100%;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 9px;
 }
 .criteriaPanelWrapper {
   padding: 18px;
@@ -81,6 +77,7 @@ export default {
   border-radius: 18px;
   max-height: 55vh;
   overflow: scroll;
+  width: 100%;
 }
 .viewPriorityHeader {
   color: var(--dark-grey);

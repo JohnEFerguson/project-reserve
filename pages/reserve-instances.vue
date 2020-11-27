@@ -20,8 +20,8 @@
           :key="`${instance.id}`"
           class="reserveTableRow"
         >
-          <span class="rowCell">{{ instance.dateLoaded }}</span>
-          <span class="rowCell">{{ instance.name }}</span>
+          <span class="rowCell fw-b">{{ instance.dateLoaded }}</span>
+          <span class="rowCell fw-b">{{ instance.name }}</span>
           <span class="rowCell status"
             ><span
               :class="[

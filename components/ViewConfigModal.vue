@@ -38,14 +38,14 @@ export default {
     }
   },
   computed: {
-    sortByLabel() {
-      const sortOrders = (this.reserveCategory.priority || []).map(
-        (cat) => `by <strong>${cat.name}</strong>`
-      )
-      if ((sortOrders || []).length < 3) {
-        sortOrders.push('by <strong>random lottery tiebreaker</strong>')
-      }
-      return `Sort ${(sortOrders || []).join(', ')}`
+    reserveCategories() {
+      return this.config.reserveCategories || []
+    },
+    unitType() {
+      return this.config.unitType
+    },
+    supply() {
+      return this.config.supply
     },
   },
   methods: {
