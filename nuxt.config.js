@@ -1,4 +1,4 @@
-export default {
+module.exports = { // eslint-disable-line
   /*
    ** Nuxt target
    ** See https://nuxtjs.org/api/configuration-target

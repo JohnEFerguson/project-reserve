@@ -18,12 +18,30 @@
         </div>
         <div class="reserveTableRows">
           <div
-            v-for="category in reserveCategories"
+            v-for="(category, index) in reserveCategories"
             :key="`${category.name}${category.order}`"
             class="reserveTableRow"
           >
             <span class="rowCell">{{ category.order }}</span>
-            <span class="rowCell">{{ category.name }}</span>
+            <span class="rowCell"
+              >{{ category.name
+              }}<span v-if="category.description" class="iconWrapper"
+                ><font-awesome-icon
+                  icon="info-circle"
+                  class="icon ml-9"
+                  @mouseenter="() => setDescriptionIndexToShow(index)"
+                  @mouseleave="() => setDescriptionIndexToShow(null)"
+                />
+                <div
+                  :class="[
+                    'descriptionWrapper',
+                    { isVisible: descriptionIndexToShow === index },
+                  ]"
+                >
+                  {{ category.description }}
+                </div></span
+              ></span
+            >
             <span class="rowCell">{{ category.size }}</span>
             <button class="p9" @click="() => onPriorityClick(category)">
               {{ 'Priority' }}
@@ -32,7 +50,7 @@
         </div>
       </div>
     </div>
-    <div class="requiredFieldsWrapper">
+    <div v-if="requiredFields.length" class="requiredFieldsWrapper">
       <p class="mb-27">
         This configuration will
         <strong>require the following data fields</strong> for every potential
@@ -63,6 +81,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      descriptionIndexToShow: null,
+    }
+  },
   computed: {
     reserveCategories() {
       return this.config.reserveCategories || []
@@ -77,9 +100,14 @@ export default {
       return this.config.requiredFields || []
     },
   },
+  methods: {
+    setDescriptionIndexToShow(index) {
+      this.descriptionIndexToShow = index
+    },
+  },
 }
 </script>
-<style>
+<style lang="scss">
 .finishContainer {
   margin: auto;
   width: 100%;
@@ -91,6 +119,9 @@ export default {
 }
 .finishConfirmationData {
   grid-column: span 2;
+  &:last-child {
+    grid-column: span 3;
+  }
 }
 .reserveTableContainer {
   width: 100%;
@@ -121,6 +152,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 .requiredFieldsWrapper {
   padding: 18px;
@@ -131,5 +163,27 @@ export default {
   border-radius: 18px;
   background-color: var(--light-grey);
   padding: 9px 18px;
+}
+.iconWrapper {
+  position: relative;
+}
+.icon {
+  cursor: pointer;
+}
+.descriptionWrapper {
+  z-index: 1000;
+  display: none;
+  position: absolute;
+  top: 50%;
+  width: 200px;
+  transform: translateY(-50%);
+  left: calc(100% + 9px);
+  background-color: white;
+  border: 2px solid var(--dark-blue);
+  padding: 9px;
+  border-radius: 9px;
+  &.isVisible {
+    display: block;
+  }
 }
 </style>
