@@ -97,7 +97,9 @@ export default {
             const fieldIndex = fieldNames.indexOf(name)
             if (fieldIndex < 0) {
               throw new Error(
-                `Could not find column for ${name} in ${fieldNames.join(', ')}`
+                `Could not find column for required field ${name} in ${fieldNames.join(
+                  ', '
+                )}`
               )
             }
             acc[fieldIndex] = { name, dataType }

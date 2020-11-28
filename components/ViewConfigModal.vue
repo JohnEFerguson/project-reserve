@@ -77,7 +77,8 @@ export default {
   z-index: 100;
 }
 .modalInnerWrapper {
-  height: 90%;
+  height: fit-content;
+  max-height: 90%;
   width: 90%;
   border: 2px solid var(--dark-blue);
   background: white;
