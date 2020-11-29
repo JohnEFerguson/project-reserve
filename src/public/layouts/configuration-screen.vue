@@ -11,7 +11,7 @@
         Finish & Confirm
       </div>
     </div>
-    <Nuxt />
+    <slot />
   </div>
 </template>
 
@@ -19,16 +19,13 @@
 export default {
   computed: {
     pageUrl() {
-      return this.$nuxt.$route.path
+      return this.$route.path;
     },
   },
-  beforeMount() {
-    this.$store.dispatch('initSocket')
-  },
-}
+};
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .config-container {
   height: 100vh;
   display: flex;

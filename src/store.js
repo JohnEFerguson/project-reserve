@@ -1,13 +1,13 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import arrayMove from "array-move";
-import socket from "./plugins/socket.io.js";
-import { STATUS_UPDATE } from "../socketConstants";
+import socket from "./public/plugins/socket.io.js";
+import { STATUS_UPDATE } from "./socketConstants";
 import {
   transformCriteriaForDisplay,
   transformCriteriaForPost,
   removeIds,
-} from "./plugins/helpers";
+} from "./public/plugins/helpers";
 
 Vue.use(Vuex);
 
@@ -30,6 +30,19 @@ const initialState = {
     requiredFields: [],
   },
 };
+
+function getBaseUrl() {
+  const url =
+    process &&
+    process.env &&
+    process.env.BASE_URL &&
+    process.env.BASE_URL !== "undefined" &&
+    typeof process.env.BASE_URL !== undefined
+      ? process.env.BASE_URL
+      : "";
+  return url;
+}
+
 export function createStore() {
   return new Vuex.Store({
     // IMPORTANT: state must be a function so the module can be
@@ -37,31 +50,34 @@ export function createStore() {
     state: () => initialState,
 
     actions: {
-      //   initSocket({ commit, state }) {
-      //     if (!state.isSocketConnected) {
-      //       commit("setSocketConnected");
-      //       socket.on(STATUS_UPDATE, (reserveInstances) => {
-      //         commit("setReserveInstances", reserveInstances);
-      //       });
-      //     }
-      //   },
+      initSocket({ commit, state }) {
+        if (!state.isSocketConnected) {
+          commit("setSocketConnected");
+          socket.on(STATUS_UPDATE, (reserveInstances) => {
+            commit("setReserveInstances", reserveInstances);
+          });
+        }
+      },
       async deleteCurrentConfig({ commit, state }) {
         if (state.currentConfig.id) {
-          await fetch(`/api/configurations/${state.currentConfig.id}`, {
-            method: "DELETE",
-          });
+          await fetch(
+            `${getBaseUrl()}/configurations/${state.currentConfig.id}`,
+            {
+              method: "DELETE",
+            }
+          );
           commit("deleteConfigIds");
         }
       },
-      async getReserveInstances({ commit }) {
-        const sourceFilesRes = await fetch("/api/sourceFiles");
+      async getReserveInstances({ commit, state }) {
+        const sourceFilesRes = await fetch(`${getBaseUrl()}/sourceFiles`);
         commit("setReserveInstances", await sourceFilesRes.json());
       },
       async processSourceFile({ commit }, sourceFileId) {
-        await fetch(`/api/sourceFiles/${sourceFileId}/process`, {
+        await fetch(`${getBaseUrl()}/sourceFiles/${sourceFileId}/process`, {
           method: "POST",
         });
-        const sourceFilesRes = await fetch("/api/sourceFiles");
+        const sourceFilesRes = await fetch(`${getBaseUrl()}/sourceFiles`);
         commit("setReserveInstances", await sourceFilesRes.json());
       },
       async postConfig({ commit, state, ...props }) {
@@ -80,7 +96,7 @@ export function createStore() {
             []
           ),
         };
-        const configRes = await fetch("/api/configurations", {
+        const configRes = await fetch(`${getBaseUrl()}/configurations`, {
           method: "POST",
           headers: {
             "content-type": "application/json",
@@ -103,7 +119,7 @@ export function createStore() {
           ),
         });
         const requiredFieldsRes = await fetch(
-          `/api/configurations/${config.id}/fieldNames`
+          `${getBaseUrl()}/configurations/${config.id}/fieldNames`
         );
         const requiredFields = await requiredFieldsRes.json();
         commit("setRequiredFields", requiredFields);

@@ -44,7 +44,7 @@
             >
             <span class="rowCell">{{ category.size }}</span>
             <button class="p9" @click="() => onPriorityClick(category)">
-              {{ 'Priority' }}
+              {{ "Priority" }}
             </button>
           </div>
         </div>
@@ -90,30 +90,30 @@ export default {
   data() {
     return {
       descriptionIndexToShow: null,
-    }
+    };
   },
   computed: {
     reserveCategories() {
-      return this.config.reserveCategories || []
+      return this.config.reserveCategories || [];
     },
     unitType() {
-      return this.config.unitType
+      return this.config.unitType;
     },
     supply() {
-      return this.config.supply
+      return this.config.supply;
     },
     requiredFields() {
-      return this.config.requiredFields || []
+      return this.config.requiredFields || [];
     },
   },
   methods: {
     setDescriptionIndexToShow(index) {
-      this.descriptionIndexToShow = index
+      this.descriptionIndexToShow = index;
     },
   },
-}
+};
 </script>
-<style lang="scss">
+<style lang="stylus">
 .finishContainer {
   margin: auto;
   width: 100%;

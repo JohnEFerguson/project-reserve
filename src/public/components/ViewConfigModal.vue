@@ -18,8 +18,8 @@
 </template>
 
 <script>
-import PrioritySummary from './PrioritySummary'
-import ConfigSummary from './ConfigSummary'
+import PrioritySummary from "./PrioritySummary.vue";
+import ConfigSummary from "./ConfigSummary.vue";
 export default {
   components: { PrioritySummary, ConfigSummary },
   props: {
@@ -35,35 +35,35 @@ export default {
   data() {
     return {
       priorityToView: null,
-    }
+    };
   },
   computed: {
     reserveCategories() {
-      return this.config.reserveCategories || []
+      return this.config.reserveCategories || [];
     },
     unitType() {
-      return this.config.unitType
+      return this.config.unitType;
     },
     supply() {
-      return this.config.supply
+      return this.config.supply;
     },
   },
   methods: {
     handleOnClose() {
       if (this.priorityToView) {
-        this.priorityToView = null
+        this.priorityToView = null;
       } else {
-        this.onClose()
+        this.onClose();
       }
     },
     goToPrioritySummary(category) {
-      this.priorityToView = category
+      this.priorityToView = category;
     },
   },
-}
+};
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .modalWrapper {
   position: fixed;
   top: 0;

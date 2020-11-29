@@ -6,12 +6,12 @@ const server = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const compression = require("compression");
-const db = require("./api/main/config/db");
-const { STATUS_UPDATE, emitter } = require("./socketConstants");
+const db = require("./src/api/main/config/db");
+const { STATUS_UPDATE, emitter } = require("./src/socketConstants");
 
-const patientsRoute = require("./api/main/routes/patients");
-const configurationsRoute = require("./api/main/routes/configurations");
-const sourceFilesRoute = require("./api/main/routes/source_files");
+const patientsRoute = require("./src/api/main/routes/patients");
+const configurationsRoute = require("./src/api/main/routes/configurations");
+const sourceFilesRoute = require("./src/api/main/routes/source_files");
 
 const serverInfo =
   `express/${require("express/package.json").version} ` +
@@ -112,6 +112,7 @@ function render(req, res) {
   };
   renderer.renderToString(context, (err, html) => {
     if (err) {
+      console.error(err);
       if (err.code === 404) {
         res.status(404).end("Page not found");
       } else {

@@ -232,8 +232,8 @@
 </template>
 
 <script>
-import arrayMove from 'array-move'
-import { CATEGORY_TYPE, NUMERIC_TYPE } from './constants'
+import arrayMove from "array-move";
+import { CATEGORY_TYPE, NUMERIC_TYPE } from "./constants";
 
 export default {
   props: {
@@ -252,72 +252,72 @@ export default {
   },
   computed: {
     CATEGORY_TYPE() {
-      return CATEGORY_TYPE
+      return CATEGORY_TYPE;
     },
     NUMERIC_TYPE() {
-      return NUMERIC_TYPE
+      return NUMERIC_TYPE;
     },
   },
   methods: {
     addNewElement() {
       this.criteria.elements.push({
-        name: '',
+        name: "",
         order: this.criteria.elements.length + 1,
-      })
+      });
     },
     deleteElement(order) {
-      let elOrder = 1
+      let elOrder = 1;
       this.criteria.elements = this.criteria.elements.reduce((acc, el) => {
         if (el.order !== order) {
-          acc.push({ ...el, order: elOrder })
-          elOrder = elOrder + 1
+          acc.push({ ...el, order: elOrder });
+          elOrder = elOrder + 1;
         }
-        return acc
-      }, [])
+        return acc;
+      }, []);
     },
     updateNumBins(numBins) {
       if (numBins < 0) {
-        return
+        return;
       }
-      const newBins = []
-      const currentBins = this.criteria.bins
+      const newBins = [];
+      const currentBins = this.criteria.bins;
       for (let i = 0; i < numBins; i++) {
         if (currentBins[i]) {
-          newBins.push({ ...currentBins[i], order: i + 1 })
+          newBins.push({ ...currentBins[i], order: i + 1 });
         } else {
-          newBins.push({ min: 0, max: 0, order: i + 1 })
+          newBins.push({ min: 0, max: 0, order: i + 1 });
         }
       }
-      this.criteria.bins = newBins
+      this.criteria.bins = newBins;
     },
     moveElementDown(element) {
-      const elements = this.criteria.elements
+      const elements = this.criteria.elements;
       const newIndex =
-        element.order === 1 ? elements.length - 1 : element.order - 2
+        element.order === 1 ? elements.length - 1 : element.order - 2;
 
-      const movedElements = arrayMove(elements, element.order - 1, newIndex)
+      const movedElements = arrayMove(elements, element.order - 1, newIndex);
       movedElements.forEach((element, index) => {
-        element.order = index + 1
-      })
+        element.order = index + 1;
+      });
 
-      this.criteria.elements = movedElements
+      this.criteria.elements = movedElements;
     },
     moveElementUp(element) {
-      const elements = this.criteria.elements
-      const newIndex = element.order === elements.length ? 0 : element.order
+      const elements = this.criteria.elements;
+      const newIndex = element.order === elements.length ? 0 : element.order;
 
-      const movedElements = arrayMove(elements, element.order - 1, newIndex)
+      const movedElements = arrayMove(elements, element.order - 1, newIndex);
       movedElements.forEach((element, index) => {
-        element.order = index + 1
-      })
+        element.order = index + 1;
+      });
 
-      this.criteria.elements = movedElements
+      this.criteria.elements = movedElements;
     },
   },
-}
+};
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .textInput {
   cursor: pointer;
   resize: none;

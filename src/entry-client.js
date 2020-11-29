@@ -1,3 +1,5 @@
+import "regenerator-runtime/runtime.js";
+import "isomorphic-fetch";
 import { createApp } from "./app";
 
 // client-specific bootstrapping logic...

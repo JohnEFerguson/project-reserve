@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import PrioritySummary from './PrioritySummary'
+import PrioritySummary from "./PrioritySummary.vue";
 export default {
   components: { PrioritySummary },
   props: {
@@ -23,10 +23,10 @@ export default {
       required: true,
     },
   },
-}
+};
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .modalWrapper {
   position: fixed;
   top: 0;

@@ -1,7 +1,7 @@
 <template>
   <div class="modalWrapper">
     <div class="modalInnerWrapper">
-      <h2>{{ `${mode === 'add' ? 'Add' : 'Edit'} Reserve Category` }}</h2>
+      <h2>{{ `${mode === "add" ? "Add" : "Edit"} Reserve Category` }}</h2>
       <div class="modalBody">
         <div class="flexcolumn">
           <div class="flexcolumn mb-27">
@@ -91,7 +91,7 @@
           ]"
           @click="saveCategory"
         >
-          {{ `${mode === 'add' ? 'Add' : 'Edit'}` }}
+          {{ `${mode === "add" ? "Add" : "Edit"}` }}
         </button>
       </div>
     </div>
@@ -99,25 +99,25 @@
 </template>
 
 <script>
-import PriorityOrderPanel from './PriorityOrderPanel'
+import PriorityOrderPanel from "./PriorityOrderPanel.vue";
 import {
   CATEGORY_TYPE,
   NUMERIC_TYPE,
   categoryFields,
   numericFields,
-} from './constants'
+} from "./constants";
 
 function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj))
+  return JSON.parse(JSON.stringify(obj));
 }
 
 const defaultCriteria = {
-  name: '',
+  name: "",
   criteriaType: CATEGORY_TYPE,
   order: null,
   ...deepClone(categoryFields),
   ...deepClone(numericFields),
-}
+};
 export default {
   components: { PriorityOrderPanel },
   props: {
@@ -128,11 +128,11 @@ export default {
       required: false,
       default: function defaultCategory() {
         return {
-          name: '',
-          description: '',
+          name: "",
+          description: "",
           size: 0,
           priority: [{ ...deepClone(defaultCriteria) }],
-        }
+        };
       },
     },
   },
@@ -142,34 +142,34 @@ export default {
       currentCriteria: 0,
       hasNameError: false,
       initialSize: this.categoryToEdit.size,
-    }
+    };
   },
   computed: {
     availableSupply() {
       const defaultCategory = this.$store.state.currentConfig.reserveCategories.find(
         (cat) => !!cat.isDefault
-      )
+      );
       if (defaultCategory) {
-        return parseInt(this.initialSize) + parseInt(defaultCategory.size)
+        return parseInt(this.initialSize) + parseInt(defaultCategory.size);
       }
-      return this.$store.state.currentConfig.supply
+      return this.$store.state.currentConfig.supply;
     },
     CATEGORY_TYPE() {
-      return CATEGORY_TYPE
+      return CATEGORY_TYPE;
     },
     NUMERIC_TYPE() {
-      return NUMERIC_TYPE
+      return NUMERIC_TYPE;
     },
     hasSizeError() {
       return (
         parseInt(this.reserveCategory.size) > parseInt(this.availableSupply) ||
         this.reserveCategory.size < 0
-      )
+      );
     },
   },
   mounted() {
     if (!this.reserveCategory.priority.length) {
-      this.reserveCategory.priority = [{ ...deepClone(defaultCriteria) }]
+      this.reserveCategory.priority = [{ ...deepClone(defaultCriteria) }];
     }
   },
   methods: {
@@ -177,35 +177,35 @@ export default {
       if (!this.hasSizeError && this.reserveCategory.name) {
         const filteredPriorities = this.reserveCategory.priority.filter(
           (criteria) => criteria.name
-        )
-        this.$store.commit('saveCategory', {
+        );
+        this.$store.commit("saveCategory", {
           ...this.reserveCategory,
           priority: filteredPriorities,
-        })
-        this.onClose()
+        });
+        this.onClose();
       } else {
-        this.validateCategoryName()
+        this.validateCategoryName();
       }
     },
     updateCriteriaTab(newIndex) {
-      this.currentCriteria = newIndex
+      this.currentCriteria = newIndex;
     },
     addNewCriteria() {
       if (this.reserveCategory.priority.length < 3) {
         this.reserveCategory.priority.push({
           ...deepClone(defaultCriteria),
-        })
-        this.updateCriteriaTab(this.reserveCategory.priority.length - 1)
+        });
+        this.updateCriteriaTab(this.reserveCategory.priority.length - 1);
       }
     },
     validateCategoryName() {
-      this.hasNameError = !this.reserveCategory.name
+      this.hasNameError = !this.reserveCategory.name;
     },
   },
-}
+};
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .modalWrapper {
   position: fixed;
   top: 0;

@@ -59,18 +59,18 @@
           </div>
         </div>
         <div class="buttonWrapper">
-          <nuxt-link
+          <router-link
             to="/unit-definition"
             class="addButton p-18 fs-12"
             @click.native="initConfig"
           >
             Add New Reserve Instance
-          </nuxt-link>
+          </router-link>
         </div>
       </div>
     </div>
     <div class="navButtons">
-      <nuxt-link to="/load-data" class="navButton">Back</nuxt-link>
+      <router-link to="/load-data" class="navButton">Back</router-link>
     </div>
   </div>
 </template>
@@ -83,10 +83,9 @@ import {
   downloadCSV,
   removeIds,
 } from "../plugins/helpers";
-import ViewConfigModal from "~/components/ViewConfigModal.vue";
+import ViewConfigModal from "../components/ViewConfigModal.vue";
 
 export default {
-  layout: "default",
   components: { ViewConfigModal },
   data() {
     return {
@@ -106,9 +105,7 @@ export default {
     },
   },
   mounted() {
-    if (!this.reserveInstances) {
-      this.$store.dispatch("getReserveInstances");
-    }
+    this.$store.dispatch("getReserveInstances");
   },
   serverPrefetch() {
     this.$store.dispatch("getReserveInstances");
@@ -128,7 +125,7 @@ export default {
     },
     async fetchConfig(instance) {
       const configRes = await fetch(
-        `/api/configurations/${instance.configurationId}`
+        `/configurations/${instance.configurationId}`
       );
       const config = await configRes.json();
       return {
@@ -166,7 +163,7 @@ export default {
     },
     async export({ instance, patients, suffix }) {
       const configurationRes = await fetch(
-        `/api/configurations/${instance.configurationId}`
+        `/configurations/${instance.configurationId}`
       );
       const configuration = await configurationRes.json();
       const parsedFileName = path.parse(instance.name).name;
@@ -201,22 +198,20 @@ export default {
       });
     },
     async exportAll(instance) {
-      const patientsRes = await fetch(
-        `/api/sourceFiles/${instance.id}/patients`
-      );
+      const patientsRes = await fetch(`/sourceFiles/${instance.id}/patients`);
       const patients = await patientsRes.json();
       this.export({ instance, patients, suffix: "_all_patients" });
     },
     async exportWinners(instance) {
       const winnersRes = await fetch(
-        `/api/sourceFiles/${instance.id}/patients?givenUnit=true`
+        `/sourceFiles/${instance.id}/patients?givenUnit=true`
       );
       const patients = await winnersRes.json();
       this.export({ instance, patients, suffix: "_recipients" });
     },
     async exportLosers(instance) {
       const losersRes = await fetch(
-        `/api/sourceFiles/${instance.id}/patients?givenUnit=false`
+        `/sourceFiles/${instance.id}/patients?givenUnit=false`
       );
       const patients = await losersRes.json();
       this.export({ instance, patients, suffix: "_non_recipients" });
@@ -225,7 +220,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .header {
   padding: 18px 45px;
   color: var(--dark-blue);
