@@ -44,7 +44,7 @@ app.use((req, res, next) => {
   next()
 })
 
-const sequelizePromise = db.sequelize.sync({ force: true })
+const sequelizePromise = db.sequelize.sync({ force: false })
 
 app.use(async (req, res, next) => {
   await sequelizePromise
