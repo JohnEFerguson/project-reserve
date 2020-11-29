@@ -13,7 +13,11 @@
               class="textInput"
               name="categoryName"
               placeholder="e.g., clinical trial participant"
+              @input="validateCategoryName"
             />
+            <span v-if="hasNameError" class="fs-12 mt-9 ml-18 col-error">{{
+              `Please enter a name for the reserve category.`
+            }}</span>
           </div>
           <div class="flexcolumn mb-27">
             <label class="ml-9 mb-9" for="categoryDescription"
@@ -36,10 +40,10 @@
               name="categoryDescription"
               type="number"
               placeholder="e.g., 60"
-              @input="validateCategorySize"
+              :min="0"
             />
             <span v-if="hasSizeError" class="fs-12 mt-9 ml-18 col-error">{{
-              `There are only ${availableSupply} units available. Please re-allocate from other reserve categories.`
+              `There are only ${availableSupply} units available. Please re-allocate from other reserve categories, then enter a non-zero size.`
             }}</span>
           </div>
         </div>
@@ -56,7 +60,13 @@
               @click="() => updateCriteriaTab(criteriaIndex)"
               >{{ `Criteria ${criteriaIndex + 1}` }}</span
             >
-            <button class="ml-9" @click="addNewCriteria">+</button>
+            <button
+              v-if="reserveCategory.priority.length < 3"
+              class="ml-9"
+              @click="addNewCriteria"
+            >
+              +
+            </button>
           </div>
           <div class="modalCriteriaPanels">
             <div
@@ -75,7 +85,10 @@
       <div class="modalButtons">
         <button class="navButton" @click="onClose">Cancel</button>
         <button
-          :class="['navButton', { isDisabled: hasSizeError }]"
+          :class="[
+            'navButton',
+            { isDisabled: hasSizeError || !reserveCategory.name },
+          ]"
           @click="saveCategory"
         >
           {{ `${mode === 'add' ? 'Add' : 'Edit'}` }}
@@ -127,7 +140,7 @@ export default {
     return {
       reserveCategory: deepClone(this.categoryToEdit),
       currentCriteria: 0,
-      hasSizeError: false,
+      hasNameError: false,
       initialSize: this.categoryToEdit.size,
     }
   },
@@ -147,6 +160,12 @@ export default {
     NUMERIC_TYPE() {
       return NUMERIC_TYPE
     },
+    hasSizeError() {
+      return (
+        parseInt(this.reserveCategory.size) > parseInt(this.availableSupply) ||
+        this.reserveCategory.size < 0
+      )
+    },
   },
   mounted() {
     if (!this.reserveCategory.priority.length) {
@@ -155,7 +174,7 @@ export default {
   },
   methods: {
     saveCategory() {
-      if (!this.hasSizeError) {
+      if (!this.hasSizeError && this.reserveCategory.name) {
         const filteredPriorities = this.reserveCategory.priority.filter(
           (criteria) => criteria.name
         )
@@ -164,6 +183,8 @@ export default {
           priority: filteredPriorities,
         })
         this.onClose()
+      } else {
+        this.validateCategoryName()
       }
     },
     updateCriteriaTab(newIndex) {
@@ -174,11 +195,11 @@ export default {
         this.reserveCategory.priority.push({
           ...deepClone(defaultCriteria),
         })
+        this.updateCriteriaTab(this.reserveCategory.priority.length - 1)
       }
     },
-    validateCategorySize() {
-      this.hasSizeError =
-        parseInt(this.reserveCategory.size) > parseInt(this.availableSupply)
+    validateCategoryName() {
+      this.hasNameError = !this.reserveCategory.name
     },
   },
 }
@@ -195,6 +216,7 @@ export default {
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(5px);
+  z-index: 1000;
 }
 .modalInnerWrapper {
   height: calc(100% - 18px);

@@ -107,6 +107,7 @@ export default {
           },
           {}
         )
+        const recipientIds = []
         patientObjs = patients.map((patient) => {
           return patient.reduce((acc, field, index) => {
             const { name, dataType, required } = dataTypeMap[index]
@@ -117,6 +118,16 @@ export default {
                 `${errorMessage} This field is required but is empty.`
               )
             }
+            if (name === 'recipient_id') {
+              if (recipientIds.includes(realFieldValue)) {
+                throw new Error(
+                  `${errorMessage} Duplicate recipient ID: ${realFieldValue}`
+                )
+              } else {
+                recipientIds.push(realFieldValue)
+              }
+            }
+
             switch (dataType) {
               case 'BOOLEAN': {
                 const fieldUC = field.toUpperCase()

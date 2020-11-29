@@ -1,17 +1,23 @@
 <template>
   <div class="container">
-    <div class="inputRow">
+    <div class="inputRow mb-54">
       <label for="unitTypeInput">What unit is being allocated?</label>
       <input v-model="unitType" name="unitTypeInput" placeholder="Antibodies" />
     </div>
-    <div class="inputRow">
-      <label for="supplyInput">How many units are being allocated?</label>
-      <input
-        v-model="supply"
-        name="supplyInput"
-        type="number"
-        placeholder="120"
-      />
+    <div class="mb-54">
+      <div class="inputRow">
+        <label for="supplyInput">How many units are being allocated?</label>
+        <input
+          v-model="supply"
+          name="supplyInput"
+          type="number"
+          placeholder="120"
+          @input="validateCategorySize"
+        />
+      </div>
+      <div v-if="hasSizeError" class="fs-12 mt-9 ml-a wfc mr-18 col-error">
+        Please ensure supply is between 0 and 10,000
+      </div>
     </div>
     <div class="navButtons">
       <nuxt-link to="/reserve-instances" class="navButton">Back</nuxt-link>
@@ -28,9 +34,14 @@
 <script>
 export default {
   layout: 'configuration-screen',
+  data() {
+    return {
+      hasSizeError: false,
+    }
+  },
   computed: {
     isNextButtonDisabled() {
-      return !this.unitType || !this.supply
+      return !this.unitType || !this.supply || this.hasSizeError
     },
     unitType: {
       get() {
@@ -59,6 +70,10 @@ export default {
         this.$router.push('/specify-reserve')
       })
     },
+    validateCategorySize() {
+      this.hasSizeError =
+        parseInt(this.supply) > 10000 || parseInt(this.supply) < 0
+    },
   },
 }
 </script>
@@ -72,7 +87,6 @@ export default {
 }
 .inputRow {
   width: 700px;
-  margin-bottom: 54px;
   padding: 18px 36px;
   font-size: 20px;
   display: flex;

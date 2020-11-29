@@ -8,7 +8,7 @@ export const numericFields = {
   min: 0,
   max: 0,
   binOrder: 'desc',
-  coarsened: true,
+  coarsened: false,
   numBins: 1,
   bins: [
     {
