@@ -33,8 +33,8 @@ router.post("/patients", async (req, res) => {
 
         const rand_number =
           rawPat.random_number &&
-          (Number.isInteger(rawPat.random_number) ||
-            Number.isFloat(rawPat.random_number))
+            (Number.isInteger(rawPat.random_number) ||
+              Number.isFloat(rawPat.random_number))
             ? rawPat.random_number
             : Math.random() * 100000;
 
@@ -96,7 +96,7 @@ router.post("/patients", async (req, res) => {
 
           let bucket = null;
 
-          if (crit.coarsened) {
+          if (crit.coarsened && value != crit.dataValues.max) {
             bucket = await db.numericCriteriaBucket.findOne({
               where: {
                 numeric_criterium_id: critId,
@@ -106,6 +106,17 @@ router.post("/patients", async (req, res) => {
                 ],
               },
             });
+          } else if (crit.coarsened) {
+
+            bucket = await db.numericCriteriaBucket.findOne({
+              where: {
+                numeric_criterium_id: critId,
+                [Op.and]: [
+                  { min: { [Op.lte]: value } },
+                  { max: { [Op.gte]: value } },
+                ],
+              },
+            })
           } else {
             bucket = await db.numericCriteriaBucket.create({
               numericCriteriumId: critId,

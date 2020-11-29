@@ -7,8 +7,8 @@ const env = {
   DATABASE: process.env.DATABASE || 'data.sqlite',
   DATABASE_DIALECT: process.env.DATABASE_DIALECT || 'sqlite',
   DATABASE_STORAGE:
-    process.env.DATABASE_STORAGE || path.join(__dirname, '../data.sqlite'),
-  PORT: 8019,
+    process.env.DATABASE_STORAGE || 'data.sqlite',
+  PORT: 8080,
   NODE_ENV: process.env.NODE_ENV || 'development',
 }
 
