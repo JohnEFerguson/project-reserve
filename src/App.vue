@@ -5,7 +5,7 @@
 <script>
 export default {
   beforeMount() {
-    this.$store.dispatch("initSocket");
+    this.$store.dispatch('initSocket')
   },
-};
+}
 </script>

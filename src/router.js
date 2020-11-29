@@ -1,24 +1,24 @@
-import Vue from "vue";
-import Router from "vue-router";
+import Vue from 'vue'
+import Router from 'vue-router'
 
-Vue.use(Router);
+Vue.use(Router)
 
 export function createRouter() {
   return new Router({
-    mode: "history",
+    mode: 'history',
     routes: [
-      { path: "/", component: () => import("./public/pages/index.vue") },
+      { path: '/', component: () => import('./public/pages/index.vue') },
       {
-        path: "/reserve-instances",
-        component: () => import("./public/pages/reserve-instances.vue"),
+        path: '/reserve-instances',
+        component: () => import('./public/pages/reserve-instances.vue'),
       },
       {
-        path: "/unit-definition",
-        component: () => import("./public/pages/unit-definition.vue"),
+        path: '/unit-definition',
+        component: () => import('./public/pages/unit-definition.vue'),
       },
       {
-        path: "/specify-reserve",
-        component: () => import("./public/pages/specify-reserve.vue"),
+        path: '/specify-reserve',
+        component: () => import('./public/pages/specify-reserve.vue'),
       },
       //   {
       //     path: "/finish",
@@ -29,5 +29,5 @@ export function createRouter() {
       //     component: () => import("~/src/pages/load-data.vue"),
       //   },
     ],
-  });
+  })
 }
