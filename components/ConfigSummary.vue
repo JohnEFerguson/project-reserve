@@ -51,11 +51,17 @@
       </div>
     </div>
     <div v-if="requiredFields.length" class="requiredFieldsWrapper">
-      <p class="mb-27">
+      <p class="mb-18">
         This configuration will
         <strong>require the following data fields</strong> for every potential
-        recipient of a vaccine. Please ensure that this data is readily
-        available before continuing.
+        recipient. Please ensure that this data is readily available before
+        continuing.
+      </p>
+      <p class="mb-27">
+        A user can optionally include their own random number for a patient by
+        including a field exactly named random_number. If a patient has a blank
+        random number or random number not in the range 0 to 1000, the system
+        will generate and report its own random number for the patient.
       </p>
       <div class="mb-18 fw-b">Required fields:</div>
       <p

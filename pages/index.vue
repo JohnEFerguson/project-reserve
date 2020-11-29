@@ -14,9 +14,12 @@
     </div>
     <div class="buttons">
       <button class="menuButton navButton">About</button>
-      <button class="menuButton navButton">Paper</button>
-      <button class="menuButton navButton">Contact</button>
-      <button class="menuButton navButton">Press</button>
+      <a
+        class="menuButton navButton"
+        href="https://arxiv.org/abs/2008.00374"
+        target="__blank"
+        >Paper</a
+      >
       <nuxt-link to="/reserve-instances" class="menuButton navButton"
         >Start</nuxt-link
       >

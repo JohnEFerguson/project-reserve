@@ -9,6 +9,9 @@
         placeholder="e.g., sofa_score"
         :disabled="isReadOnly"
       />
+      <div class="ml-9 mt-9 fs-12">
+        Note: The criteria will not be saved unless you have entered a name.
+      </div>
     </div>
     <div class="flexcolumn mb-27 mt-18">
       <label class="mb-9">Criteria Type</label>
@@ -68,6 +71,13 @@
             icon="arrow-down"
             class="icon cp fs-12"
             @click="() => moveElementUp(element)"
+          />
+        </div>
+        <div v-if="!isReadOnly && criteria.elements.length > 1">
+          <font-awesome-icon
+            icon="trash"
+            class="icon ml-9 cp fs-12"
+            @click="() => deleteElement(element.order)"
           />
         </div>
       </div>
@@ -254,6 +264,16 @@ export default {
         name: '',
         order: this.criteria.elements.length + 1,
       })
+    },
+    deleteElement(order) {
+      let elOrder = 1
+      this.criteria.elements = this.criteria.elements.reduce((acc, el) => {
+        if (el.order !== order) {
+          acc.push({ ...el, order: elOrder })
+          elOrder = elOrder + 1
+        }
+        return acc
+      }, [])
     },
     updateNumBins(numBins) {
       if (numBins < 0) {

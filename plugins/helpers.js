@@ -35,18 +35,18 @@ export function downloadCSV({ content, fileName }) {
   }
 }
 
-function generateBins({ min, max }) {
-  const diff = max - min
-  const bins = []
-  for (let i = 0; i < diff; i++) {
-    bins.push({
-      order: i + 1,
-      min: min + i,
-      max: min + 1 + i,
-    })
-  }
-  return bins
-}
+// function generateBins({ min, max }) {
+//   const diff = max - min
+//   const bins = []
+//   for (let i = 0; i < diff; i++) {
+//     bins.push({
+//       order: i + 1,
+//       min: min + i,
+//       max: min + 1 + i,
+//     })
+//   }
+//   return bins
+// }
 
 export function transformCriteriaForPost(priority) {
   if (!priority) {
@@ -73,16 +73,10 @@ export function transformCriteriaForPost(priority) {
         order,
         ...pick(criteria, ['name', ...Object.keys(fields)]),
       }
-      if (
-        filteredCriteria.criteriaType === NUMERIC_TYPE &&
-        !filteredCriteria.coarsened
-      ) {
-        const bins = generateBins({
-          min: filteredCriteria.min,
-          max: filteredCriteria.max,
-        })
-        filteredCriteria.bins = bins
-        filteredCriteria.numBins = bins.length
+      if (criteria.criteriaType === CATEGORY_TYPE) {
+        filteredCriteria.elements = filteredCriteria.elements.filter(
+          ({ name }) => !!name
+        )
       }
       bucket.push(filteredCriteria)
       order = order + 1

@@ -62,6 +62,9 @@ export const mutations = {
     }
   },
   saveCategory(state, category) {
+    if (category.name) {
+      category.name = (category.name || '').toLowerCase().replace(/ /g, '_')
+    }
     if (category.priority) {
       category.priority = category.priority.map((criteria) => ({
         ...criteria,
