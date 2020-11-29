@@ -1,6 +1,11 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
 # Logs
+
+dist/
+
+electron-build/
+
 /logs
 *.log
 npm-debug.log*
@@ -62,15 +67,6 @@ typings/
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# Nuxt generate
-dist
-
 # vuepress build output
 .vuepress/dist
 
@@ -88,9 +84,6 @@ sw.*
 
 # Vim swap files
 *.swp
-
-# Local Netlify folder
-.netlify
 
 # VS Code config
 .vscode
