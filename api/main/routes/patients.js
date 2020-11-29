@@ -67,6 +67,7 @@ router.post('/patients', async (req, res) => {
           (rc) => rc.priority.id
         )
 
+
         const createdPatient = await db.patient.create(newPatient)
         newPatient.reserveCategories.forEach(async (cat) => {
           createdPatient.addReserveCategory(cat)
@@ -89,12 +90,9 @@ router.post('/patients', async (req, res) => {
           const fieldName = crit.dataValues.name
           const value = rawPat[fieldName]
 
-
-
-
           let bucket = null
 
-          if (crit.coarsened) {
+          if (crit.coarsened && value != crit.dataValues.max) {
 
             bucket = await db.numericCriteriaBucket.findOne({
               where: {
@@ -102,6 +100,18 @@ router.post('/patients', async (req, res) => {
                 [Op.and]: [
                   { min: { [Op.lte]: value } },
                   { max: { [Op.gt]: value } },
+                ],
+              },
+            })
+
+          } else if (crit.coarsened) {
+
+            bucket = await db.numericCriteriaBucket.findOne({
+              where: {
+                numeric_criterium_id: critId,
+                [Op.and]: [
+                  { min: { [Op.lte]: value } },
+                  { max: { [Op.gte]: value } },
                 ],
               },
             })
