@@ -213,7 +213,7 @@ export function createStore() {
         });
         state.currentConfig.reserveCategories = movedCategories;
       },
-      deleteCategory(state, category) {},
+      deleteCategory(state, category) { },
       addReserveInstance(state, reserveInstance) {
         state.reserveInstances = [
           ...(state.reserveInstances || []),

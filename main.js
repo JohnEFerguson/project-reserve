@@ -6,19 +6,19 @@ const server = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const compression = require("compression");
-const db = require("./src/api/main/config/db");
-const { STATUS_UPDATE, emitter } = require("./src/socketConstants");
+const db = require(path.join(__dirname, "/src/api/main/config/db"));
+const { STATUS_UPDATE, emitter } = require(path.join(__dirname, "/src/socketConstants"));
 
-const patientsRoute = require("./src/api/main/routes/patients");
-const configurationsRoute = require("./src/api/main/routes/configurations");
-const sourceFilesRoute = require("./src/api/main/routes/source_files");
+const patientsRoute = require(path.join(__dirname, "/src/api/main/routes/patients"));
+const configurationsRoute = require(path.join(__dirname, "/src/api/main/routes/configurations"));
+const sourceFilesRoute = require(path.join(__dirname, "/src/api/main/routes/source_files"));
 
 const serverInfo =
   `express/${require("express/package.json").version} ` +
   `vue-server-renderer/${require("vue-server-renderer/package.json").version}`;
 
 const resolve = (file) => path.resolve(__dirname, file);
-const isProd = process.env.NODE_ENV === "production";
+const isProd = true // process.env.NODE_ENV === "production";
 
 server.db = db;
 
@@ -48,10 +48,6 @@ server.use(configurationsRoute);
 server.use(sourceFilesRoute);
 
 const { createBundleRenderer } = require("vue-server-renderer");
-
-const template = require("fs").readFileSync("./index.template.html", "utf-8");
-const serverBundle = require("./dist/vue-ssr-server-bundle.json");
-const clientManifest = require("./dist/vue-ssr-client-manifest.json");
 
 function createRenderer(bundle, options) {
   // https://github.com/vuejs/vue/blob/dev/packages/vue-server-renderer/README.md#why-use-bundlerenderer
@@ -84,7 +80,7 @@ if (isProd) {
 } else {
   // In development: setup the dev server with watch and hot-reload,
   // and create a new renderer on bundle / index template update.
-  readyPromise = require("./build/setup-dev-server")(
+  readyPromise = require(path.join(__dirname, "./build/setup-dev-server"))(
     server,
     templatePath,
     (bundle, options) => {
@@ -138,8 +134,8 @@ server.get(
   isProd
     ? render
     : (req, res) => {
-        readyPromise.then(() => render(req, res));
-      }
+      readyPromise.then(() => render(req, res));
+    }
 );
 
 const httpServer = http.createServer(server);
@@ -157,4 +153,52 @@ clientSocket.on("connection", (socket) => {
   socket.on(STATUS_UPDATE, (statusObj) => {
     socket.emit(STATUS_UPDATE, statusObj);
   });
+});
+
+/**
+ * 
+ * ELECTRON
+ * 
+ */
+
+const { app, BrowserWindow } = require('electron');
+
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+
+
+
+const createWindow = () => {
+  // Create the browser window.
+  const mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+  });
+
+  // and load the index.html of the app.
+  mainWindow.loadURL("http://localhost:8080/");
+
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools();
+};
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('ready', createWindow);
+
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });

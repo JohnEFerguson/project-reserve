@@ -38,7 +38,7 @@ router.get("/sourceFiles/:id/patients", async (req, res) => {
   if (req.query.givenUnit)
     filterLosers += `and ${
       req.query.givenUnit === "false" ? "not" : ""
-    } given_unit`;
+      } given_unit`;
 
   return res.json(await getPatientsWithAttributes(db, id, filterLosers));
 });
