@@ -76,14 +76,14 @@
 </template>
 
 <script>
-import path from "path-browserify";
-import { unparse } from "papaparse";
+import path from 'path-browserify'
+import { unparse } from 'papaparse'
 import {
   transformCriteriaForDisplay,
   downloadCSV,
   removeIds,
-} from "../plugins/helpers";
-import ViewConfigModal from "../components/ViewConfigModal.vue";
+} from '../plugins/helpers'
+import ViewConfigModal from '../components/ViewConfigModal.vue'
 
 export default {
   components: { ViewConfigModal },
@@ -91,83 +91,86 @@ export default {
     return {
       viewConfigModalOpen: false,
       configToView: null,
-    };
+    }
   },
   computed: {
     reserveInstances() {
       return (this.$store.state.reserveInstances || []).map((instance) => {
-        const dateLoaded = new Date(instance.dateLoaded);
+        const dateLoaded = new Date(instance.dateLoaded)
         return {
           ...instance,
           dateLoaded: `${dateLoaded.toLocaleDateString()} ${dateLoaded.toLocaleTimeString()}`,
-        };
-      });
+        }
+      })
     },
   },
   mounted() {
-    this.$store.dispatch("getReserveInstances");
+    this.$store.dispatch('getReserveInstances')
   },
   serverPrefetch() {
-    this.$store.dispatch("getReserveInstances");
+    this.$store.dispatch('getReserveInstances')
   },
   methods: {
     initConfig() {
-      this.$store.commit("resetConfig");
+      this.$store.commit('resetConfig')
     },
     closeViewConfigModal() {
-      this.viewConfigModalOpen = false;
-      this.configToView = null;
+      this.viewConfigModalOpen = false
+      this.configToView = null
     },
     toTitleCase(str) {
       return str.replace(/\w\S*/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      });
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      })
     },
     async fetchConfig(instance) {
       const configRes = await fetch(
         `/configurations/${instance.configurationId}`
-      );
-      const config = await configRes.json();
+      )
+      const config = await configRes.json()
       return {
         ...config,
         reserveCategories: config.reserveCategories.reduce((acc, category) => {
           const formattedCategory = {
             ...category,
             priority: transformCriteriaForDisplay(category.priority),
-          };
-          acc.push(formattedCategory);
-          return acc;
+          }
+          acc.push(formattedCategory)
+          return acc
         }, []),
-      };
+      }
     },
     async startFromOldConfig(instance) {
-      const config = await this.fetchConfig(instance);
-      removeIds(config);
-      this.$store.commit("setConfig", config);
-      this.$nextTick(() => {
-        this.$store.dispatch("postConfig");
-      });
+      const config = await this.fetchConfig(instance)
+      removeIds(config)
+      this.$store.commit('setConfig', config)
+      this.$nextTick(async () => {
+        try {
+          await this.$store.dispatch('postConfig')
+          this.$router.push('/finish')
+        } catch (e) {}
+      })
     },
     async viewConfig(instance) {
-      this.configToView = await this.fetchConfig(instance);
+      this.configToView = await this.fetchConfig(instance)
       this.$nextTick(() => {
-        this.viewConfigModalOpen = true;
-      });
+        this.viewConfigModalOpen = true
+      })
     },
     sortByLabel(priority) {
-      const sortOrders = (priority || []).map((cat) => `by ${cat.name}`);
+      const sortOrders = (priority || []).map((cat) => `by ${cat.name}`)
       if ((sortOrders || []).length < 3) {
-        sortOrders.push("by random lottery tiebreaker");
+        sortOrders.push('by random lottery tiebreaker')
       }
-      return `Sort ${(sortOrders || []).join(", ")}`;
+      return `Sort ${(sortOrders || []).join(', ')}`
     },
     async export({ instance, patients, suffix }) {
       const configurationRes = await fetch(
         `/configurations/${instance.configurationId}`
-      );
-      const configuration = await configurationRes.json();
-      const parsedFileName = path.parse(instance.name).name;
-      const today = new Date();
+      )
+      const configuration = await configurationRes.json()
+      const parsedFileName = path.parse(instance.name).name
+      const today = new Date()
       downloadCSV({
         content: unparse([
           [
@@ -177,9 +180,9 @@ export default {
           ],
           [],
           [`Number Allocated: ${configuration.supply}`],
-          ["Reserve Categories"],
+          ['Reserve Categories'],
           ...configuration.reserveCategories.map((category) => [
-            "",
+            '',
             `${category.name} (size = ${
               category.size
             }, priority order: ${this.sortByLabel(
@@ -191,33 +194,33 @@ export default {
           [],
           patients.length
             ? Object.keys(patients[0])
-            : ["No patients to display"],
+            : ['No patients to display'],
           ...patients.map(Object.values),
         ]),
         fileName: `${parsedFileName}${suffix}`,
-      });
+      })
     },
     async exportAll(instance) {
-      const patientsRes = await fetch(`/sourceFiles/${instance.id}/patients`);
-      const patients = await patientsRes.json();
-      this.export({ instance, patients, suffix: "_all_patients" });
+      const patientsRes = await fetch(`/sourceFiles/${instance.id}/patients`)
+      const patients = await patientsRes.json()
+      this.export({ instance, patients, suffix: '_all_patients' })
     },
     async exportWinners(instance) {
       const winnersRes = await fetch(
         `/sourceFiles/${instance.id}/patients?givenUnit=true`
-      );
-      const patients = await winnersRes.json();
-      this.export({ instance, patients, suffix: "_recipients" });
+      )
+      const patients = await winnersRes.json()
+      this.export({ instance, patients, suffix: '_recipients' })
     },
     async exportLosers(instance) {
       const losersRes = await fetch(
         `/sourceFiles/${instance.id}/patients?givenUnit=false`
-      );
-      const patients = await losersRes.json();
-      this.export({ instance, patients, suffix: "_non_recipients" });
+      )
+      const patients = await losersRes.json()
+      this.export({ instance, patients, suffix: '_non_recipients' })
     },
   },
-};
+}
 </script>
 
 <style scoped lang="stylus">

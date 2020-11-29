@@ -31,7 +31,7 @@
             <span class="rowCell">{{ category.size }}</span>
             <span class="rowCell">{{ calcSupplyPercent(category.size) }}</span>
             <button class="p9" @click="() => viewPriorityOrder(category)">
-              {{ "Priority" }}
+              {{ 'Priority' }}
             </button>
             <span class="actionButtons">
               <font-awesome-icon icon="trash" class="icon" />
@@ -74,16 +74,16 @@
 </template>
 
 <script>
-import EditReserveCategoryModal from "../components/EditReserveCategoryModal.vue";
-import ViewPriorityOrderModal from "../components/ViewPriorityOrderModal.vue";
-import ConfigLayout from "../layouts/configuration-screen.vue";
+import EditReserveCategoryModal from '../components/EditReserveCategoryModal.vue'
+import ViewPriorityOrderModal from '../components/ViewPriorityOrderModal.vue'
+import ConfigLayout from '../layouts/configuration-screen.vue'
 
 function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+  return JSON.parse(JSON.stringify(obj))
 }
 
 export default {
-  middleware: "has-category",
+  middleware: 'has-category',
   components: {
     EditReserveCategoryModal,
     ViewPriorityOrderModal,
@@ -92,66 +92,69 @@ export default {
   data() {
     return {
       editReserveCategoryModalOpen: false,
-      editReserveCategoryModalMode: "",
+      editReserveCategoryModalMode: '',
       categoryToEdit: null,
       viewPriorityOrderModalOpen: false,
       reserveCategoryToView: null,
-    };
+    }
   },
   computed: {
     totalSupply() {
-      return this.$store.state.currentConfig.supply;
+      return this.$store.state.currentConfig.supply
     },
     allocationText() {
-      return `${this.$store.state.currentConfig.supply} ${this.$store.state.currentConfig.unitType}`;
+      return `${this.$store.state.currentConfig.supply} ${this.$store.state.currentConfig.unitType}`
     },
     reserveCategories() {
-      return this.$store.state.currentConfig.reserveCategories;
+      return this.$store.state.currentConfig.reserveCategories
     },
   },
   methods: {
     openAddReserveCategoryModal() {
-      this.editReserveCategoryModalMode = "add";
-      this.editReserveCategoryModalOpen = true;
+      this.editReserveCategoryModalMode = 'add'
+      this.editReserveCategoryModalOpen = true
     },
     closeEditReserveCategoryModal() {
-      this.editReserveCategoryModalOpen = false;
-      this.categoryToEdit = null;
+      this.editReserveCategoryModalOpen = false
+      this.categoryToEdit = null
     },
     closeViewPriorityOrderModal() {
-      this.viewPriorityOrderModalOpen = false;
-      this.reserveCategoryToView = null;
+      this.viewPriorityOrderModalOpen = false
+      this.reserveCategoryToView = null
     },
     viewPriorityOrder(category) {
-      this.reserveCategoryToView = category;
+      this.reserveCategoryToView = category
       this.$nextTick(() => {
-        this.viewPriorityOrderModalOpen = true;
-      });
+        this.viewPriorityOrderModalOpen = true
+      })
     },
     editCategory(category) {
-      this.editReserveCategoryModalMode = "edit";
-      this.categoryToEdit = deepClone(category);
+      this.editReserveCategoryModalMode = 'edit'
+      this.categoryToEdit = deepClone(category)
       this.$nextTick(() => {
-        this.editReserveCategoryModalOpen = true;
-      });
+        this.editReserveCategoryModalOpen = true
+      })
     },
     moveCategoryUp(category) {
-      this.$store.commit("moveCategory", { category, direction: "up" });
+      this.$store.commit('moveCategory', { category, direction: 'up' })
     },
     moveCategoryDown(category) {
-      this.$store.commit("moveCategory", { category, direction: "down" });
+      this.$store.commit('moveCategory', { category, direction: 'down' })
     },
-    postConfig() {
-      this.$store.dispatch("postConfig");
+    async postConfig() {
+      try {
+        await this.$store.dispatch('postConfig')
+        this.$router.push('/finish')
+      } catch (e) {}
     },
     calcSupplyPercent(size) {
-      const percent = (size / this.totalSupply) * 100;
+      const percent = (size / this.totalSupply) * 100
       return percent % 1 > 0.5
         ? `${Math.ceil(percent)}%`
-        : `${Math.floor(percent)}%`;
+        : `${Math.floor(percent)}%`
     },
   },
-};
+}
 </script>
 
 <style scoped lang="stylus">

@@ -28,55 +28,55 @@
 </template>
 
 <script>
-import ViewPriorityOrderModal from "../components/ViewPriorityOrderModal.vue";
-import ConfigSummary from "../components/ConfigSummary.vue";
-import ConfigLayout from "../layouts/configuration-screen.vue";
+import ViewPriorityOrderModal from '../components/ViewPriorityOrderModal.vue'
+import ConfigSummary from '../components/ConfigSummary.vue'
+import ConfigLayout from '../layouts/configuration-screen.vue'
 
 export default {
-  middleware: "has-category",
+  middleware: 'has-category',
   components: { ViewPriorityOrderModal, ConfigSummary, ConfigLayout },
   data() {
     return {
       viewPriorityOrderModalOpen: false,
       reserveCategoryToView: null,
-    };
+    }
   },
   computed: {
     supply() {
-      return this.$store.state.currentConfig.supply;
+      return this.$store.state.currentConfig.supply
     },
     unitType() {
-      return this.$store.state.currentConfig.unitType;
+      return this.$store.state.currentConfig.unitType
     },
     reserveCategories() {
-      return this.$store.state.currentConfig.reserveCategories;
+      return this.$store.state.currentConfig.reserveCategories
     },
     requiredFields() {
-      return this.$store.state.currentConfig.requiredFields;
+      return this.$store.state.currentConfig.requiredFields
     },
     currentConfig() {
-      return this.$store.state.currentConfig;
+      return this.$store.state.currentConfig
     },
   },
   methods: {
     closeViewPriorityOrderModal() {
-      this.viewPriorityOrderModalOpen = false;
-      this.reserveCategoryToView = null;
+      this.viewPriorityOrderModalOpen = false
+      this.reserveCategoryToView = null
     },
     viewPriorityOrder(category) {
-      this.reserveCategoryToView = category;
+      this.reserveCategoryToView = category
       this.$nextTick(() => {
-        this.viewPriorityOrderModalOpen = true;
-      });
+        this.viewPriorityOrderModalOpen = true
+      })
     },
     deleteCurrentConfig() {
-      this.$store.dispatch("deleteCurrentConfig");
+      this.$store.dispatch('deleteCurrentConfig')
     },
   },
-};
+}
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .finishContainer {
   flex: 1;
   margin: auto;

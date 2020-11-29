@@ -40,52 +40,52 @@
 </template>
 
 <script>
-import ConfigLayout from "../layouts/configuration-screen.vue";
+import ConfigLayout from '../layouts/configuration-screen.vue'
 
 export default {
   components: { ConfigLayout },
   data() {
     return {
       hasSizeError: false,
-    };
+    }
   },
   computed: {
     isNextButtonDisabled() {
-      return !this.unitType || !this.supply || this.hasSizeError;
+      return !this.unitType || !this.supply || this.hasSizeError
     },
     unitType: {
       get() {
-        return this.$store.state.currentConfig.unitType;
+        return this.$store.state.currentConfig.unitType
       },
       set(val) {
-        this.$store.commit("updateUnitType", val);
+        this.$store.commit('updateUnitType', val)
       },
     },
     supply: {
       get() {
-        return this.$store.state.currentConfig.supply;
+        return this.$store.state.currentConfig.supply
       },
       set(val) {
-        this.$store.commit("updateSupply", val);
+        this.$store.commit('updateSupply', val)
       },
     },
   },
   methods: {
     generateDefaultCategory() {
       if (this.isNextButtonDisabled) {
-        return;
+        return
       }
-      this.$store.commit("generateDefaultCategory");
+      this.$store.commit('generateDefaultCategory')
       this.$nextTick(() => {
-        this.$router.push("/specify-reserve");
-      });
+        this.$router.push('/specify-reserve')
+      })
     },
     validateCategorySize() {
       this.hasSizeError =
-        parseInt(this.supply) > 10000 || parseInt(this.supply) < 0;
+        parseInt(this.supply) > 10000 || parseInt(this.supply) < 0
     },
   },
-};
+}
 </script>
 
 <style scoped lang="stylus">
