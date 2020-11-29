@@ -24,164 +24,163 @@
       </div>
     </div>
     <div class="navButtons">
-      <nuxt-link to="/finish" class="navButton">Back</nuxt-link>
-      <nuxt-link
+      <router-link to="/finish" class="navButton">Back</router-link>
+      <router-link
         :to="!successMessage ? '/load-data' : '/reserve-instances'"
         :class="['navButton', { isDisabled: !successMessage }]"
         @click.native="setReserveInstance"
-        >Next</nuxt-link
+        >Next</router-link
       >
     </div>
   </div>
 </template>
 
 <script>
-import { unparse, parse } from "papaparse";
-import { downloadCSV } from "../plugins/helpers";
+import { unparse, parse } from 'papaparse'
+import { downloadCSV } from '../plugins/helpers'
 
 export default {
-  middleware: "has-category",
   data() {
     return {
       errorMessage: null,
       successMessage: null,
       sourceFile: null,
-    };
+    }
   },
   computed: {
     requiredFields() {
-      return this.$store.state.currentConfig.requiredFields;
+      return this.$store.state.currentConfig.requiredFields
     },
     currentConfig() {
-      return this.$store.state.currentConfig;
+      return this.$store.state.currentConfig
     },
   },
   mounted() {
-    this.$refs.fileUpload.addEventListener("change", () => {
-      const file = this.$refs.fileUpload.files[0];
+    this.$refs.fileUpload.addEventListener('change', () => {
+      const file = this.$refs.fileUpload.files[0]
       if (file) {
         parse(file, {
           complete: (res, file) => {
-            this.parseUploadedCsv(res, file);
+            this.parseUploadedCsv(res, file)
           },
-        });
+        })
       }
-    });
+    })
   },
   methods: {
     setReserveInstance() {
-      this.$store.dispatch("processSourceFile", this.sourceFile.id);
+      this.$store.dispatch('processSourceFile', this.sourceFile.id)
     },
     downloadCsvTemplate() {
       const csv = unparse({
         fields: this.requiredFields.map(({ name }) => name),
-      });
+      })
       downloadCSV({
         content: csv,
         fileName: `${new Date().toLocaleDateString()}_${
           this.currentConfig.unitType
         }_${this.currentConfig.supply}`,
-      });
+      })
     },
     async parseUploadedCsv(res, file) {
       // validate data
-      const { data, errors } = res;
+      const { data, errors } = res
       if (errors.length) {
-        this.errorMessage = errors;
+        this.errorMessage = errors
       }
-      const [fieldNames, ...patients] = data;
-      let patientObjs;
+      const [fieldNames, ...patients] = data
+      let patientObjs
       try {
         const dataTypeMap = this.requiredFields.reduce(
           (acc, { name, dataType }) => {
-            const fieldIndex = fieldNames.indexOf(name);
+            const fieldIndex = fieldNames.indexOf(name)
             if (fieldIndex < 0) {
               throw new Error(
                 `Could not find column for required field ${name} in ${fieldNames.join(
-                  ", "
+                  ', '
                 )}`
-              );
+              )
             }
-            acc[fieldIndex] = { name, dataType };
-            return acc;
+            acc[fieldIndex] = { name, dataType }
+            return acc
           },
           {}
-        );
-        const recipientIds = [];
+        )
+        const recipientIds = []
         patientObjs = patients.map((patient) => {
           return patient.reduce((acc, field, index) => {
-            const { name, dataType, required } = dataTypeMap[index];
-            const errorMessage = `Patient ${index} has an invalid value for ${name}: ${field}.`;
-            let realFieldValue = field;
+            const { name, dataType, required } = dataTypeMap[index]
+            const errorMessage = `Patient ${index} has an invalid value for ${name}: ${field}.`
+            let realFieldValue = field
             if (required && !realFieldValue) {
               throw new Error(
                 `${errorMessage} This field is required but is empty.`
-              );
+              )
             }
-            if (name === "recipient_id") {
+            if (name === 'recipient_id') {
               if (recipientIds.includes(realFieldValue)) {
                 throw new Error(
                   `${errorMessage} Duplicate recipient ID: ${realFieldValue}`
-                );
+                )
               } else {
-                recipientIds.push(realFieldValue);
+                recipientIds.push(realFieldValue)
               }
             }
 
             switch (dataType) {
-              case "BOOLEAN": {
-                const fieldUC = field.toUpperCase();
-                if (!["TRUE", "FALSE"].includes(fieldUC)) {
+              case 'BOOLEAN': {
+                const fieldUC = field.toUpperCase()
+                if (!['TRUE', 'FALSE'].includes(fieldUC)) {
                   throw new Error(
                     `${errorMessage} Please ensure this is a true/false value`
-                  );
+                  )
                 }
-                realFieldValue = fieldUC === "TRUE";
-                break;
+                realFieldValue = fieldUC === 'TRUE'
+                break
               }
-              case "NUMBER": {
-                let numberVal;
+              case 'NUMBER': {
+                let numberVal
                 try {
-                  numberVal = parseFloat(field);
-                } catch {
+                  numberVal = parseFloat(field)
+                } catch (_) {
                   throw new Error(
                     `${errorMessage} Please ensure this is a real number`
-                  );
+                  )
                 }
-                realFieldValue = numberVal;
-                break;
+                realFieldValue = numberVal
+                break
               }
               default:
-              case "STRING":
+              case 'STRING':
                 // data will always be a string?
-                break;
+                break
             }
-            acc[name] = realFieldValue;
-            return acc;
-          }, {});
-        });
+            acc[name] = realFieldValue
+            return acc
+          }, {})
+        })
       } catch (e) {
-        this.errorMessage = e;
-        this.$refs.fileUpload.value = "";
-        return;
+        this.errorMessage = e
+        this.$refs.fileUpload.value = ''
+        return
       }
 
       // POST { name: file name }
-      const sourceFileRes = await fetch("/api/sourceFiles", {
-        method: "POST",
+      const sourceFileRes = await fetch('/sourceFiles', {
+        method: 'POST',
         headers: {
-          "content-type": "application/json",
+          'content-type': 'application/json',
         },
         body: JSON.stringify({
           configurationId: this.currentConfig.id,
           name: file.name,
         }),
-      });
-      const sourceFile = await sourceFileRes.json();
-      await fetch("/api/patients", {
-        method: "POST",
+      })
+      const sourceFile = await sourceFileRes.json()
+      await fetch('/patients', {
+        method: 'POST',
         headers: {
-          "content-type": "application/json",
+          'content-type': 'application/json',
         },
         body: JSON.stringify(
           patientObjs.map((patientInfo) => ({
@@ -190,16 +189,16 @@ export default {
             ...patientInfo,
           }))
         ),
-      });
-      this.errorMessage = null;
-      this.sourceFile = sourceFile;
-      this.successMessage = `Successfully loaded ${sourceFile.name}`;
+      })
+      this.errorMessage = null
+      this.sourceFile = sourceFile
+      this.successMessage = `Successfully loaded ${sourceFile.name}`
     },
   },
-};
+}
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="stylus">
 .container {
   display: flex;
   height: 100vh;

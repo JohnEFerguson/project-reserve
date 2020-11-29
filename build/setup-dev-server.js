@@ -3,6 +3,7 @@ const path = require('path')
 const MFS = require('memory-fs')
 const webpack = require('webpack')
 const chokidar = require('chokidar')
+// const { ipcRenderer } = require('electron')
 const clientConfig = require('./webpack.client.config')
 const serverConfig = require('./webpack.server.config')
 

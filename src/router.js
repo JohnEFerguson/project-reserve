@@ -20,14 +20,14 @@ export function createRouter() {
         path: '/specify-reserve',
         component: () => import('./public/pages/specify-reserve.vue'),
       },
-      //   {
-      //     path: "/finish",
-      //     component: () => import("~/src/pages/finish.vue"),
-      //   },
-      //   {
-      //     path: "/load-data",
-      //     component: () => import("~/src/pages/load-data.vue"),
-      //   },
+      {
+        path: '/finish',
+        component: () => import('./public/pages/finish.vue'),
+      },
+      {
+        path: '/load-data',
+        component: () => import('./public/pages/load-data.vue'),
+      },
     ],
   })
 }

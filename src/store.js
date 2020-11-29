@@ -123,7 +123,6 @@ export function createStore() {
         )
         const requiredFields = await requiredFieldsRes.json()
         commit('setRequiredFields', requiredFields)
-        this.app.router.push('/finish')
       },
     },
 

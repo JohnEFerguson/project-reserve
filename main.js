@@ -6,6 +6,7 @@ const server = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const compression = require('compression')
+const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron')
 
 const db = require(path.join(__dirname, '/src/api/main/config/db'))
 const { STATUS_UPDATE, emitter } = require(path.join(
@@ -31,7 +32,7 @@ const serverInfo =
   `vue-server-renderer/${require('vue-server-renderer/package.json').version}`
 
 const resolve = (file) => path.resolve(__dirname, file)
-const isProd = true // process.env.NODE_ENV === "production";
+const isProd = process.env.NODE_ENV !== 'dev'
 
 server.db = db
 
@@ -74,6 +75,27 @@ function createRenderer(bundle, options) {
     })
   )
 }
+
+let mainWindow
+
+const createWindow = () => {
+  // Create the browser window.
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+  })
+
+  // and load the index.html of the app.
+  mainWindow.loadURL('http://localhost:8080/')
+
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools()
+}
+
+// ipcMain.on('re-render', () => {
+//   mainWindow.loadURL('http://localhost:8080/')
+// })
+
 let renderer
 let readyPromise
 const templatePath = resolve('./index.template.html')
@@ -174,24 +196,7 @@ clientSocket.on('connection', (socket) => {
  *
  */
 
-const { app, BrowserWindow } = require('electron')
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-
-const createWindow = () => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-  })
-
-  // and load the index.html of the app.
-  mainWindow.loadURL('http://localhost:8080/')
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-}
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
