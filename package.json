@@ -1,12 +1,13 @@
 {
-  "name": "project-reserve-stripped",
+  "name": "project-reserve",
   "version": "1.0.0",
-  "description": "project reserve without nuxt lol",
+  "description": "Electron app implementation of Project Reserve",
   "main": "main.js",
-  "author": "sam grund & jack ferguson",
+  "author": "Samuel Grund and Jack Ferguson",
   "license": "MIT",
   "private": true,
   "build": {
+    "productName": "Project Reserve",
     "appId": "your.id",
     "mac": {
       "category": "your.app.category.type"
@@ -26,7 +27,7 @@
   "scripts": {
     "dev": "node -r dotenv/config main",
     "start": "cross-env NODE_ENV=production node -r dotenv/config main",
-    "start:electron": "NODE_ENV=dev electron .", 
+    "start:electron": "NODE_ENV=dev electron .",
     "build": "rimraf dist && npm run build:client && npm run build:server",
     "build:client": "cross-env NODE_ENV=production webpack --config build/webpack.client.config.js --progress",
     "build:server": "cross-env NODE_ENV=production webpack --config build/webpack.server.config.js --progress",
