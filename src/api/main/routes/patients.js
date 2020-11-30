@@ -31,12 +31,9 @@ router.post("/patients", async (req, res) => {
       rawPatients.map(async (rawPat) => {
         const configurationId = rawPat.configurationId;
 
-        const rand_number =
-          rawPat.random_number &&
-            (Number.isInteger(rawPat.random_number) ||
-              Number.isFloat(rawPat.random_number))
-            ? rawPat.random_number
-            : Math.random() * 100000;
+        rawPat['generated_random_number'] = rawPat.random_number && (Number.isInteger(rawPat.random_number) || Number.isFloat(rawPat.random_number))
+
+        const rand_number = rawPat['generated_random_number'] ? rawPat.random_number : Math.random() * 100000
 
         const newPatient = {
           name: rawPat.name,

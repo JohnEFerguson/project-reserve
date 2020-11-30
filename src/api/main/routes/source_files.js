@@ -177,7 +177,7 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
     (
       await db.sequelize.query(
         `
-    select name, given_unit, rand_number, info, group_allocated_under, id
+    select name, given_unit, rand_number, info, group_allocated_under 
     from patient 
     where source_file_id = ${sourceFileId} ${filterLosers};
     `,
@@ -188,7 +188,10 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
       patObj.random_number = p.rand_number;
       patObj.allocated_status = p.given_unit === 1;
       patObj.group_allocated_under = p.group_allocated_under;
-      patObj.id = p.id;
+
+      delete patObj.configurationId
+      delete patObj.sourceFileId
+
       return patObj;
     })
   );
