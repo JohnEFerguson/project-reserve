@@ -39,7 +39,7 @@ function getBaseUrl() {
     process.env.BASE_URL !== 'undefined' &&
     typeof process.env.BASE_URL !== undefined
       ? process.env.BASE_URL
-      : ''
+      : 'http://localhost:8019'
   return url
 }
 

@@ -30,6 +30,7 @@
                   inProgress: instance.status === 'IN_PROGRESS',
                   finished: instance.status === 'FINISHED',
                   error: instance.status === 'ERROR',
+                  ready: instance.status === 'READY_TO_PROCESS',
                 },
               ]"
               >{{ toTitleCase(instance.status) }}</span
@@ -119,7 +120,7 @@ export default {
       this.configToView = null
     },
     toTitleCase(str) {
-      return str.replace(/\w\S*/g, function (txt) {
+      return str.replace(/_/g, ' ').replace(/\w\S*/g, function (txt) {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
       })
     },
@@ -195,7 +196,9 @@ export default {
           patients.length
             ? Object.keys(patients[0])
             : ['No patients to display'],
-          ...patients.map(Object.values),
+          ...patients
+            .filter((patient) => !!patient.recipient_id)
+            .map(Object.values),
         ]),
         fileName: `${parsedFileName}${suffix}`,
       })
@@ -288,6 +291,9 @@ export default {
   }
   &.inProgress {
     background-color: #ffa947;
+  }
+  &.ready {
+    background-color: #63d4ff;
   }
 }
 .label {
