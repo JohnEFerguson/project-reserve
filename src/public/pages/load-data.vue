@@ -45,6 +45,7 @@ export default {
       errorMessage: null,
       successMessage: null,
       sourceFile: null,
+      patientObjs: null,
     }
   },
   computed: {
@@ -68,8 +69,34 @@ export default {
     })
   },
   methods: {
-    setReserveInstance() {
-      this.$store.dispatch('processSourceFile', this.sourceFile.id)
+    async setReserveInstance() {
+      if (this.successMessage) {
+        const sourceFileRes = await fetch('/sourceFiles', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            configurationId: this.currentConfig.id,
+            name: this.sourceFile.name,
+          }),
+        })
+        const sourceFile = await sourceFileRes.json()
+        await fetch('/patients', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(
+            this.patientObjs.map((patientInfo) => ({
+              configurationId: this.currentConfig.id,
+              sourceFileId: sourceFile.id,
+              ...patientInfo,
+            }))
+          ),
+        })
+        this.$store.dispatch('processSourceFile', sourceFile.id)
+      }
     },
     downloadCsvTemplate() {
       const csv = unparse({
@@ -92,7 +119,7 @@ export default {
       let patientObjs
       try {
         const dataTypeMap = this.requiredFields.reduce(
-          (acc, { name, dataType }) => {
+          (acc, { name, dataType, required }) => {
             const fieldIndex = fieldNames.indexOf(name)
             if (fieldIndex < 0) {
               throw new Error(
@@ -101,7 +128,7 @@ export default {
                 )}`
               )
             }
-            acc[fieldIndex] = { name, dataType }
+            acc[fieldIndex] = { name, dataType, required }
             return acc
           },
           {}
@@ -109,7 +136,11 @@ export default {
         const recipientIds = []
         patientObjs = patients.map((patient) => {
           return patient.reduce((acc, field, index) => {
-            const { name, dataType, required } = dataTypeMap[index]
+            const { name, dataType, required } = dataTypeMap[index] || {
+              name: fieldNames[index],
+              dataType: 'STRING',
+              required: false,
+            }
             const errorMessage = `Patient ${index} has an invalid value for ${name}: ${field}.`
             let realFieldValue = field
             if (required && !realFieldValue) {
@@ -164,35 +195,10 @@ export default {
         this.$refs.fileUpload.value = ''
         return
       }
-
-      // POST { name: file name }
-      const sourceFileRes = await fetch('/sourceFiles', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          configurationId: this.currentConfig.id,
-          name: file.name,
-        }),
-      })
-      const sourceFile = await sourceFileRes.json()
-      await fetch('/patients', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify(
-          patientObjs.map((patientInfo) => ({
-            configurationId: this.currentConfig.id,
-            sourceFileId: sourceFile.id,
-            ...patientInfo,
-          }))
-        ),
-      })
       this.errorMessage = null
-      this.sourceFile = sourceFile
-      this.successMessage = `Successfully loaded ${sourceFile.name}`
+      this.sourceFile = file
+      this.patientObjs = patientObjs
+      this.successMessage = `Successfully loaded ${file.name}`
     },
   },
 }

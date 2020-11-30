@@ -6,7 +6,7 @@ const server = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const compression = require('compression')
-const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron')
+const { app, BrowserWindow } = require('electron')
 
 const db = require(path.join(__dirname, '/src/api/main/config/db'))
 const { STATUS_UPDATE, emitter } = require(path.join(
@@ -75,26 +75,6 @@ function createRenderer(bundle, options) {
     })
   )
 }
-
-let mainWindow
-
-const createWindow = () => {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-  })
-
-  // and load the index.html of the app.
-  mainWindow.loadURL('http://localhost:8080/')
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-}
-
-// ipcMain.on('re-render', () => {
-//   mainWindow.loadURL('http://localhost:8080/')
-// })
 
 let renderer
 let readyPromise
@@ -176,8 +156,8 @@ server.get(
 const httpServer = http.createServer(server)
 const io = require('socket.io')(httpServer)
 
-httpServer.listen(8080, () => {
-  console.log('Server listening on port 8080')
+httpServer.listen(8019, () => {
+  console.log('Server listening on port 8019')
 })
 
 const clientSocket = io.of('/connection/client')
@@ -196,6 +176,26 @@ clientSocket.on('connection', (socket) => {
  *
  */
 
+let mainWindow
+
+const createWindow = () => {
+  // Create the browser window.
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+  })
+
+  // and load the index.html of the app.
+  mainWindow.loadURL('http://localhost:8019/')
+
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools()
+}
+
+// ipcMain.on('re-render', () => {
+//   mainWindow.loadURL('http://localhost:8019/')
+// })
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -210,6 +210,12 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+// app.on('open-file', () => {
+//   if (BrowserWindow.getAllWindows().length === 0) {
+//     createWindow()
+//   }
+// })
 
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
