@@ -2,8 +2,6 @@
 
 module.exports = function (storagePath) {
 
-  console.log(storagePath)
-
   const Sequelize = require('sequelize')
   const env = require('./env')
   const sequelize = new Sequelize(
@@ -58,7 +56,6 @@ module.exports = function (storagePath) {
   db.configuration.hasMany(db.sourceFile, { foreignKey: { allowNull: false } })
   db.sourceFile.belongsTo(db.configuration)
 
-  // db.patient.hasMany(db.reserveCategory)
   db.configuration.reserveCategories = db.configuration.hasMany(
     db.reserveCategory,
     { as: 'reserveCategories' }
