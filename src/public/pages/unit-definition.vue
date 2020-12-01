@@ -1,8 +1,18 @@
 <template>
   <ConfigLayout>
+    <CopyModal
+      v-if="copyToShow"
+      :copy="copyToShow"
+      :on-close="closeCopyModal"
+    />
     <div class="container">
       <div class="inputRow mb-54">
-        <label for="unitTypeInput">What unit is being allocated?</label>
+        <label for="unitTypeInput"
+          >What unit is being allocated?<font-awesome-icon
+            icon="info-circle"
+            class="icon ml-9"
+            @click="() => setCopyToShow('unitType')"
+        /></label>
         <input
           v-model="unitType"
           name="unitTypeInput"
@@ -11,7 +21,12 @@
       </div>
       <div class="mb-54">
         <div class="inputRow">
-          <label for="supplyInput">How many units are being allocated?</label>
+          <label for="supplyInput"
+            >How many units are being allocated?<font-awesome-icon
+              icon="info-circle"
+              class="icon ml-9"
+              @click="() => setCopyToShow('unitAllocation')"
+          /></label>
           <input
             v-model="supply"
             name="supplyInput"
@@ -41,12 +56,15 @@
 
 <script>
 import ConfigLayout from '../layouts/configuration-screen.vue'
+import CopyModal from '../components/CopyModal.vue'
+import { unitDefinitionCopyMap } from '../components/constants'
 
 export default {
-  components: { ConfigLayout },
+  components: { ConfigLayout, CopyModal },
   data() {
     return {
       hasSizeError: false,
+      copyToShow: null,
     }
   },
   computed: {
@@ -71,6 +89,12 @@ export default {
     },
   },
   methods: {
+    setCopyToShow(copyKey) {
+      this.copyToShow = unitDefinitionCopyMap[copyKey]
+    },
+    closeCopyModal() {
+      this.copyToShow = null
+    },
     generateDefaultCategory() {
       if (!this.isNextButtonDisabled) {
         this.$store.dispatch('generateDefaultCategory')
@@ -107,6 +131,7 @@ export default {
     margin-right: 18px;
   }
   input {
+    width: 200px;
     background-color: white;
     border: 2px solid var(--dark-grey);
     font-size: 20px;

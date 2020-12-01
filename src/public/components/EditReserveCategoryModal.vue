@@ -1,5 +1,10 @@
 <template>
   <div class="modalWrapper">
+    <CopyModal
+      v-if="copyToShow"
+      :copy="copyToShow"
+      :on-close="closeCopyModal"
+    />
     <div class="modalInnerWrapper">
       <h2>{{ `${mode === 'add' ? 'Add' : 'Edit'} Reserve Category` }}</h2>
       <div class="modalBody">
@@ -119,6 +124,7 @@ import {
   categoryFields,
   numericFields,
 } from './constants'
+import { editReserveCategoryCopyMap } from './constants'
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
@@ -247,7 +253,7 @@ export default {
 }
 .modalInnerWrapper {
   height: calc(100% - 18px);
-  width: 90%;
+  width: 95%;
   border: 2px solid var(--dark-blue);
   background: white;
   border-radius: 18px;
