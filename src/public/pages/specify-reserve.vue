@@ -34,7 +34,11 @@
               {{ 'Priority' }}
             </button>
             <span class="actionButtons">
-              <font-awesome-icon icon="trash" class="icon" />
+              <font-awesome-icon
+                icon="trash"
+                :class="['icon', { isDisabled: category.isDefault }]"
+                @click="() => deleteCategory(category)"
+              />
               <font-awesome-icon
                 icon="edit"
                 class="icon"
@@ -67,7 +71,17 @@
           Project Reserve | Allocation of
           <span class="allocationText">{{ allocationText }}</span> units
         </h3>
-        <button class="navButton" @click="postConfig">Next</button>
+        <div class="nextBtnWrapper">
+          <button
+            :class="['navButton', { isDisabled: !!errorMessage }]"
+            @click="postConfig"
+          >
+            Next
+          </button>
+          <span v-if="errorMessage" class="errMessage col-error">{{
+            errorMessage
+          }}</span>
+        </div>
       </div>
     </div>
   </ConfigLayout>
@@ -108,6 +122,25 @@ export default {
     reserveCategories() {
       return this.$store.state.currentConfig.reserveCategories
     },
+    supplySum() {
+      return this.$store.state.supplySum
+    },
+    availableSupply() {
+      return parseInt(this.$store.state.currentConfig.supply)
+    },
+    errorMessage() {
+      if (this.supplySum < this.availableSupply) {
+        return `Please allocate the remaining ${
+          this.availableSupply - this.supplySum
+        } units.`
+      } else if (this.supplySum > this.availableSupply) {
+        return `You have allocated ${
+          this.supplySum - this.availableSupply
+        } too many available units.`
+      } else {
+        return null
+      }
+    },
   },
   methods: {
     openAddReserveCategoryModal() {
@@ -141,11 +174,16 @@ export default {
     moveCategoryDown(category) {
       this.$store.commit('moveCategory', { category, direction: 'down' })
     },
+    deleteCategory(category) {
+      this.$store.dispatch('deleteCategory', category)
+    },
     async postConfig() {
-      try {
-        await this.$store.dispatch('postConfig')
-        this.$router.push('/finish')
-      } catch (e) {}
+      if (!this.disableNext) {
+        try {
+          await this.$store.dispatch('postConfig')
+          this.$router.push('/finish')
+        } catch (e) {}
+      }
     },
     calcSupplyPercent(size) {
       const percent = (size / this.totalSupply) * 100
@@ -226,5 +264,18 @@ export default {
 }
 .icon {
   cursor: pointer;
+  &.isDisabled {
+    cursor: not-allowed;
+    opacity: .25;
+  }
+}
+.nextBtnWrapper {
+  position: relative;
+}
+.errMessage {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  width: max-content;
 }
 </style>

@@ -72,13 +72,12 @@ export default {
   },
   methods: {
     generateDefaultCategory() {
-      if (this.isNextButtonDisabled) {
-        return
+      if (!this.isNextButtonDisabled) {
+        this.$store.dispatch('generateDefaultCategory')
+        this.$nextTick(() => {
+          this.$router.push('/specify-reserve')
+        })
       }
-      this.$store.commit('generateDefaultCategory')
-      this.$nextTick(() => {
-        this.$router.push('/specify-reserve')
-      })
     },
     validateCategorySize() {
       this.hasSizeError =

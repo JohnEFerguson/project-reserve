@@ -13,6 +13,7 @@
               class="textInput"
               name="categoryName"
               placeholder="e.g., clinical trial participant"
+              :disabled="reserveCategory.isDefault"
               @input="validateCategoryName"
             />
             <span v-if="hasNameError" class="fs-12 mt-9 ml-18 col-error">{{
@@ -69,6 +70,14 @@
             </button>
           </div>
           <div class="modalCriteriaPanels">
+            <font-awesome-icon
+              v-if="reserveCategory.priority.length > 1"
+              icon="trash"
+              class="deleteCriteriaButton"
+              @click="deleteCurrentCriteria"
+            >
+              Delete
+            </font-awesome-icon>
             <div
               v-for="(criteria, criteriaIndex) in reserveCategory.priority"
               :key="`criteria-panel-${criteriaIndex}`"
@@ -77,6 +86,7 @@
                 v-if="criteriaIndex === currentCriteria"
                 :criteria="criteria"
                 :criteria-index="criteriaIndex"
+                :set-has-criteria-error="setHasCriteriaError"
               />
             </div>
           </div>
@@ -87,7 +97,10 @@
         <button
           :class="[
             'navButton',
-            { isDisabled: hasSizeError || !reserveCategory.name },
+            {
+              isDisabled:
+                hasSizeError || !reserveCategory.name || hasCriteriaError,
+            },
           ]"
           @click="saveCategory"
         >
@@ -141,6 +154,7 @@ export default {
       reserveCategory: deepClone(this.categoryToEdit),
       currentCriteria: 0,
       hasNameError: false,
+      hasCriteriaError: false,
       initialSize: this.categoryToEdit.size,
     }
   },
@@ -173,12 +187,15 @@ export default {
     }
   },
   methods: {
+    setHasCriteriaError(hasCriteriaError) {
+      this.hasCriteriaError = hasCriteriaError
+    },
     saveCategory() {
       if (!this.hasSizeError && this.reserveCategory.name) {
         const filteredPriorities = this.reserveCategory.priority.filter(
           (criteria) => criteria.name
         )
-        this.$store.commit('saveCategory', {
+        this.$store.dispatch('saveCategory', {
           ...this.reserveCategory,
           priority: filteredPriorities,
         })
@@ -198,7 +215,16 @@ export default {
         this.updateCriteriaTab(this.reserveCategory.priority.length - 1)
       }
     },
-    deleteCriteria(criteriaIndex) {},
+    deleteCurrentCriteria() {
+      const deletedLastCriteria =
+        this.currentCriteria === this.reserveCategory.priority.length - 1
+      this.reserveCategory.priority.splice(this.currentCriteria, 1)
+      if (deletedLastCriteria) {
+        this.$nextTick(() => {
+          this.currentCriteria = this.currentCriteria - 1
+        })
+      }
+    },
     validateCategoryName() {
       this.hasNameError = !this.reserveCategory.name
     },
@@ -269,6 +295,13 @@ export default {
   border-radius: 0 0 18px 18px;
   max-height: 50vh;
   overflow: scroll;
+  position: relative;
+}
+.deleteCriteriaButton {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  cursor: pointer;
 }
 .textInput {
   cursor: pointer;

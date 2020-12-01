@@ -91,26 +91,26 @@
 
     <div v-if="criteria.criteriaType === NUMERIC_TYPE">
       <div :class="isReadOnly ? 'flexcolumn' : 'flexrow'">
-        <div class="flexcolumn">
+        <div class="flexcolumn wfc">
           <label class="ml-9" :for="`criteria${criteriaIndex}min`"
             >Criteria Minimum</label
           >
           <input
             v-model="criteria.min"
             type="number"
-            class="textInput"
+            class="textInput w50"
             :name="`criteria${criteriaIndex}min`"
             :disabled="isReadOnly"
           />
         </div>
-        <div :class="`flexcolumn ${isReadOnly ? 'mt-9' : 'ml-18'}`">
+        <div :class="`flexcolumn wfc ${isReadOnly ? 'mt-9' : 'ml-18'}`">
           <label class="ml-9" :for="`criteria${criteriaIndex}max`"
             >Criteria Maximum</label
           >
           <input
             v-model="criteria.max"
             type="number"
-            class="textInput"
+            class="textInput mw50"
             :name="`criteria${criteriaIndex}max`"
             :disabled="isReadOnly"
           />
@@ -249,6 +249,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    setHasCriteriaError: {
+      type: Function,
+      default: () => {},
+    },
   },
   computed: {
     CATEGORY_TYPE() {
@@ -318,6 +322,9 @@ export default {
 </script>
 
 <style scoped lang="stylus">
+.panelWrapper {
+  position: relative;
+}
 .textInput {
   cursor: pointer;
   resize: none;
