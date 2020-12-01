@@ -91,7 +91,7 @@ router.post("/configurations", async (req, res) => {
 
     return res.status(201).json(newConfig.dataValues);
   } catch (err) {
-    return res.status(400);
+    return res.status(400).json(err);
   }
 });
 
@@ -108,7 +108,7 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
 
   const categoryCriteriaFields = await db.sequelize.query(
     `
-    SELECT name FROM category_criteria 
+    SELECT id, name FROM category_criteria 
     WHERE priority_id IN (
       SELECT id FROM priority 
       WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
@@ -117,9 +117,32 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
     { type: SELECT }
   );
 
+
+  const possibleValues = await Promise.all(categoryCriteriaFields[0].map(async (criteria) => {
+    const values = await db.sequelize.query(
+      `
+      select cce.name 
+      from category_criteria cc 
+      inner join category_criteria_element cce 
+      on cc.id = cce.category_criterium_id 
+      where cce.category_criterium_id = ${criteria.id}
+    `,
+      { type: SELECT })
+    return {
+      criteriaId: criteria.id,
+      values: values[0].map((r) => r.name)
+    }
+  }))
+
+  const possibleValuesMap = possibleValues.reduce((map, valueObj) => {
+    map[valueObj.criteriaId] = valueObj.values
+    return map
+  }, {})
+
+
   const numericCriteriaFields = await db.sequelize.query(
     `
-    SELECT name FROM numeric_criteria 
+    SELECT name, min, max FROM numeric_criteria 
     WHERE priority_id IN (
       SELECT id FROM priority 
       WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
@@ -143,6 +166,7 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
       name: criteria.name.toLowerCase().split(" ").join("_"),
       required: false,
       dataType: "STRING",
+      possibleValues: possibleValuesMap[criteria.id]
     })
   );
   numericCriteriaFields[0].forEach((criteria) =>
@@ -150,6 +174,7 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
       name: criteria.name.toLowerCase().split(" ").join("_"),
       required: false,
       dataType: "NUMBER",
+      possibleValues: { min: criteria.min, max: criteria.max }
     })
   );
 

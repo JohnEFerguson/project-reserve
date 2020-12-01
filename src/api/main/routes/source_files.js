@@ -101,7 +101,6 @@ router.post("/sourceFiles/:id/process", async (req, res) => {
     const notSelectedPatients = new Set(patients);
     const nthReservePatients = [];
 
-    console.log(orderedPatientsByReserve);
 
     orderedPatientsByReserve.forEach((f) => {
       let given = 0;
