@@ -6,6 +6,24 @@ const { STATUS_UPDATE, emitter } = require("../../../socketConstants");
 
 const router = Router();
 
+// DELETE one source file by id
+router.delete("/sourceFiles/:id", async (req, res) => {
+  const { db } = req;
+
+  const id = req.params.id;
+  await db.sourceFile.destroy({ where: { id } });
+  return res.status(200).json();
+});
+
+
+// DELETE all source files
+router.delete("/sourceFiles", async (req, res) => {
+  const { db } = req;
+
+  await db.sourceFile.destroy({ where: {}, truncate: true });
+  return res.status(200).json();
+});
+
 // GET all source files
 router.get("/sourceFiles", async (req, res) => {
   const { db } = req;
