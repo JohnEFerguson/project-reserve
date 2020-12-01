@@ -92,7 +92,7 @@
 
     <div v-if="criteria.criteriaType === NUMERIC_TYPE">
       <div :class="isReadOnly ? 'flexcolumn' : 'flexrow'">
-        <div class="flexcolumn wfc">
+        <div class="flexcolumn">
           <label class="ml-9" :for="`criteria${criteriaIndex}min`"
             >Criteria Minimum</label
           >
@@ -104,7 +104,7 @@
             :disabled="isReadOnly"
           />
         </div>
-        <div :class="`flexcolumn wfc ${isReadOnly ? 'mt-9' : 'ml-18'}`">
+        <div :class="`flexcolumn ${isReadOnly ? 'mt-9' : 'ml-18'}`">
           <label class="ml-9" :for="`criteria${criteriaIndex}max`"
             >Criteria Maximum</label
           >
