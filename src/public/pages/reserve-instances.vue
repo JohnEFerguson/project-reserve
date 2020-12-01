@@ -71,7 +71,7 @@
       </div>
     </div>
     <div class="navButtons">
-      <router-link to="/load-data" class="navButton">Back</router-link>
+      <router-link to="/" class="navButton">Back</router-link>
     </div>
   </div>
 </template>
