@@ -54,7 +54,8 @@
         class="flexrow mb-9"
       >
         <input
-          v-model="criteria.elements[elementIndex].name"
+          v-if="element.name"
+          v-model="element.name"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
@@ -183,11 +184,11 @@
           >Number of bins</label
         >
         <input
+          v-if="!isReadOnly"
           v-model="criteria.numBins"
           class="textInput w25"
           :name="`criteriaNumBins${criteriaIndex}`"
           type="number"
-          :disabled="isReadOnly"
           @input="(e) => updateNumBins(e.target.value)"
         />
         <div class="divider mt-18 mb-18" />
