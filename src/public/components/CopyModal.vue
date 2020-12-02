@@ -16,6 +16,7 @@
             <p>{{ q.answer }}</p>
           </div>
         </div>
+        <div class="tal" v-if="copy.paragraph" v-html="copy.paragraph" />
       </div>
       <div class="modalButtons">
         <button class="navButton ml-a" @click="onClose">Close</button>

@@ -107,6 +107,7 @@
 
 <script>
 import path from 'path-browserify'
+import pick from 'lodash.pick'
 import { unparse } from 'papaparse'
 import {
   transformCriteriaForDisplay,
@@ -117,7 +118,12 @@ import {
 import ViewConfigModal from '../components/ViewConfigModal.vue'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
 import CopyModal from '../components/CopyModal.vue'
-import { reserveInstancesCopy } from '../components/constants'
+import {
+  reserveInstancesCopy,
+  categoryFields,
+  numericFields,
+  CATEGORY_TYPE,
+} from '../components/constants'
 
 export default {
   components: { ViewConfigModal, ConfirmationModal, CopyModal },
@@ -189,11 +195,7 @@ export default {
       }
       this.confirmationModalOpen = true
     },
-    async fetchConfig(instance) {
-      const configRes = await fetch(
-        `/configurations/${instance.configurationId}`
-      )
-      const config = await configRes.json()
+    transformConfigForDisplay(config) {
       return {
         ...config,
         reserveCategories: config.reserveCategories.reduce((acc, category) => {
@@ -205,6 +207,13 @@ export default {
           return acc
         }, []),
       }
+    },
+    async fetchConfig(instance) {
+      const configRes = await fetch(
+        `/configurations/${instance.configurationId}`
+      )
+      const config = await configRes.json()
+      return this.transformConfigForDisplay(config)
     },
     async startFromOldConfig(instance) {
       const config = await this.fetchConfig(instance)
@@ -223,12 +232,47 @@ export default {
         this.viewConfigModalOpen = true
       })
     },
-    sortByLabel(priority) {
-      const sortOrders = (priority || []).map((cat) => `by ${cat.name}`)
-      if ((sortOrders || []).length < 3) {
-        sortOrders.push('by random lottery tiebreaker')
-      }
-      return `Sort ${(sortOrders || []).join(', ')}`
+    generatePriorityString(priority) {
+      const filteredPriority = pick(priority, [
+        'name',
+        ...Object.keys(
+          priority.criteriaType === CATEGORY_TYPE
+            ? categoryFields
+            : numericFields
+        ),
+      ])
+      const priorityStringElements = []
+      Object.keys(filteredPriority).forEach((key) => {
+        switch (key) {
+          case 'elements':
+            priorityStringElements.push(
+              `elements (n = ${
+                filteredPriority.elements.length
+              }) = {${filteredPriority.elements
+                .map(({ name }) => name)
+                .join(', ')}}`
+            )
+            break
+          case 'ascending':
+            priorityStringElements.push(
+              `direction = ${
+                filteredPriority.ascending
+                  ? 'lowest value prioritized'
+                  : 'highest value prioritized'
+              }`
+            )
+            break
+          case 'bins':
+            priorityStringElements.push(
+              `number_of_bins = ${filteredPriority.bins.length}`
+            )
+            break
+          default:
+            priorityStringElements.push(`${key} = ${filteredPriority[key]}`)
+            break
+        }
+      })
+      return priorityStringElements.join(', ')
     },
     async export({ instance, patients, suffix }) {
       const configurationRes = await fetch(
@@ -237,34 +281,62 @@ export default {
       const configuration = await configurationRes.json()
       const parsedFileName = path.parse(instance.name).name
       const today = new Date()
-      downloadCSV({
-        content: unparse([
-          [
-            `${today.toLocaleDateString()} ${today.toLocaleTimeString()} Allocation of ${
-              configuration.unitType
-            } using ${parsedFileName}`,
-          ],
-          [],
-          [`Number Allocated: ${configuration.supply}`],
-          ['Reserve Categories'],
-          ...configuration.reserveCategories.map((category) => [
+      const loaded = new Date(instance.dateLoaded)
+      const displayConfig = this.transformConfigForDisplay(configuration)
+      const outputArray = []
+      outputArray.push([
+        `${today.toLocaleDateString()} ${today.toLocaleTimeString()} Export from Project Reserve | Allocation of ${
+          displayConfig.unitType
+        } using ${parsedFileName}`,
+      ])
+      outputArray.push([])
+      outputArray.push([`Unit Allocated: ${displayConfig.unitType}`])
+      outputArray.push([`Number Allocated: ${displayConfig.supply}`])
+      outputArray.push([
+        [
+          `Allocation Timestamp: ${loaded.toLocaleDateString()} ${loaded.toLocaleTimeString()}`,
+        ],
+      ])
+      outputArray.push([])
+      outputArray.push(['Reserve Categories'])
+      outputArray.push([[]])
+
+      displayConfig.reserveCategories.forEach((category, index) => {
+        outputArray.push([
+          '',
+          `(${index + 1}) ${category.name} (size = ${category.size})`,
+        ])
+        category.priority.forEach((priority, index) => {
+          outputArray.push([
             '',
-            `${category.name} (size = ${
-              category.size
-            }, priority order: ${this.sortByLabel(
-              transformCriteriaForDisplay(category.priority)
-            )})`,
-          ]),
-          [],
-          [],
-          [],
-          patients.length
-            ? Object.keys(patients[0])
-            : ['No patients to display'],
-          ...patients
-            .filter((patient) => !!patient.recipient_id)
-            .map(Object.values),
-        ]),
+            '',
+            `Criteria ${index + 1}: ${priority.name} (type = ${
+              priority.criteriaType
+            }, ${this.generatePriorityString(priority)})`,
+          ])
+        })
+        outputArray.push([
+          '',
+          '',
+          'Final criteria is always a unique random lottery number',
+        ])
+      })
+      outputArray.push([])
+      outputArray.push([])
+      outputArray.push([])
+      if (patients.length) {
+        outputArray.push(Object.keys(patients[0]))
+      } else {
+        outputArray.push(['No patients to display'])
+      }
+      patients.forEach((patient) => {
+        if (patient.recipient_id) {
+          outputArray.push(Object.values(patient))
+        }
+      })
+
+      downloadCSV({
+        content: unparse(outputArray),
         fileName: `${parsedFileName}${suffix}`,
       })
     },

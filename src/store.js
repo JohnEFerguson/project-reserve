@@ -7,6 +7,7 @@ import {
   transformCriteriaForDisplay,
   transformCriteriaForPost,
   removeIds,
+  trimStrings,
 } from './public/plugins/helpers'
 
 Vue.use(Vuex)
@@ -81,7 +82,7 @@ export function createStore() {
         const sourceFilesRes = await fetch(`${getBaseUrl()}/sourceFiles`)
         commit('setReserveInstances', await sourceFilesRes.json())
       },
-      async postConfig({ commit, state, ...props }) {
+      async postConfig({ commit, state }) {
         const configPayload = {
           unitType: state.currentConfig.unitType,
           supply: state.currentConfig.supply,
@@ -127,7 +128,9 @@ export function createStore() {
       },
       saveCategory({ commit, dispatch }, category) {
         commit('saveCategory', category)
-        commit('updateDefaultCategorySize')
+        if (!category.isDefault) {
+          commit('updateDefaultCategorySize')
+        }
         commit('updateSupplySum')
       },
       deleteCategory({ commit, dispatch }, category) {
@@ -135,8 +138,8 @@ export function createStore() {
         commit('updateDefaultCategorySize')
         commit('updateSupplySum')
       },
-      generateDefaultCategory({ commit, dispatch }) {
-        commit('generateDefaultCategory')
+      generateDefaultCategory({ commit, dispatch }, hasUpdatedSupply) {
+        commit('generateDefaultCategory', hasUpdatedSupply)
         commit('updateDefaultCategorySize')
         commit('updateSupplySum')
       },
@@ -178,7 +181,7 @@ export function createStore() {
       updateSupply(state, supply) {
         state.currentConfig.supply = supply
       },
-      generateDefaultCategory(state) {
+      generateDefaultCategory(state, hasUpdatedSupply) {
         const defaultCategory = state.currentConfig.reserveCategories.find(
           (el) => el.isDefault
         )
@@ -187,6 +190,14 @@ export function createStore() {
             generateDefaultCategory(state.currentConfig.supply),
             ...state.currentConfig.reserveCategories,
           ]
+        }
+        if (hasUpdatedSupply) {
+          state.currentConfig.reserveCategories = state.currentConfig.reserveCategories.map(
+            (category) =>
+              category.isDefault
+                ? { ...category, size: state.currentConfig.supply }
+                : { ...category, size: 0 }
+          )
         }
       },
       updateSupplySum(state) {

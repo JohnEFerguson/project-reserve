@@ -3,7 +3,7 @@
     <div class="flexcolumn mb-27 mt-18">
       <label class="ml-9 mb-9" for="name">Criteria Name</label>
       <input
-        v-model="criteria.name"
+        v-model.trim="criteria.name"
         class="textInput"
         name="name"
         placeholder="e.g., sofa_score"
@@ -54,7 +54,7 @@
         class="flexrow mb-9"
       >
         <input
-          v-model="element.name"
+          v-model.trim="element.name"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
@@ -96,7 +96,7 @@
             >Criteria Minimum</label
           >
           <input
-            v-model="criteria.min"
+            v-model.number="criteria.min"
             type="number"
             class="textInput w50"
             :name="`criteria${criteriaIndex}min`"
@@ -108,7 +108,7 @@
             >Criteria Maximum</label
           >
           <input
-            v-model="criteria.max"
+            v-model.number="criteria.max"
             type="number"
             class="textInput w50"
             :name="`criteria${criteriaIndex}max`"
@@ -184,7 +184,7 @@
         >
         <input
           v-if="!isReadOnly"
-          v-model="criteria.numBins"
+          v-model.number="criteria.numBins"
           class="textInput w25"
           :name="`criteriaNumBins${criteriaIndex}`"
           type="number"
@@ -204,7 +204,7 @@
               >Min</label
             >
             <input
-              v-model="bin.min"
+              v-model.number="bin.min"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}min`"
@@ -218,7 +218,7 @@
               >Max</label
             >
             <input
-              v-model="bin.max"
+              v-model.number="bin.max"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}max`"

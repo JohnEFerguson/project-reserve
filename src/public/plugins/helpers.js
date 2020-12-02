@@ -48,6 +48,16 @@ export function downloadCSV({ content, fileName }) {
 //   return bins
 // }
 
+export function trimStrings(obj) {
+  const objCopy = { ...obj }
+  for (const prop in obj) {
+    if (typeof objCopy[prop] === 'string') objCopy[prop] = prop.trim()
+    else if (typeof objCopy[prop] === 'object')
+      objCopy[prop] = removeIds(obj[prop])
+  }
+  return objCopy
+}
+
 export function transformCriteriaForPost(priority) {
   if (!priority) {
     return null

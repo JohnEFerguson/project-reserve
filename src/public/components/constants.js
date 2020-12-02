@@ -19,6 +19,15 @@ export const numericFields = {
   ],
 }
 
+export const aboutCopy = {
+  title: 'About',
+  paragraph: `<p>The reserve system implemented is as described in a 2020 working paper released by a team of researchers from Boston College and MIT: Parag Pathak, Tayfun Sönmez, Utku Ünver, and Bumin Yenmez. The intended use case is for medical rationing. Specifically, a policymaker may need to allocate scarce resources transparently and equitably while prioritizing specific groups of people. A reserve system can be a useful tool in this scenario. A configuration of a reserve system requires three main actions / decisions.</p><br/>
+    <p>First, what is the unit being allocated and how many units are available in the particular batch of supply to be rationed?</p><br/>
+    <p>Second, what are the groups to be prioritized? This will include specifying each group, how many units are prioritized for each group, and how members of the same group are ranked against each other during allocation. A crucial and potentially unintuitive component of this is that the order in which each group is allocated units can affect outcomes. This is detailed in the working paper.</p><br/>
+    <p>Finally, a valid csv of patients must be uploaded. The patient list must have all the data needed to complete the reserve implementation configured and the system will prompt a user with the necessary fields based on the configuration.</p><br/>
+    <p>Further information is available throughout the application in the form of information buttons and in the working paper.</p><br/>`,
+}
+
 export const unitDefinitionCopyMap = {
   unitType: {
     title: 'What is the unit allocated?',
