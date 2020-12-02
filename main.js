@@ -9,7 +9,7 @@ app.on('window-all-closed', function () {
 try {
   const server = require(path.join(__dirname, '/src/api/main/server'))({
     pathToDb: app.getPath('userData'),
-    cleanDB: true,
+    cleanDB: false,
   })
 
   /**
