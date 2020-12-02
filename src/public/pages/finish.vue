@@ -80,7 +80,8 @@ export default {
 .finishContainer {
   flex: 1;
   margin: auto;
-  width: 90vw;
+  padding-bottom: 18px;
+  width: 90%;
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -377,15 +377,18 @@ export default {
 
 <style scoped lang="stylus">
 .header {
+
   padding: 18px 45px;
   color: var(--dark-blue);
   background-color: var(--light-grey);
   border-radius: 36px;
   margin-bottom: 36px;
+  margin-top: 36px;
 }
 .reserveContainer {
-  height: 100vh;
-  width: 100vw;
+  height: fit-content;
+  padding-bottom: 18px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -427,7 +430,7 @@ export default {
 .deleteReserveInstanceButton {
   position: absolute;
   top: 50%;
-  left: 27px;
+  left: 18px;
   transform: translate3d(-50%, -50%, 0);
   z-index: 10;
 }

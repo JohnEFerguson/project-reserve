@@ -204,7 +204,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90vw;
+  width: 90%;
   position: relative;
 }
 .reserveTableContainer {
@@ -236,7 +236,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  word-break: break-all;
+  word-break: break-word;
 }
 .actionButtons {
   width: 75%;

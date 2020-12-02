@@ -161,6 +161,7 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
+  word-break: break-word;
 }
 .requiredFieldsWrapper {
   padding: 18px;
@@ -185,7 +186,8 @@ export default {
   display: none;
   position: absolute;
   top: 50%;
-  width: 200px;
+  width: 250px;
+  word-break: break-word;
   transform: translateY(-50%);
   left: calc(100% + 9px);
   background-color: white;
