@@ -5,7 +5,7 @@
       <input
         v-model.trim="criteria.name"
         class="textInput"
-        @input="validatePriorities"
+        @input="runValidations"
         name="name"
         placeholder="e.g., sofa_score"
         :disabled="isReadOnly"
@@ -21,6 +21,7 @@
           <input
             v-model="criteria.criteriaType"
             class="textInput"
+            @change="runValidations"
             :name="`criteriaTypeCategory${criteriaIndex}`"
             type="radio"
             :value="CATEGORY_TYPE"
@@ -34,6 +35,7 @@
           <input
             v-model="criteria.criteriaType"
             class="textInput"
+            @change="runValidations"
             :name="`criteriaTypeNumeric${criteriaIndex}`"
             type="radio"
             :value="NUMERIC_TYPE"
@@ -61,7 +63,7 @@
       >
         <input
           v-model.trim="element.name"
-          @input="validatePriorities"
+          @input="runValidations"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
@@ -99,7 +101,7 @@
     <div v-if="criteria.criteriaType === NUMERIC_TYPE">
       <span
         v-if="criteriaErrors && criteriaErrors.minMax"
-        class="fs-12 mt-9 ml-18 col-error"
+        class="fs-12 mt-9 ml-9 col-error"
         >{{ criteriaErrors.minMax }}</span
       >
       <div :class="isReadOnly ? 'flexcolumn' : 'flexrow'">
@@ -109,7 +111,7 @@
           >
           <input
             v-model.number="criteria.min"
-            @input="validatePriorities"
+            @input="runValidations"
             type="number"
             class="textInput w50"
             :name="`criteria${criteriaIndex}min`"
@@ -122,7 +124,7 @@
           >
           <input
             v-model.number="criteria.max"
-            @input="validatePriorities"
+            @input="runValidations"
             type="number"
             class="textInput w50"
             :name="`criteria${criteriaIndex}max`"
@@ -167,7 +169,7 @@
           <div class="flexrow">
             <input
               v-model="criteria.coarsened"
-              @input="validatePriorities"
+              @change="runValidations"
               class="textInput"
               :name="`criteriaCoarsenedYes${criteriaIndex}`"
               type="radio"
@@ -181,7 +183,7 @@
           <div class="flexrow ml-18">
             <input
               v-model="criteria.coarsened"
-              @input="validatePriorities"
+              @change="runValidations"
               class="textInput"
               :name="`criteriaCoarsenedNo${criteriaIndex}`"
               type="radio"
@@ -212,7 +214,7 @@
           @input="
             (e) => {
               updateNumBins(e.target.value)
-              validatePriorities()
+              runValidations()
             }
           "
         />
@@ -231,7 +233,7 @@
             >
             <input
               v-model.number="bin.min"
-              @input="validatePriorities"
+              @input="runValidations"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}min`"
@@ -246,7 +248,7 @@
             >
             <input
               v-model.number="bin.max"
-              @input="validatePriorities"
+              @input="runValidations"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}max`"
@@ -295,6 +297,11 @@ export default {
     },
   },
   methods: {
+    runValidations() {
+      this.$nextTick(() => {
+        this.validatePriorities()
+      })
+    },
     addNewElement() {
       this.criteria.elements.push({
         name: '',
@@ -310,6 +317,7 @@ export default {
         }
         return acc
       }, [])
+      this.runValidations()
     },
     updateNumBins(numBins) {
       if (numBins < 0) {
