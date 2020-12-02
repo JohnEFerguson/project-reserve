@@ -70,6 +70,11 @@ export default {
       return this.$store.state.currentConfig
     },
   },
+  beforeMount() {
+    if (!this.$store.state.currentConfig.reserveCategories.length) {
+      this.$router.push('/reserve-instances')
+    }
+  },
   mounted() {
     this.$refs.fileUpload.addEventListener('change', () => {
       const file = this.$refs.fileUpload.files[0]

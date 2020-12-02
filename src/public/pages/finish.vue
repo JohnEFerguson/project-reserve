@@ -58,6 +58,11 @@ export default {
       return this.$store.state.currentConfig
     },
   },
+  beforeMount() {
+    if (!this.$store.state.currentConfig.reserveCategories.length) {
+      this.$router.push('/reserve-instances')
+    }
+  },
   methods: {
     closeViewPriorityOrderModal() {
       this.viewPriorityOrderModalOpen = false
