@@ -236,7 +236,7 @@ export default {
                   )
                 }
                 const numberVal = parseFloat(field)
-                if (possibleValues) {
+                if (possibleValues && !isNaN(numberVal)) {
                   const { min, max } = possibleValues
                   if (numberVal < min || numberVal > max) {
                     throw new Error(
@@ -244,7 +244,7 @@ export default {
                     )
                   }
                 }
-                realFieldValue = numberVal
+                realFieldValue = !isNaN(numberVal) ? numberVal : null
                 break
               }
               default:
@@ -262,7 +262,7 @@ export default {
                 }
                 break
             }
-            acc[name] = realFieldValue
+            acc[name] = realFieldValue === '' ? null : realFieldValue
             acc.usedGeneratedRandomNumber = !hasCustomRandomNumber
             return acc
           }, {})

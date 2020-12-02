@@ -279,6 +279,11 @@ export default {
         `/configurations/${instance.configurationId}`
       )
       const configuration = await configurationRes.json()
+      const nthReservePatientsRes = await fetch(
+        `/sourceFiles/${instance.id}/nthReservePatients`
+      )
+      const nthReservePatients = await nthReservePatientsRes.json()
+
       const parsedFileName = path.parse(instance.name).name
       const today = new Date()
       const loaded = new Date(instance.dateLoaded)
@@ -302,9 +307,16 @@ export default {
       outputArray.push([[]])
 
       displayConfig.reserveCategories.forEach((category, index) => {
+        const nthPatient =
+          nthReservePatients &&
+          nthReservePatients.find((patient) => patient.name === category.name)
         outputArray.push([
           '',
-          `(${index + 1}) ${category.name} (size = ${category.size})`,
+          `(${index + 1}) ${category.name} (size = ${category.size}${
+            nthPatient
+              ? `, nth recipient id = ${nthPatient.nthRecipientId}`
+              : ''
+          })`,
         ])
         category.priority.forEach((priority, index) => {
           outputArray.push([
