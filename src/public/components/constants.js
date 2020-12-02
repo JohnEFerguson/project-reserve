@@ -55,7 +55,7 @@ export const loadDataCopy = {
     {
       question: 'What is the optional random number field?',
       answer:
-        'There is an optional random number field that the application will accept if you would like to supply your own random number. This must be a decimal between 0 and 1000 (inclusive) and the field name must be exactly “random_number”. If either of these conditions are violated, the application will generate its own random number. For each patient, the application will report in the output whether or not it generated a random number and regardless of generated status, will print the random number.',
+        'There is an optional random number field that the application will accept if you would like to supply your own random number. This must be a decimal between 0 and 100000 (inclusive) and the field name must be exactly “random_number”. If either of these conditions are violated, the application will generate its own random number. For each patient, the application will report in the output whether or not it generated a random number and regardless of generated status, will print the random number.',
     },
     {
       question: 'What is the downloadable template?',
@@ -98,6 +98,11 @@ export const editReserveCategoryCopyMap = {
         question: 'What is the unreserved default reserve category?',
         answer:
           'The application will automatically create and maintain this reserve category to enforce the constraint that the sum of reserve sizes across all reserve categories must equal the total number of units allocated. You are able to edit this category (it is created with a priority order based only on unique random numbers) or stop using it by setting the size to 0.',
+      },
+      {
+        question: 'Can I change the unreserved default reserve category?',
+        answer:
+          'You can change it a bit, but no matter how you add or subtract criteria every patient uploaded will qualify for it. If there is no unreserved category in your configuration, we suggest setting the reserve size to 0 and constructing your own reserve categories as opposed to trying to transform the default unreserved category into one that fits with your configuration.',
       },
       {
         question: 'Are there any constraints on naming?',

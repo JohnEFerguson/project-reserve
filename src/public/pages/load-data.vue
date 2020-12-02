@@ -170,6 +170,14 @@ export default {
       const [fieldNames, ...patients] = data
       let patientObjs
       try {
+        const seenNames = []
+        fieldNames.forEach((name) => {
+          if (seenNames.includes(name)) {
+            throw new Error(`Duplicate column detected: ${name}`)
+          } else {
+            seenNames.push(name)
+          }
+        })
         const dataTypeMap = this.requiredFields.reduce(
           (acc, { name, dataType, required, possibleValues }) => {
             const fieldIndex = fieldNames.indexOf(name)
@@ -194,6 +202,7 @@ export default {
               name: fieldNames[index],
               dataType: 'STRING',
               required: false,
+              possibleValues: { min: 0, max: 100000 },
             }
             const errorMessage = `Patient ${
               patientIndex + 1
@@ -213,13 +222,17 @@ export default {
                 recipientIds.push(realFieldValue)
               }
             }
+            let typeCheck = dataType
+            if (name === 'random_number') {
+              typeCheck = 'NUMBER'
+            }
 
-            switch (dataType) {
+            switch (typeCheck) {
               case 'BOOLEAN': {
                 const fieldUC = field.toUpperCase()
                 if (!['TRUE', 'FALSE'].includes(fieldUC)) {
                   throw new Error(
-                    `${errorMessage} Please ensure this is a true/false value`
+                    `${errorMessage} Please ensure this is a true/false value.`
                   )
                 }
                 realFieldValue = fieldUC === 'TRUE'
@@ -228,15 +241,17 @@ export default {
               case 'NUMBER': {
                 if (!isFloat(field)) {
                   throw new Error(
-                    `${errorMessage} Please ensure this is a real number`
+                    `${errorMessage} Please ensure this is a real number.`
                   )
                 }
                 const numberVal = parseFloat(field)
-                const { min, max } = possibleValues || {}
-                if (numberVal < min || numberVal > max) {
-                  throw new Error(
-                    `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
-                  )
+                if (possibleValues) {
+                  const { min, max } = possibleValues
+                  if (numberVal < min || numberVal > max) {
+                    throw new Error(
+                      `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
+                    )
+                  }
                 }
                 realFieldValue = numberVal
                 break

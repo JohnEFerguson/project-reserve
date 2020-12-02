@@ -20,7 +20,7 @@ const generateDefaultCategory = (size) => ({
   isDefault: true,
 })
 
-const initialState = {
+const generateInitialState = () => ({
   isSocketConnected: false,
   reserveInstances: [],
   supplySum: 0,
@@ -30,7 +30,7 @@ const initialState = {
     reserveCategories: [],
     requiredFields: [],
   },
-}
+})
 
 function getBaseUrl() {
   const url =
@@ -48,7 +48,7 @@ export function createStore() {
   return new Vuex.Store({
     // IMPORTANT: state must be a function so the module can be
     // instantiated multiple times
-    state: () => initialState,
+    state: () => generateInitialState(),
 
     actions: {
       initSocket({ commit, state }) {
@@ -160,8 +160,11 @@ export function createStore() {
     },
 
     mutations: {
-      resetConfig(state, list) {
-        state = initialState
+      resetConfig(state) {
+        const init = generateInitialState()
+        Object.keys(init).forEach((key) => {
+          state[key] = init[key]
+        })
       },
       setConfig(state, config) {
         state.currentConfig = config
