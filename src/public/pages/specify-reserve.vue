@@ -142,6 +142,9 @@ export default {
       }
     },
   },
+  mounted() {
+    this.$store.commit('updateSupplySum')
+  },
   methods: {
     openAddReserveCategoryModal() {
       this.editReserveCategoryModalMode = 'add'
@@ -233,6 +236,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  word-break: break-all;
 }
 .actionButtons {
   width: 75%;

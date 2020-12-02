@@ -345,7 +345,7 @@ export default {
   top: 50%;
   left: 27px;
   transform: translate3d(-50%, -50%, 0);
-  z-index: 100;
+  z-index: 10;
 }
 .rowCell {
   grid-column: span 3;

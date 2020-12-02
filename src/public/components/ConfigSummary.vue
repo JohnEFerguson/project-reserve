@@ -60,7 +60,7 @@
       <p class="mb-27">
         A user can optionally include their own random number for a patient by
         including a field exactly named random_number. If a patient has a blank
-        random number or random number not in the range 0 to 1000, the system
+        random number or random number not in the range 0 to 100000, the system
         will generate and report its own random number for the patient.
       </p>
       <div class="mb-18 fw-b">Required fields:</div>
