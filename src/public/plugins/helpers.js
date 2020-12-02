@@ -48,9 +48,6 @@ export function downloadCSV({ content, fileName }) {
 //   return bins
 // }
 
-const sortByAscendingBin = (a, b) => a.order - b.order
-const sortByDescendingBin = (a, b) => b.order - a.order
-
 export function transformCriteriaForPost(priority) {
   if (!priority) {
     return null
