@@ -10,7 +10,7 @@
         <label for="unitTypeInput"
           >What unit is being allocated?<font-awesome-icon
             icon="info-circle"
-            size="s"
+            size="sm"
             class="icon ml-9"
             @click="() => setCopyToShow('unitType')"
         /></label>
@@ -25,7 +25,7 @@
           <label for="supplyInput"
             >How many units are being allocated?<font-awesome-icon
               icon="info-circle"
-              size="s"
+              size="sm"
               class="icon ml-9"
               @click="() => setCopyToShow('unitAllocation')"
           /></label>
