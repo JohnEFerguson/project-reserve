@@ -1,5 +1,10 @@
 <template>
   <div class="container">
+    <CopyModal
+      v-if="copyToShow"
+      :copy="copyToShow"
+      :on-close="closeCopyModal"
+    />
     <h1>Project Reserve</h1>
     <div class="description">
       <p>
@@ -13,7 +18,7 @@
       </p>
     </div>
     <div class="buttons">
-      <button class="menuButton navButton">About</button>
+      <button class="menuButton navButton" @click="openCopyModal">About</button>
       <a
         class="menuButton navButton"
         href="https://arxiv.org/abs/2008.00374"
@@ -26,7 +31,24 @@
     </div>
   </div>
 </template>
-<script></script>
+<script>
+import CopyModal from '../components/CopyModal.vue'
+import { aboutCopy } from '../components/constants'
+export default {
+  components: { CopyModal },
+  data() {
+    return { copyToShow: null, showCopyModal: false }
+  },
+  methods: {
+    openCopyModal() {
+      this.copyToShow = aboutCopy
+    },
+    closeCopyModal() {
+      this.copyToShow = null
+    },
+  },
+}
+</script>
 
 <style scoped lang="stylus">
 .container {

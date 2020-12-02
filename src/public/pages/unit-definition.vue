@@ -16,7 +16,7 @@
           />
         </div>
         <input
-          v-model="unitType"
+          v-model.trim="unitType"
           name="unitTypeInput"
           placeholder="Antibodies"
         />
@@ -32,7 +32,7 @@
             />
           </div>
           <input
-            v-model="supply"
+            v-model.number="supply"
             name="supplyInput"
             type="number"
             placeholder="120"
@@ -69,6 +69,7 @@ export default {
     return {
       hasSizeError: false,
       copyToShow: null,
+      hasUpdatedSupply: false,
     }
   },
   computed: {
@@ -101,13 +102,14 @@ export default {
     },
     generateDefaultCategory() {
       if (!this.isNextButtonDisabled) {
-        this.$store.dispatch('generateDefaultCategory')
+        this.$store.dispatch('generateDefaultCategory', this.hasUpdatedSupply)
         this.$nextTick(() => {
           this.$router.push('/specify-reserve')
         })
       }
     },
     validateCategorySize() {
+      this.hasUpdatedSupply = true
       this.hasSizeError =
         parseInt(this.supply) > 10000 || parseInt(this.supply) < 0
     },

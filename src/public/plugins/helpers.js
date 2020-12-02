@@ -48,6 +48,16 @@ export function downloadCSV({ content, fileName }) {
 //   return bins
 // }
 
+export function trimStrings(obj) {
+  const objCopy = { ...obj }
+  for (const prop in obj) {
+    if (typeof objCopy[prop] === 'string') objCopy[prop] = prop.trim()
+    else if (typeof objCopy[prop] === 'object')
+      objCopy[prop] = removeIds(obj[prop])
+  }
+  return objCopy
+}
+
 export function transformCriteriaForPost(priority) {
   if (!priority) {
     return null
@@ -77,6 +87,14 @@ export function transformCriteriaForPost(priority) {
         filteredCriteria.elements = filteredCriteria.elements.filter(
           ({ name }) => !!name
         )
+      } else {
+        // const sortedBins = filteredCriteria.bins.sort(
+        //   filteredCriteria.ascending ? sortByAscendingBin : sortByDescendingBin
+        // )
+        // sortedBins.forEach((bin, index) => {
+        //   bin.order = index + 1
+        // })
+        // filteredCriteria.bins = sortedBins
       }
       bucket.push(filteredCriteria)
       order = order + 1
@@ -104,6 +122,7 @@ export function transformCriteriaForDisplay(priority) {
     (crit) =>
       (criterias[crit.order - 1] = {
         ...crit,
+        numBins: crit.bins.length,
         criteriaType: NUMERIC_TYPE,
       })
   )

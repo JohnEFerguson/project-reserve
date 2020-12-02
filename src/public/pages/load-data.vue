@@ -135,20 +135,6 @@ export default {
         ).then(() => {
           this.$store.dispatch('processSourceFile', sourceFile.id)
         })
-
-        // await fetch('/patients', {
-        //   method: 'POST',
-        //   headers: {
-        //     'content-type': 'application/json',
-        //   },
-        //   body: JSON.stringify(
-        //     this.patientObjs.map((patientInfo) => ({
-        //       configurationId: this.currentConfig.id,
-        //       sourceFileId: sourceFile.id,
-        //       ...patientInfo,
-        //     }))
-        //   ),
-        // })
       }
     },
     downloadCsvTemplate() {
@@ -197,16 +183,17 @@ export default {
         const recipientIds = []
         patientObjs = patients.map((patient, patientIndex) => {
           return patient.reduce((acc, field, index) => {
+            const hasCustomRandomNumber =
+              fieldNames[index] === 'random_number' && !!field
             const { name, dataType, required, possibleValues } = dataTypeMap[
               index
             ] || {
               name: fieldNames[index],
               dataType: 'STRING',
               required: false,
-              possibleValues:
-                fieldNames[index] === 'random_number'
-                  ? { min: 0, max: 100000 }
-                  : null,
+              possibleValues: hasCustomRandomNumber
+                ? { min: 0, max: 100000 }
+                : null,
             }
             const errorMessage = `Patient ${
               patientIndex + 1
@@ -227,7 +214,7 @@ export default {
               }
             }
             let typeCheck = dataType
-            if (name === 'random_number') {
+            if (hasCustomRandomNumber) {
               typeCheck = 'NUMBER'
             }
 
@@ -243,7 +230,7 @@ export default {
                 break
               }
               case 'NUMBER': {
-                if (!isFloat(field)) {
+                if (field && !isFloat(field)) {
                   throw new Error(
                     `${errorMessage} Please ensure this is a real number.`
                   )
@@ -262,7 +249,11 @@ export default {
               }
               default:
               case 'STRING':
-                if (possibleValues && !possibleValues.includes(field)) {
+                if (
+                  possibleValues &&
+                  Array.isArray(possibleValues) &&
+                  !possibleValues.includes(field)
+                ) {
                   throw new Error(
                     `${errorMessage} Please ensure value is one of ${possibleValues.join(
                       ', '
@@ -272,6 +263,7 @@ export default {
                 break
             }
             acc[name] = realFieldValue
+            acc.usedGeneratedRandomNumber = !hasCustomRandomNumber
             return acc
           }, {})
         })

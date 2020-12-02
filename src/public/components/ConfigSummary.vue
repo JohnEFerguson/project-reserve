@@ -1,5 +1,5 @@
 <template>
-  <div class="finishContainer">
+  <div class="configSummaryContainer">
     <div class="finishConfirmationData">
       <div class="flexrow mb-18">
         <strong class="fw-b mr-9">Unit allocated: </strong
@@ -22,7 +22,7 @@
             :key="`${category.name}${category.order}`"
             class="reserveTableRow"
           >
-            <span class="rowCell">{{ category.order }}</span>
+            <span class="rowCell">{{ index + 1 }}</span>
             <span class="rowCell"
               >{{ category.name
               }}<span v-if="category.description" class="iconWrapper"
@@ -94,7 +94,9 @@ export default {
   },
   computed: {
     reserveCategories() {
-      return this.config.reserveCategories || []
+      return (this.config.reserveCategories || []).filter(
+        (cat) => parseInt(cat.size) > 0
+      )
     },
     unitType() {
       return this.config.unitType
@@ -114,13 +116,13 @@ export default {
 }
 </script>
 <style lang="stylus">
-.finishContainer {
+.configSummaryContainer {
+  grid-column: span 3;
   margin: auto;
   width: 100%;
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: min-content min-content min-content;
   grid-gap: 27px;
 }
 .finishConfirmationData {
@@ -164,6 +166,8 @@ export default {
   padding: 18px;
   border: 2px solid var(--dark-blue);
   border-radius: 18px;
+  overflow: auto;
+  max-height: 500px;
 }
 .requiredField {
   border-radius: 18px;

@@ -17,7 +17,7 @@
                 @click="() => setCopyToShow('name')"
             /></label>
             <input
-              v-model="reserveCategory.name"
+              v-model.trim="reserveCategory.name"
               class="textInput"
               name="categoryName"
               placeholder="e.g., clinical trial participant"
@@ -33,7 +33,7 @@
               >Description</label
             >
             <textarea
-              v-model="reserveCategory.description"
+              v-model.trim="reserveCategory.description"
               class="textInput textAreaInput"
               name="categoryDescription"
               placeholder="e.g., A clinical trial participant is defined as anyone who has enrolled in a COVID-19 Moderna clinical trial in the past 90 days."
@@ -47,7 +47,7 @@
                 @click="() => setCopyToShow('size')"
             /></label>
             <input
-              v-model="reserveCategory.size"
+              v-model.number="reserveCategory.size"
               class="textInput"
               name="categoryDescription"
               type="number"
