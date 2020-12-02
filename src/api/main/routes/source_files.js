@@ -1,193 +1,191 @@
-"use strict";
+'use strict'
 
-const { Router } = require("express");
-const { SELECT } = require("sequelize");
-const { STATUS_UPDATE, emitter } = require("../../../socketConstants");
+const { Router } = require('express')
+const { SELECT } = require('sequelize')
+const { STATUS_UPDATE, emitter } = require('../../../socketConstants')
 
-const router = Router();
+const router = Router()
 
 // DELETE one source file by id
-router.delete("/sourceFiles/:id", async (req, res) => {
-  const { db } = req;
+router.delete('/sourceFiles/:id', async (req, res) => {
+  const { db } = req
 
-  const id = req.params.id;
-  await db.sourceFile.destroy({ where: { id } });
-  return res.status(200).json();
-});
-
+  const id = req.params.id
+  await db.sourceFile.destroy({ where: { id } })
+  return res.status(200).json()
+})
 
 // DELETE all source files
-router.delete("/sourceFiles", async (req, res) => {
-  const { db } = req;
+router.delete('/sourceFiles', async (req, res) => {
+  const { db } = req
 
-  await db.sourceFile.destroy({ where: {}, truncate: true });
-  return res.status(200).json();
-});
+  await db.sourceFile.destroy({ where: {}, truncate: true })
+  return res.status(200).json()
+})
 
 // GET all source files
-router.get("/sourceFiles", async (req, res) => {
-  const { db } = req;
-  return res.json(await db.sourceFile.findAll({ order: ["id"] }));
-});
+router.get('/sourceFiles', async (req, res) => {
+  const { db } = req
+  return res.json(await db.sourceFile.findAll({ order: ['id'] }))
+})
 
 // GET one source file id
-router.get("/sourceFiles/:id", async (req, res) => {
-  const { db } = req;
-  const id = req.params.id;
-  return res.json(await db.sourceFile.findOne({ where: { id } }));
-});
+router.get('/sourceFiles/:id', async (req, res) => {
+  const { db } = req
+  const id = req.params.id
+  return res.json(await db.sourceFile.findOne({ where: { id } }))
+})
 
 // GET one source file id
-router.get("/sourceFiles/:id/nthReservePatients", async (req, res) => {
-  const { db } = req;
-  const id = req.params.id;
+router.get('/sourceFiles/:id/nthReservePatients', async (req, res) => {
+  const { db } = req
+  const id = req.params.id
   return res.json(
     JSON.parse(
       (await db.sourceFile.findOne({ where: { id } })).nth_reserve_patients
     )
-  );
-});
+  )
+})
 
 // GET all patients for a source file
-router.get("/sourceFiles/:id/patients", async (req, res) => {
-  const { db } = req;
-  const id = req.params.id;
-  let filterLosers = "";
+router.get('/sourceFiles/:id/patients', async (req, res) => {
+  const { db } = req
+  const id = req.params.id
+  let filterLosers = ''
   if (req.query.givenUnit)
     filterLosers += `and ${
-      req.query.givenUnit === "false" ? "not" : ""
-      } given_unit`;
+      req.query.givenUnit === 'false' ? 'not' : ''
+    } given_unit`
 
-  return res.json(await getPatientsWithAttributes(db, id, filterLosers));
-});
+  return res.json(await getPatientsWithAttributes(db, id, filterLosers))
+})
 
 // process all patients in a source file
-router.post("/sourceFiles/:id/process", async (req, res) => {
-  const { db } = req;
-  const id = req.params.id;
+router.post('/sourceFiles/:id/process', async (req, res) => {
+  const { db } = req
+  const id = req.params.id
 
   try {
     // update status of file to be processing
-    const sourceFile = await db.sourceFile.findOne({ where: { id } });
-    sourceFile.status = "PROCESSING";
-    await sourceFile.save();
+    const sourceFile = await db.sourceFile.findOne({ where: { id } })
+    sourceFile.status = 'PROCESSING'
+    await sourceFile.save()
 
-    const configId = sourceFile.dataValues.configurationId;
+    const configId = sourceFile.dataValues.configurationId
     const reserveCategories = (
       await db.reserveCategory.findAll({
         where: { configurationId: configId },
-        order: [["order", "ASC"]],
+        order: [['order', 'ASC']],
       })
-    ).map((ent) => ent.dataValues);
+    ).map((ent) => ent.dataValues)
 
     const orderedPatientsByReserve = await Promise.all(
       reserveCategories.map((rc) => {
-        return orderPatientsInReserveCategory(db, rc.id, rc.size, rc.name);
+        return orderPatientsInReserveCategory(db, rc.id, rc.size, rc.name)
       })
-    );
+    )
 
     const patients = await Promise.all(
       (
         await db.patient.findAll({
           where: { sourceFileId: id },
-          order: [["rand_number", "ASC"]],
+          order: [['rand_number', 'ASC']],
         })
       ).map((f) => f.id)
-    );
+    )
 
-    let leftOver = 0; // handle this!
-    const selectedPatients = new Set();
-    const allocatedPatientGroups = new Map();
-    const notSelectedPatients = new Set(patients);
-    const nthReservePatients = [];
-
+    let leftOver = 0 // handle this!
+    const selectedPatients = new Set()
+    const allocatedPatientGroups = new Map()
+    const notSelectedPatients = new Set(patients)
+    const nthReservePatients = []
 
     orderedPatientsByReserve.forEach((f) => {
-      let given = 0;
-      let i = 0;
+      let given = 0
+      let i = 0
       while (i < f.patients.length) {
         if (given < f.size && !selectedPatients.has(f.patients[i])) {
-          selectedPatients.add(f.patients[i]);
-          allocatedPatientGroups[f.patients[i]] = f.name;
-          given += 1;
-          notSelectedPatients.delete(f.patients[i]);
+          selectedPatients.add(f.patients[i])
+          allocatedPatientGroups[f.patients[i]] = f.name
+          given += 1
+          notSelectedPatients.delete(f.patients[i])
 
           if (given == f.size) {
             nthReservePatients.push({
               name: f.name,
               nthRecipientPrimaryId: f.patients[i],
-            });
+            })
           }
         }
-        i += 1;
+        i += 1
       }
 
-      leftOver += f.size - given;
-    });
+      leftOver += f.size - given
+    })
 
     // give left over to unallocated patients if there are any
     while (leftOver > 0 && notSelectedPatients.size > 0) {
-      const pat = notSelectedPatients.next();
-      notSelectedPatients.delete(pat);
-      selectedPatients.add(pat);
-      allocatedPatientGroups[pat] = "None";
-      leftOver -= 1;
+      const pat = notSelectedPatients.next()
+      notSelectedPatients.delete(pat)
+      selectedPatients.add(pat)
+      allocatedPatientGroups[pat] = 'None'
+      leftOver -= 1
     }
 
     // update patients
     selectedPatients.forEach(async (pId) => {
-      const patient = await db.patient.findOne({ where: { id: pId } });
-      patient.given_unit = true;
-      patient.group_allocated_under = allocatedPatientGroups[pId];
-      await patient.save();
-    });
+      const patient = await db.patient.findOne({ where: { id: pId } })
+      patient.given_unit = true
+      patient.group_allocated_under = allocatedPatientGroups[pId]
+      await patient.save()
+    })
 
     const nthReservePatientsWithNames = await Promise.all(
       nthReservePatients.map(async (f) => {
         const name = (
           await db.patient.findOne({ where: { id: f.nthRecipientPrimaryId } })
-        ).recipient_id;
-        return { name: f.name, nthRecipientId: name };
+        ).recipient_id
+        return { name: f.name, nthRecipientId: name }
       })
-    );
+    )
 
     // update sourceFile
-    sourceFile.status = "FINISHED";
+    sourceFile.status = 'FINISHED'
     sourceFile.nth_reserve_patients = JSON.stringify(
       nthReservePatientsWithNames
-    );
-    sourceFile.left_over = leftOver;
-    const finished = await sourceFile.save();
+    )
+    sourceFile.left_over = leftOver
+    const finished = await sourceFile.save()
 
     if (finished)
       emitter.emit(
         STATUS_UPDATE,
         (await db.sourceFile.findAll()).map((sf) => sf.dataValues)
-      );
+      )
   } catch (err) {
     // update status of file to be error processing
-    const sourceFile = await db.sourceFile.findOne({ where: { id } });
-    sourceFile.status = "ERROR";
-    await sourceFile.save();
-    console.log(err);
-    return res.status(500).json();
+    const sourceFile = await db.sourceFile.findOne({ where: { id } })
+    sourceFile.status = 'ERROR'
+    await sourceFile.save()
+    console.log(err)
+    return res.status(500).json()
   }
 
-  return res.json(); // return 200 no matter WHAT
-});
+  return res.json() // return 200 no matter WHAT
+})
 
 // POST a source file
-router.post("/sourceFiles", async (req, res) => {
-  const { db } = req;
+router.post('/sourceFiles', async (req, res) => {
+  const { db } = req
 
   try {
-    const newSourceFile = await db.sourceFile.create(req.body);
+    const newSourceFile = await db.sourceFile.create(req.body)
 
-    return res.status(201).json(newSourceFile.dataValues);
+    return res.status(201).json(newSourceFile.dataValues)
   } catch (err) {
-    return res.status(400);
+    return res.status(400)
   }
-});
+})
 
 async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
   const patients = await Promise.all(
@@ -201,19 +199,19 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
         { type: SELECT }
       )
     )[0].map((p) => {
-      const patObj = JSON.parse(p.info);
-      patObj.random_number = p.rand_number;
-      patObj.allocated_status = p.given_unit === 1;
-      patObj.group_allocated_under = p.group_allocated_under;
+      const patObj = JSON.parse(p.info)
+      patObj.random_number = p.rand_number
+      patObj.allocated_status = p.given_unit === 1
+      patObj.group_allocated_under = p.group_allocated_under
 
       delete patObj.configurationId
       delete patObj.sourceFileId
 
-      return patObj;
+      return patObj
     })
-  );
+  )
 
-  return patients;
+  return patients
 }
 
 async function orderPatientsInReserveCategory(
@@ -423,14 +421,14 @@ async function orderPatientsInReserveCategory(
     order by cc_1, nc_1, cc_2, nc_2, cc_3, nc_3, rand_number
     `,
     { type: SELECT }
-  );
+  )
 
   return {
     id: reserveCategoryId,
     size,
     name,
     patients: (await orderedPatientIds)[0].map((ent) => ent.id),
-  };
+  }
 }
 
-module.exports = router;
+module.exports = router

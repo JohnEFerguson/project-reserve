@@ -9,7 +9,7 @@
         placeholder="e.g., sofa_score"
         :disabled="isReadOnly"
       />
-      <div class="ml-9 mt-9 fs-12">
+      <div v-if="!isReadOnly" class="ml-9 mt-9 fs-12">
         Note: The criteria will not be saved unless you have entered a name.
       </div>
     </div>
@@ -54,7 +54,8 @@
         class="flexrow mb-9"
       >
         <input
-          v-model="criteria.elements[elementIndex].name"
+          v-if="element.name"
+          v-model="element.name"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
@@ -98,7 +99,7 @@
           <input
             v-model="criteria.min"
             type="number"
-            class="textInput"
+            class="textInput w50"
             :name="`criteria${criteriaIndex}min`"
             :disabled="isReadOnly"
           />
@@ -110,7 +111,7 @@
           <input
             v-model="criteria.max"
             type="number"
-            class="textInput"
+            class="textInput w50"
             :name="`criteria${criteriaIndex}max`"
             :disabled="isReadOnly"
           />
@@ -121,11 +122,11 @@
         <div class="flexrow">
           <div class="flexrow">
             <input
-              v-model="criteria.binOrder"
+              v-model="criteria.ascending"
               class="textInput"
               :name="`criteriaBinOrderDesc${criteriaIndex}`"
               type="radio"
-              value="desc"
+              :value="true"
               :disabled="isReadOnly"
             />
             <label class="ml-9" :for="`criteriaBinOrderDesc${criteriaIndex}`"
@@ -134,11 +135,11 @@
           </div>
           <div class="flexrow ml-18">
             <input
-              v-model="criteria.binOrder"
+              v-model="criteria.ascending"
               class="textInput"
               :name="`criteriaBinOrderAsc${criteriaIndex}`"
               type="radio"
-              value="asc"
+              :value="false"
               :disabled="isReadOnly"
             />
             <label class="ml-9" :for="`criteriaBinOrderAsc${criteriaIndex}`"
@@ -183,11 +184,11 @@
           >Number of bins</label
         >
         <input
+          v-if="!isReadOnly"
           v-model="criteria.numBins"
           class="textInput w25"
           :name="`criteriaNumBins${criteriaIndex}`"
           type="number"
-          :disabled="isReadOnly"
           @input="(e) => updateNumBins(e.target.value)"
         />
         <div class="divider mt-18 mb-18" />
@@ -204,7 +205,7 @@
               >Min</label
             >
             <input
-              v-model="criteria.bins[binIndex].min"
+              v-model="bin.min"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}min`"
@@ -218,7 +219,7 @@
               >Max</label
             >
             <input
-              v-model="criteria.bins[binIndex].max"
+              v-model="bin.max"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}max`"
@@ -249,6 +250,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    setHasCriteriaError: {
+      type: Function,
+      default: () => {},
+    },
   },
   computed: {
     CATEGORY_TYPE() {
@@ -259,6 +264,9 @@ export default {
     },
   },
   methods: {
+    logCriteria() {
+      console.log(this.criteria)
+    },
     addNewElement() {
       this.criteria.elements.push({
         name: '',
@@ -318,6 +326,9 @@ export default {
 </script>
 
 <style scoped lang="stylus">
+.panelWrapper {
+  position: relative;
+}
 .textInput {
   cursor: pointer;
   resize: none;
@@ -329,6 +340,10 @@ export default {
   outline: none;
   &::placeholder {
     color: #ddd;
+  }
+  &:disabled {
+    padding: 0;
+    text-align: center;
   }
 }
 .textAreaInput {

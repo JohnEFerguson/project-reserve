@@ -12,7 +12,7 @@ import {
 Vue.use(Vuex)
 
 const generateDefaultCategory = (size) => ({
-  name: 'Unreserved (auto-populated)',
+  name: 'unreserved_auto_populated',
   description: 'Default reserve category',
   size,
   order: 1,
@@ -23,6 +23,7 @@ const generateDefaultCategory = (size) => ({
 const initialState = {
   isSocketConnected: false,
   reserveInstances: [],
+  supplySum: 0,
   currentConfig: {
     unitType: '',
     supply: null,
@@ -124,6 +125,21 @@ export function createStore() {
         const requiredFields = await requiredFieldsRes.json()
         commit('setRequiredFields', requiredFields)
       },
+      saveCategory({ commit, dispatch }, category) {
+        commit('saveCategory', category)
+        commit('updateDefaultCategorySize')
+        commit('updateSupplySum')
+      },
+      deleteCategory({ commit, dispatch }, category) {
+        commit('deleteCategory', category)
+        commit('updateDefaultCategorySize')
+        commit('updateSupplySum')
+      },
+      generateDefaultCategory({ commit, dispatch }) {
+        commit('generateDefaultCategory')
+        commit('updateDefaultCategorySize')
+        commit('updateSupplySum')
+      },
     },
 
     mutations: {
@@ -143,22 +159,39 @@ export function createStore() {
         state.currentConfig.supply = supply
       },
       generateDefaultCategory(state) {
-        const defaultCategoryIndex = state.currentConfig.reserveCategories.findIndex(
+        const defaultCategory = state.currentConfig.reserveCategories.find(
           (el) => el.isDefault
         )
-        if (defaultCategoryIndex >= 0) {
-          state.currentConfig.reserveCategories[defaultCategoryIndex] = {
-            ...generateDefaultCategory(state.currentConfig.supply),
-            order: defaultCategoryIndex + 1,
-          }
-        } else {
+        if (!defaultCategory) {
           state.currentConfig.reserveCategories = [
             generateDefaultCategory(state.currentConfig.supply),
             ...state.currentConfig.reserveCategories,
           ]
         }
       },
-      saveCategory(state, category) {
+      updateSupplySum(state) {
+        const sum = state.currentConfig.reserveCategories.reduce(
+          (sum, category) => sum + parseInt(category.size),
+          0
+        )
+        state.supplySum = sum
+      },
+      updateDefaultCategorySize(state) {
+        const defaultCategory = state.currentConfig.reserveCategories.find(
+          (el) => el.isDefault
+        )
+        if (defaultCategory) {
+          const nonDefaultCategoriesAllocation = state.currentConfig.reserveCategories
+            .filter((cat) => !cat.isDefault)
+            .reduce((acc, cat) => {
+              return acc + parseInt(cat.size)
+            }, 0)
+          defaultCategory.size =
+            state.currentConfig.supply - nonDefaultCategoriesAllocation
+        }
+      },
+      saveCategory(state, cat) {
+        const category = { ...cat }
         if (category.name) {
           category.name = (category.name || '').toLowerCase().replace(/ /g, '_')
         }
@@ -173,18 +206,6 @@ export function createStore() {
         } else {
           const order = state.currentConfig.reserveCategories.length + 1
           state.currentConfig.reserveCategories.push({ ...category, order })
-        }
-        const defaultCategory = state.currentConfig.reserveCategories.find(
-          (el) => el.isDefault
-        )
-        if (defaultCategory) {
-          const nonDefaultCategoriesAllocation = state.currentConfig.reserveCategories
-            .filter((cat) => !cat.isDefault)
-            .reduce((acc, cat) => {
-              return acc + parseInt(cat.size)
-            }, 0)
-          defaultCategory.size =
-            state.currentConfig.supply - nonDefaultCategoriesAllocation
         }
       },
       moveCategory(state, { category, direction }) {
@@ -210,7 +231,17 @@ export function createStore() {
         })
         state.currentConfig.reserveCategories = movedCategories
       },
-      deleteCategory(state, category) {},
+      deleteCategory(state, categoryToDelete) {
+        if (!categoryToDelete.isDefault) {
+          const filteredCategories = state.currentConfig.reserveCategories.filter(
+            (category) => category.order !== categoryToDelete.order
+          )
+          filteredCategories.forEach((category, index) => {
+            category.order = index + 1
+          })
+          state.currentConfig.reserveCategories = filteredCategories
+        }
+      },
       addReserveInstance(state, reserveInstance) {
         state.reserveInstances = [
           ...(state.reserveInstances || []),

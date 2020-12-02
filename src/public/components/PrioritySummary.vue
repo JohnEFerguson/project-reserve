@@ -27,7 +27,7 @@
   </div>
 </template>
 <script>
-import PriorityOrderPanel from "./PriorityOrderPanel.vue";
+import PriorityOrderPanel from './PriorityOrderPanel.vue'
 export default {
   components: { PriorityOrderPanel },
   props: {
@@ -40,12 +40,12 @@ export default {
     sortByLabel() {
       const sortOrders = (this.reserveCategory.priority || []).map(
         (cat) => `by <strong>${cat.name}</strong>`
-      );
-      sortOrders.push("by <strong>random lottery tiebreaker</strong>");
-      return `Sort ${(sortOrders || []).join(", ")}`;
+      )
+      sortOrders.push('by <strong>random lottery tiebreaker</strong>')
+      return `Sort ${(sortOrders || []).join(', ')}`
     },
   },
-};
+}
 </script>
 <style scoped lang="stylus">
 .prioritySummaryWrapper {
@@ -59,8 +59,8 @@ export default {
 .summaryBody {
   flex: 1;
   width: 100%;
-  padding: 45px;
-  margin: 27px;
+  padding: 18px;
+  margin: 18px;
   background: var(--light-grey);
   border-radius: 18px;
 }
