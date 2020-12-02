@@ -142,6 +142,11 @@ export default {
       }
     },
   },
+  beforeMount() {
+    if (!this.$store.state.currentConfig.reserveCategories.length) {
+      this.$router.push('/reserve-instances')
+    }
+  },
   mounted() {
     this.$store.commit('updateSupplySum')
   },
