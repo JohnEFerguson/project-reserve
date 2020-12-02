@@ -5,6 +5,7 @@
       <input
         v-model.trim="criteria.name"
         class="textInput"
+        @input="validatePriorities"
         name="name"
         placeholder="e.g., sofa_score"
         :disabled="isReadOnly"
@@ -48,6 +49,11 @@
     <!-- CATEGORY FIELDS  -->
 
     <div v-if="criteria.criteriaType === CATEGORY_TYPE">
+      <span
+        v-if="criteriaErrors && criteriaErrors.elements"
+        class="fs-12 mt-9 ml-18 col-error"
+        >{{ criteriaErrors.elements }}</span
+      >
       <div
         v-for="(element, elementIndex) in criteria.elements"
         :key="`criteria${criteriaIndex}category${elementIndex}`"
@@ -55,6 +61,7 @@
       >
         <input
           v-model.trim="element.name"
+          @input="validatePriorities"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
@@ -90,6 +97,11 @@
     <!-- NUMERIC FIELDS -->
 
     <div v-if="criteria.criteriaType === NUMERIC_TYPE">
+      <span
+        v-if="criteriaErrors && criteriaErrors.minMax"
+        class="fs-12 mt-9 ml-18 col-error"
+        >{{ criteriaErrors.minMax }}</span
+      >
       <div :class="isReadOnly ? 'flexcolumn' : 'flexrow'">
         <div class="flexcolumn">
           <label class="ml-9" :for="`criteria${criteriaIndex}min`"
@@ -97,6 +109,7 @@
           >
           <input
             v-model.number="criteria.min"
+            @input="validatePriorities"
             type="number"
             class="textInput w50"
             :name="`criteria${criteriaIndex}min`"
@@ -109,6 +122,7 @@
           >
           <input
             v-model.number="criteria.max"
+            @input="validatePriorities"
             type="number"
             class="textInput w50"
             :name="`criteria${criteriaIndex}max`"
@@ -153,6 +167,7 @@
           <div class="flexrow">
             <input
               v-model="criteria.coarsened"
+              @input="validatePriorities"
               class="textInput"
               :name="`criteriaCoarsenedYes${criteriaIndex}`"
               type="radio"
@@ -166,6 +181,7 @@
           <div class="flexrow ml-18">
             <input
               v-model="criteria.coarsened"
+              @input="validatePriorities"
               class="textInput"
               :name="`criteriaCoarsenedNo${criteriaIndex}`"
               type="radio"
@@ -179,6 +195,11 @@
         </div>
       </div>
       <div v-if="criteria.coarsened" class="flexcolumn mt-18">
+        <span
+          v-if="criteriaErrors && criteriaErrors.bins"
+          class="fs-12 mt-9 ml-9 col-error"
+          >{{ criteriaErrors.bins }}</span
+        >
         <label class="ml-9" :for="`criteriaNumBins${criteriaIndex}`"
           >Number of bins</label
         >
@@ -188,7 +209,12 @@
           class="textInput w25"
           :name="`criteriaNumBins${criteriaIndex}`"
           type="number"
-          @input="(e) => updateNumBins(e.target.value)"
+          @input="
+            (e) => {
+              updateNumBins(e.target.value)
+              validatePriorities()
+            }
+          "
         />
         <div class="divider mt-18 mb-18" />
         <div
@@ -205,6 +231,7 @@
             >
             <input
               v-model.number="bin.min"
+              @input="validatePriorities"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}min`"
@@ -219,6 +246,7 @@
             >
             <input
               v-model.number="bin.max"
+              @input="validatePriorities"
               class="textInput w100"
               type="number"
               :name="`criteria${criteriaIndex}bin${binIndex}max`"
@@ -249,7 +277,11 @@ export default {
       type: Boolean,
       default: false,
     },
-    setHasCriteriaError: {
+    criteriaErrors: {
+      type: Object,
+      default: null,
+    },
+    validatePriorities: {
       type: Function,
       default: () => {},
     },
@@ -263,9 +295,6 @@ export default {
     },
   },
   methods: {
-    logCriteria() {
-      console.log(this.criteria)
-    },
     addNewElement() {
       this.criteria.elements.push({
         name: '',

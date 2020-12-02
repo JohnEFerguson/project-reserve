@@ -148,3 +148,20 @@ export function toTitleCase(str) {
     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
   })
 }
+
+export function checkBinRange({ bins, min, max }) {
+  let binError = null
+  const rangeCovered = bins.reduce((acc, bin, index) => {
+    if (!isFloat(bin.min) || !isFloat(bin.max)) {
+      binError = `Bin ${index + 1} must have a valid float.`
+      return acc
+    } else if (bin.min < min) {
+      binError = `Bin ${index + 1} cannot have a min less than ${min}.`
+      return acc
+    } else if (bin.max > max) {
+      binError = `Bin ${index + 1} cannot have a max greater than ${max}.`
+      return acc
+    }
+  }, [])
+  return binError
+}

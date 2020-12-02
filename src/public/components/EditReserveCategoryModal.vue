@@ -73,7 +73,10 @@
               :key="`criteria-tab-${criteriaIndex}`"
               :class="[
                 'modalCriteriaTab',
-                { isActive: criteriaIndex === currentCriteria },
+                {
+                  isActive: criteriaIndex === currentCriteria,
+                  hasError: !!criteriaErrors[criteriaIndex],
+                },
               ]"
               @click="() => updateCriteriaTab(criteriaIndex)"
               >{{ `Criteria ${criteriaIndex + 1}` }}</span
@@ -103,7 +106,8 @@
                 v-if="criteriaIndex === currentCriteria"
                 :criteria="criteria"
                 :criteria-index="criteriaIndex"
-                :set-has-criteria-error="setHasCriteriaError"
+                :validate-priorities="validatePriorities"
+                :criteria-errors="criteriaErrors[criteriaIndex]"
               />
             </div>
           </div>
@@ -139,6 +143,7 @@ import {
   numericFields,
 } from './constants'
 import { editReserveCategoryCopyMap } from './constants'
+import { checkBinRange } from '../plugins/helpers'
 
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
@@ -174,7 +179,7 @@ export default {
       reserveCategory: deepClone(this.categoryToEdit),
       currentCriteria: 0,
       hasNameError: false,
-      hasCriteriaError: false,
+      criteriaErrors: {},
       initialSize: this.categoryToEdit.size,
       copyToShow: null,
     }
@@ -201,6 +206,12 @@ export default {
         this.reserveCategory.size < 0
       )
     },
+    hasCriteriaError() {
+      return Object.keys(this.criteriaErrors).reduce(
+        (acc, key) => !!this.criteriaErrors[key] || acc,
+        false
+      )
+    },
   },
   mounted() {
     if (!this.reserveCategory.priority.length) {
@@ -208,6 +219,82 @@ export default {
     }
   },
   methods: {
+    validatePriorities() {
+      const errors = {}
+      this.reserveCategory.priority.forEach((criteria, index) => {
+        if (!!criteria.name) {
+          switch (criteria.criteriaType) {
+            case CATEGORY_TYPE:
+              const elements = criteria.elements.filter(({ name }) => !!name)
+              if (!elements.length) {
+                errors[index] = {
+                  elements: 'You need at least 1 named element.',
+                }
+              } else {
+                errors[index] = null
+              }
+              break
+            case NUMERIC_TYPE:
+              if (criteria.max < criteria.min) {
+                const minMaxError = {
+                  minMax: 'The max must be greater than or equal to the min.',
+                }
+                if (!!errors[index]) {
+                  errors[index] = minMaxError
+                } else {
+                  errors[index] = {
+                    ...errors[index],
+                    ...minMaxError,
+                  }
+                }
+              }
+              if (criteria.coarsened) {
+                // confirm that Bin 1 has the correct min
+                let binError = null
+                if (!criteria.bins.length) {
+                  binError = {
+                    bins: 'Please enter at least 1 bin.',
+                  }
+                } else if (criteria.bins[0].min !== criteria.min) {
+                  binError = {
+                    bins: `Bin 1 must have a min of ${criteria.min}.`,
+                  }
+                } else if (
+                  criteria.bins[criteria.bins.length - 1].max !== criteria.max
+                ) {
+                  binError = {
+                    bins: `Bin ${criteria.bins.length} must have a max of ${criteria.max}.`,
+                  }
+                } else {
+                  const binRangeError = checkBinRange({
+                    bins: criteria.bins,
+                    min: criteria.min,
+                    max: criteria.max,
+                  })
+                  if (binRangeError) {
+                    binError = {
+                      bins: binRangeError,
+                    }
+                  }
+                }
+
+                if (!!errors[index] && binError) {
+                  errors[index] = binError
+                } else if (binError) {
+                  errors[index] = {
+                    ...errors[index],
+                    ...binError,
+                  }
+                }
+              }
+              break
+            default:
+              break
+          }
+        }
+      })
+      this.criteriaErrors = errors
+    },
     closeCopyModal() {
       this.copyToShow = null
     },
@@ -314,6 +401,14 @@ export default {
   &.isActive {
     background-color: var(--dark-blue);
     color: var(--light-grey);
+  }
+  &.hasError {
+    background-color: #ff4242;
+    border-color: #ff4242;
+    &.isActive {
+      border-color: black;
+    }
+    color: white;
   }
 }
 .modalCriteriaPanels {
