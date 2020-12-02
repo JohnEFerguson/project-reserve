@@ -103,51 +103,52 @@ export default {
         })
         const sourceFile = await sourceFileRes.json()
 
-        // const CHUNK_UPPER_LIMIT = 50
-        // let numChunks = 1
-        // const patientChunks = this.patientObjs.reduce(
-        //   (chunks, patientObj) => {
-        //     if (chunks[numChunks - 1].length === CHUNK_UPPER_LIMIT) {
-        //       numChunks = numChunks + 1
-        //       chunks.push([])
-        //     }
-        //     chunks[numChunks - 1].push(patientObj)
-        //     return chunks
-        //   },
-        //   [[]]
-        // )
-        // await Promise.all(
-        //   patientChunks.map((chunk) =>
-        //     fetch('/patients', {
-        //       method: 'POST',
-        //       headers: {
-        //         'content-type': 'application/json',
-        //       },
-        //       body: JSON.stringify(
-        //         chunk.map((patientInfo) => ({
-        //           configurationId: this.currentConfig.id,
-        //           sourceFileId: sourceFile.id,
-        //           ...patientInfo,
-        //         }))
-        //       ),
-        //     })
-        //   )
-        // )
-
-        await fetch('/patients', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
+        const CHUNK_UPPER_LIMIT = 50
+        let numChunks = 1
+        const patientChunks = this.patientObjs.reduce(
+          (chunks, patientObj) => {
+            if (chunks[numChunks - 1].length === CHUNK_UPPER_LIMIT) {
+              numChunks = numChunks + 1
+              chunks.push([])
+            }
+            chunks[numChunks - 1].push(patientObj)
+            return chunks
           },
-          body: JSON.stringify(
-            this.patientObjs.map((patientInfo) => ({
-              configurationId: this.currentConfig.id,
-              sourceFileId: sourceFile.id,
-              ...patientInfo,
-            }))
-          ),
+          [[]]
+        )
+        Promise.all(
+          patientChunks.map((chunk) =>
+            fetch('/patients', {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: JSON.stringify(
+                chunk.map((patientInfo) => ({
+                  configurationId: this.currentConfig.id,
+                  sourceFileId: sourceFile.id,
+                  ...patientInfo,
+                }))
+              ),
+            })
+          )
+        ).then(() => {
+          this.$store.dispatch('processSourceFile', sourceFile.id)
         })
-        this.$store.dispatch('processSourceFile', sourceFile.id)
+
+        // await fetch('/patients', {
+        //   method: 'POST',
+        //   headers: {
+        //     'content-type': 'application/json',
+        //   },
+        //   body: JSON.stringify(
+        //     this.patientObjs.map((patientInfo) => ({
+        //       configurationId: this.currentConfig.id,
+        //       sourceFileId: sourceFile.id,
+        //       ...patientInfo,
+        //     }))
+        //   ),
+        // })
       }
     },
     downloadCsvTemplate() {
@@ -202,7 +203,10 @@ export default {
               name: fieldNames[index],
               dataType: 'STRING',
               required: false,
-              possibleValues: { min: 0, max: 100000 },
+              possibleValues:
+                fieldNames[index] === 'random_number'
+                  ? { min: 0, max: 100000 }
+                  : null,
             }
             const errorMessage = `Patient ${
               patientIndex + 1
