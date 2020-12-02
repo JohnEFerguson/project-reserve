@@ -6,7 +6,7 @@ const fs = require('fs')
 const express = require('express')
 const path = require('path')
 
-module.exports = function (pathToDb, cleanDB) {
+module.exports = function ({ pathToDb, cleanDB }) {
   const server = express()
   const db = require(path.join(__dirname, '/config/db'))(pathToDb)
   const env = require(path.join(__dirname, '/config/env'))
@@ -134,8 +134,8 @@ module.exports = function (pathToDb, cleanDB) {
     isProd
       ? render
       : (req, res) => {
-        readyPromise.then(() => render(req, res))
-      }
+          readyPromise.then(() => render(req, res))
+        }
   )
 
   const httpServer = http.createServer(server)

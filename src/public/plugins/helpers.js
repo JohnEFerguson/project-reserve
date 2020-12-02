@@ -48,16 +48,6 @@ export function downloadCSV({ content, fileName }) {
 //   return bins
 // }
 
-export function trimStrings(obj) {
-  const objCopy = { ...obj }
-  for (const prop in obj) {
-    if (typeof objCopy[prop] === 'string') objCopy[prop] = prop.trim()
-    else if (typeof objCopy[prop] === 'object')
-      objCopy[prop] = removeIds(obj[prop])
-  }
-  return objCopy
-}
-
 export function transformCriteriaForPost(priority) {
   if (!priority) {
     return null
@@ -88,13 +78,12 @@ export function transformCriteriaForPost(priority) {
           ({ name }) => !!name
         )
       } else {
-        // const sortedBins = filteredCriteria.bins.sort(
-        //   filteredCriteria.ascending ? sortByAscendingBin : sortByDescendingBin
-        // )
-        // sortedBins.forEach((bin, index) => {
-        //   bin.order = index + 1
-        // })
-        // filteredCriteria.bins = sortedBins
+        const totalBins = filteredCriteria.bins.length
+        for (let i = 0; i < totalBins; i++) {
+          filteredCriteria.bins[i].order = filteredCriteria.ascending
+            ? i + 1
+            : totalBins - i
+        }
       }
       bucket.push(filteredCriteria)
       order = order + 1
