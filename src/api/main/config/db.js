@@ -60,6 +60,8 @@ module.exports = function (storagePath) {
     db.reserveCategory,
     { as: 'reserveCategories' }
   )
+  db.sourceFile.belongsTo(db.configuration)
+
   db.reserveCategory.priority = db.reserveCategory.hasOne(db.priority)
   db.patient.reserveCategories = db.patient.belongsToMany(db.reserveCategory, {
     through: db.patientReserveCategory,

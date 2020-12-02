@@ -151,32 +151,43 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
     { type: SELECT }
   );
 
+  const names = new Set()
+
   const fieldNames = [
     { name: "recipient_id", required: true, dataType: "STRING" },
   ];
-  reserveCategoryNames.forEach((cat) =>
-    fieldNames.push({
-      name: "is_" + cat.name.toLowerCase().split(" ").join("_"),
-      required: true,
-      dataType: "BOOLEAN",
-    })
-  );
-  categoryCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({
-      name: criteria.name.toLowerCase().split(" ").join("_"),
-      required: false,
-      dataType: "STRING",
-      possibleValues: possibleValuesMap[criteria.id]
-    })
-  );
-  numericCriteriaFields[0].forEach((criteria) =>
-    fieldNames.push({
-      name: criteria.name.toLowerCase().split(" ").join("_"),
-      required: false,
-      dataType: "NUMBER",
-      possibleValues: { min: criteria.min, max: criteria.max }
-    })
-  );
+  reserveCategoryNames.forEach((cat) => {
+    if (!names.has(cat.name)) {
+      fieldNames.push({
+        name: "is_" + cat.name.toLowerCase().split(" ").join("_"),
+        required: true,
+        dataType: "BOOLEAN",
+      })
+      names.add(cat.name)
+    }
+  });
+  categoryCriteriaFields[0].forEach((criteria) => {
+    if (!names.has(criteria.name)) {
+      fieldNames.push({
+        name: criteria.name.toLowerCase().split(" ").join("_"),
+        required: false,
+        dataType: "STRING",
+        possibleValues: possibleValuesMap[criteria.id]
+      })
+      names.add(criteria.name)
+    }
+  });
+  numericCriteriaFields[0].forEach((criteria) => {
+    if (!names.has(criteria.name)) {
+      fieldNames.push({
+        name: criteria.name.toLowerCase().split(" ").join("_"),
+        required: false,
+        dataType: "NUMBER",
+        possibleValues: { min: criteria.min, max: criteria.max }
+      })
+      names.add(criteria.name)
+    }
+  });
 
   res.json(fieldNames);
 });

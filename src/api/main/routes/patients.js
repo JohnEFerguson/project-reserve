@@ -31,12 +31,12 @@ router.post("/patients", async (req, res) => {
       rawPatients.map(async (rawPat) => {
         const configurationId = rawPat.configurationId;
 
-        rawPat['generated_random_number'] = rawPat.random_number && (Number.isInteger(rawPat.random_number) || Number.isFloat(rawPat.random_number))
+        rawPat['used_generated_random_number'] = rawPat.usedGeneratedRandomNumber
 
-        const rand_number = rawPat['generated_random_number'] ? rawPat.random_number : Math.random() * 100000
+        const rand_number = rawPat['used_generated_random_number'] ? rawPat.random_number : Math.random() * 100000
 
         const newPatient = {
-          name: rawPat.name,
+          recipient_id: rawPat.recipient_id,
           sourceFileId: rawPat.sourceFileId,
           configurationId,
           rand_number,
@@ -86,7 +86,7 @@ router.post("/patients", async (req, res) => {
         });
 
         newPatient.numericCriteria = await numericCriteria;
-        newPatient.numericCriteria.forEach(async (crit) => {
+        const numericCriteriaValues = await Promise.all(newPatient.numericCriteria.map(async (crit) => {
           const critId = crit.dataValues.id;
           const fieldName = crit.dataValues.name;
           const value = rawPat[fieldName];
@@ -122,10 +122,10 @@ router.post("/patients", async (req, res) => {
           }
 
           // TODO: alias to avoid weird naming?
-          await createdPatient.addNumeric_criteria_bucket(bucket, {
+          return await createdPatient.addNumeric_criteria_bucket(bucket, {
             through: { value: rawPat[fieldName] },
           });
-        });
+        }))
 
         // add category criteria values
         const possibleCategoryCriteriaFields = fields.filter(
@@ -136,7 +136,7 @@ router.post("/patients", async (req, res) => {
           priority_id: { [Op.in]: priorityIds },
         });
         newPatient.categoryCriteria = await categoryCriteria;
-        newPatient.categoryCriteria.forEach(async (crit) => {
+        const categoryCriteriaElements = await Promise.all(newPatient.categoryCriteria.map(async (crit) => {
           const critId = crit.dataValues.id;
           const fieldName = crit.dataValues.name;
           const value = rawPat[fieldName];
@@ -148,12 +148,13 @@ router.post("/patients", async (req, res) => {
             },
           });
 
-          await createdPatient.addCategory_criteria_element(element, {
+          return await createdPatient.addCategory_criteria_element(element, {
             through: { value: rawPat[fieldName] },
           });
-        });
+        }));
 
-        return createdPatient;
+
+        return categoryCriteriaElements;
       })
     );
 

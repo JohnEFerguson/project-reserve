@@ -55,7 +55,7 @@ router.get('/sourceFiles/:id/patients', async (req, res) => {
   if (req.query.givenUnit)
     filterLosers += `and ${
       req.query.givenUnit === 'false' ? 'not' : ''
-    } given_unit`
+      } given_unit`
 
   return res.json(await getPatientsWithAttributes(db, id, filterLosers))
 })
@@ -85,6 +85,7 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       })
     )
 
+
     const patients = await Promise.all(
       (
         await db.patient.findAll({
@@ -94,7 +95,7 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       ).map((f) => f.id)
     )
 
-    let leftOver = 0 // handle this!
+    let leftOver = 0
     const selectedPatients = new Set()
     const allocatedPatientGroups = new Map()
     const notSelectedPatients = new Set(patients)
@@ -104,13 +105,17 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       let given = 0
       let i = 0
       while (i < f.patients.length) {
+
+
         if (given < f.size && !selectedPatients.has(f.patients[i])) {
+
           selectedPatients.add(f.patients[i])
           allocatedPatientGroups[f.patients[i]] = f.name
           given += 1
           notSelectedPatients.delete(f.patients[i])
 
           if (given == f.size) {
+
             nthReservePatients.push({
               name: f.name,
               nthRecipientPrimaryId: f.patients[i],
@@ -125,7 +130,7 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
 
     // give left over to unallocated patients if there are any
     while (leftOver > 0 && notSelectedPatients.size > 0) {
-      const pat = notSelectedPatients.next()
+      const pat = notSelectedPatients.values().next()
       notSelectedPatients.delete(pat)
       selectedPatients.add(pat)
       allocatedPatientGroups[pat] = 'None'
@@ -144,8 +149,9 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       nthReservePatients.map(async (f) => {
         const name = (
           await db.patient.findOne({ where: { id: f.nthRecipientPrimaryId } })
-        ).recipient_id
-        return { name: f.name, nthRecipientId: name }
+        )
+
+        return { name: f.name, nthRecipientId: name.dataValues.recipient_id }
       })
     )
 
@@ -206,6 +212,7 @@ async function getPatientsWithAttributes(db, sourceFileId, filterLosers) {
 
       delete patObj.configurationId
       delete patObj.sourceFileId
+      delete patObj.usedGeneratedRandomNumber
 
       return patObj
     })

@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
         autoIncrement: true,
         allowNull: false,
       },
-      public_id: {
+      recipient_id: {
         type: STRING,
       },
       name: {
