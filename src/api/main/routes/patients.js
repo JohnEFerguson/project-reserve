@@ -33,7 +33,7 @@ router.post("/patients", async (req, res) => {
 
         rawPat['used_generated_random_number'] = rawPat.usedGeneratedRandomNumber
 
-        const rand_number = rawPat['used_generated_random_number'] ? rawPat.random_number : Math.random() * 100000
+        const rand_number = rawPat['used_generated_random_number'] ? Math.random() * 100000 : rawPat.random_number
 
         const newPatient = {
           recipient_id: rawPat.recipient_id,
