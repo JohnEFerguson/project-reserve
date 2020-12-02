@@ -87,6 +87,14 @@ export function transformCriteriaForPost(priority) {
         filteredCriteria.elements = filteredCriteria.elements.filter(
           ({ name }) => !!name
         )
+      } else {
+        // const sortedBins = filteredCriteria.bins.sort(
+        //   filteredCriteria.ascending ? sortByAscendingBin : sortByDescendingBin
+        // )
+        // sortedBins.forEach((bin, index) => {
+        //   bin.order = index + 1
+        // })
+        // filteredCriteria.bins = sortedBins
       }
       bucket.push(filteredCriteria)
       order = order + 1
@@ -114,6 +122,7 @@ export function transformCriteriaForDisplay(priority) {
     (crit) =>
       (criterias[crit.order - 1] = {
         ...crit,
+        numBins: crit.bins.length,
         criteriaType: NUMERIC_TYPE,
       })
   )
