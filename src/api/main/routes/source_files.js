@@ -128,17 +128,20 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       leftOver += f.size - given
     })
 
+    const notSelectedPatientsArray = Array.from(notSelectedPatients)
+    let i = 0
     // give left over to unallocated patients if there are any
-    while (leftOver > 0 && notSelectedPatients.size > 0) {
-      const pat = notSelectedPatients.values().next()
-      notSelectedPatients.delete(pat)
+    while (leftOver > 0 && i < notSelectedPatientsArray.length) {
+      const pat = notSelectedPatientsArray[i]
       selectedPatients.add(pat)
       allocatedPatientGroups[pat] = 'None'
       leftOver -= 1
+      i += 1
     }
 
     // update patients
     selectedPatients.forEach(async (pId) => {
+
       const patient = await db.patient.findOne({ where: { id: pId } })
       patient.given_unit = true
       patient.group_allocated_under = allocatedPatientGroups[pId]
