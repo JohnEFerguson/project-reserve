@@ -279,7 +279,11 @@ export default {
       this.copyToShow = editReserveCategoryCopyMap[copyKey]
     },
     saveCategory() {
-      if (!this.hasSizeError && this.reserveCategory.name) {
+      if (
+        !this.hasSizeError &&
+        this.reserveCategory.name &&
+        !this.hasCriteriaError
+      ) {
         const filteredPriorities = this.reserveCategory.priority.filter(
           (criteria) => criteria.name
         )

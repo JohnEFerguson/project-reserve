@@ -183,10 +183,12 @@ export default {
       this.$store.commit('moveCategory', { category, direction: 'down' })
     },
     deleteCategory(category) {
-      this.$store.dispatch('deleteCategory', category)
+      if (!category.isDefault) {
+        this.$store.dispatch('deleteCategory', category)
+      }
     },
     async postConfig() {
-      if (!this.disableNext) {
+      if (!this.errorMessage) {
         try {
           await this.$store.dispatch('postConfig')
           this.$router.push('/finish')
