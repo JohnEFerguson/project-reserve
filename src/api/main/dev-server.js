@@ -1,1 +1,1 @@
-require('./server')('./', true)
+require('./server')('./', false)

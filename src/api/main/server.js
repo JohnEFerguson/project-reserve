@@ -126,16 +126,16 @@ module.exports = function (pathToDb, cleanDB) {
     })
 
   server.use(compression({ threshold: 0 }))
-  server.use('/dist', serve('./dist', true))
-  server.use('/public', serve('./public', true))
+  server.use('/dist', serve('../../../dist', true))
+  server.use('/public', serve('../../public', true))
 
   server.get(
     '*',
     isProd
       ? render
       : (req, res) => {
-          readyPromise.then(() => render(req, res))
-        }
+        readyPromise.then(() => render(req, res))
+      }
   )
 
   const httpServer = http.createServer(server)
