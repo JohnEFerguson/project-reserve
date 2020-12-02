@@ -54,12 +54,11 @@
         class="flexrow mb-9"
       >
         <input
-          v-if="element.name"
           v-model="element.name"
           type="text"
           :name="`criteria${criteriaIndex}category${elementIndex}`"
           class="textInput"
-          placeholder="e.g. Suffolk County"
+          :placeholder="isReadOnly ? '' : 'e.g. Suffolk County'"
           :disabled="isReadOnly"
         />
         <div v-if="!isReadOnly" class="flexcolumn ml-9">
