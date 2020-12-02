@@ -168,7 +168,9 @@ export default {
         const recipientIds = []
         patientObjs = patients.map((patient) => {
           return patient.reduce((acc, field, index) => {
-            const { name, dataType, required } = dataTypeMap[index] || {
+            const { name, dataType, required, possibleValues } = dataTypeMap[
+              index
+            ] || {
               name: fieldNames[index],
               dataType: 'STRING',
               required: false,
