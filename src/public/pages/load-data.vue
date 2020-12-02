@@ -1,8 +1,18 @@
 <template>
   <div class="container">
+    <CopyModal
+      v-if="copyToShow"
+      :copy="copyToShow"
+      :on-close="closeCopyModal"
+    />
     <h1 class="header">Load Data</h1>
     <div class="flexrow p18 loadBtnWrapper">
-      <span>Please upload a CSV file</span>
+      <span
+        >Please upload a CSV file<font-awesome-icon
+          icon="info-circle"
+          class="icon ml-9"
+          @click="openCopyModal"
+      /></span>
       <button class="navButton ml-a fs-16" @click="downloadCsvTemplate">
         Download Template
       </button>
@@ -37,15 +47,19 @@
 
 <script>
 import { unparse, parse } from 'papaparse'
-import { downloadCSV } from '../plugins/helpers'
+import { downloadCSV, isFloat } from '../plugins/helpers'
+import CopyModal from '../components/CopyModal.vue'
+import { loadDataCopy } from '../components/constants'
 
 export default {
+  components: { CopyModal },
   data() {
     return {
       errorMessage: null,
       successMessage: null,
       sourceFile: null,
       patientObjs: null,
+      copyToShow: null,
     }
   },
   computed: {
@@ -69,6 +83,12 @@ export default {
     })
   },
   methods: {
+    openCopyModal() {
+      this.copyToShow = loadDataCopy
+    },
+    closeCopyModal() {
+      this.copyToShow = null
+    },
     async setReserveInstance() {
       if (this.successMessage) {
         const sourceFileRes = await fetch('/sourceFiles', {
@@ -151,7 +171,7 @@ export default {
       let patientObjs
       try {
         const dataTypeMap = this.requiredFields.reduce(
-          (acc, { name, dataType, required }) => {
+          (acc, { name, dataType, required, possibleValues }) => {
             const fieldIndex = fieldNames.indexOf(name)
             if (fieldIndex < 0) {
               throw new Error(
@@ -160,13 +180,13 @@ export default {
                 )}`
               )
             }
-            acc[fieldIndex] = { name, dataType, required }
+            acc[fieldIndex] = { name, dataType, required, possibleValues }
             return acc
           },
           {}
         )
         const recipientIds = []
-        patientObjs = patients.map((patient) => {
+        patientObjs = patients.map((patient, patientIndex) => {
           return patient.reduce((acc, field, index) => {
             const { name, dataType, required, possibleValues } = dataTypeMap[
               index
@@ -175,7 +195,9 @@ export default {
               dataType: 'STRING',
               required: false,
             }
-            const errorMessage = `Patient ${index} has an invalid value for ${name}: ${field}.`
+            const errorMessage = `Patient ${
+              patientIndex + 1
+            } has an invalid value for ${name}: ${field}.`
             let realFieldValue = field
             if (required && !realFieldValue) {
               throw new Error(
@@ -204,12 +226,16 @@ export default {
                 break
               }
               case 'NUMBER': {
-                let numberVal
-                try {
-                  numberVal = parseFloat(field)
-                } catch (_) {
+                if (!isFloat(field)) {
                   throw new Error(
                     `${errorMessage} Please ensure this is a real number`
+                  )
+                }
+                const numberVal = parseFloat(field)
+                const { min, max } = possibleValues || {}
+                if (numberVal < min || numberVal > max) {
+                  throw new Error(
+                    `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
                   )
                 }
                 realFieldValue = numberVal
@@ -217,7 +243,13 @@ export default {
               }
               default:
               case 'STRING':
-                // data will always be a string?
+                if (possibleValues && !possibleValues.includes(field)) {
+                  throw new Error(
+                    `${errorMessage} Please ensure value is one of ${possibleValues.join(
+                      ', '
+                    )}.`
+                  )
+                }
                 break
             }
             acc[name] = realFieldValue

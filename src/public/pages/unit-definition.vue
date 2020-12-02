@@ -7,13 +7,14 @@
     />
     <div class="container">
       <div class="inputRow mb-54">
-        <label for="unitTypeInput"
-          >What unit is being allocated?<font-awesome-icon
+        <div>
+          <label for="unitTypeInput">What unit is being allocated?</label>
+          <font-awesome-icon
             icon="info-circle"
-            size="sm"
             class="icon ml-9"
             @click="() => setCopyToShow('unitType')"
-        /></label>
+          />
+        </div>
         <input
           v-model="unitType"
           name="unitTypeInput"
@@ -22,13 +23,14 @@
       </div>
       <div class="mb-54">
         <div class="inputRow">
-          <label for="supplyInput"
-            >How many units are being allocated?<font-awesome-icon
+          <div>
+            <label for="supplyInput">How many units are being allocated?</label>
+            <font-awesome-icon
               icon="info-circle"
-              size="sm"
               class="icon ml-9"
               @click="() => setCopyToShow('unitAllocation')"
-          /></label>
+            />
+          </div>
           <input
             v-model="supply"
             name="supplyInput"

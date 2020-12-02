@@ -11,8 +11,11 @@
         <div class="flexcolumn">
           <div class="flexcolumn mb-27">
             <label class="ml-9 mb-9" for="categoryName"
-              >Reserve category abbreviated name</label
-            >
+              >Reserve category abbreviated name<font-awesome-icon
+                icon="info-circle"
+                class="icon ml-9"
+                @click="() => setCopyToShow('name')"
+            /></label>
             <input
               v-model="reserveCategory.name"
               class="textInput"
@@ -38,8 +41,11 @@
           </div>
           <div class="flexcolumn mb-27">
             <label class="ml-9 mb-9" for="categoryDescription"
-              >Reserve size</label
-            >
+              >Reserve size<font-awesome-icon
+                icon="info-circle"
+                class="icon ml-9"
+                @click="() => setCopyToShow('size')"
+            /></label>
             <input
               v-model="reserveCategory.size"
               class="textInput"
@@ -54,7 +60,13 @@
           </div>
         </div>
         <div class="modalCriteriaWrapper">
-          <h4 class="mb-9 fw-n">Specification of priority order</h4>
+          <h4 class="mb-9 fw-n">
+            Specification of priority order<font-awesome-icon
+              icon="info-circle"
+              class="icon ml-9"
+              @click="() => setCopyToShow('priority')"
+            />
+          </h4>
           <div class="modalCriteriaTabs flexrow">
             <span
               v-for="(criteria, criteriaIndex) in reserveCategory.priority"
@@ -118,6 +130,8 @@
 
 <script>
 import PriorityOrderPanel from './PriorityOrderPanel.vue'
+import CopyModal from './CopyModal.vue'
+
 import {
   CATEGORY_TYPE,
   NUMERIC_TYPE,
@@ -138,7 +152,7 @@ const defaultCriteria = {
   ...deepClone(numericFields),
 }
 export default {
-  components: { PriorityOrderPanel },
+  components: { PriorityOrderPanel, CopyModal },
   props: {
     onClose: { type: Function, required: true },
     mode: { type: String, required: true },
@@ -162,6 +176,7 @@ export default {
       hasNameError: false,
       hasCriteriaError: false,
       initialSize: this.categoryToEdit.size,
+      copyToShow: null,
     }
   },
   computed: {
@@ -193,6 +208,12 @@ export default {
     }
   },
   methods: {
+    closeCopyModal() {
+      this.copyToShow = null
+    },
+    setCopyToShow(copyKey) {
+      this.copyToShow = editReserveCategoryCopyMap[copyKey]
+    },
     setHasCriteriaError(hasCriteriaError) {
       this.hasCriteriaError = hasCriteriaError
     },

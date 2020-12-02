@@ -140,6 +140,23 @@ export function createStore() {
         commit('updateDefaultCategorySize')
         commit('updateSupplySum')
       },
+      async deleteReserveInstance({ commit, state }, instanceId) {
+        await fetch(`/sourceFiles/${instanceId}`, {
+          method: 'DELETE',
+        })
+        commit(
+          'setReserveInstances',
+          state.reserveInstances.filter(
+            (instance) => instance.id !== instanceId
+          )
+        )
+      },
+      async deleteAllReserveInstances({ commit, state }, instanceId) {
+        await fetch('/sourceFiles', {
+          method: 'DELETE',
+        })
+        commit('setReserveInstances', [])
+      },
     },
 
     mutations: {

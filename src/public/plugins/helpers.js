@@ -125,3 +125,18 @@ export function removeIds(obj) {
     else if (typeof obj[prop] === 'object') removeIds(obj[prop])
   }
 }
+
+export function isFloat(val) {
+  var floatRegex = /^-?\d+(?:[.,]\d*?)?$/
+  if (!floatRegex.test(val)) return false
+
+  val = parseFloat(val)
+  if (isNaN(val)) return false
+  return true
+}
+
+export function toTitleCase(str) {
+  return str.replace(/_/g, ' ').replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  })
+}
