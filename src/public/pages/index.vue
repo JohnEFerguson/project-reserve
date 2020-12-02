@@ -7,9 +7,9 @@
         working paper authored by a team of market design researchers: Parag
         Pathak (MIT), Tayfun Sönmez (Boston College), Utku Ünver (Boston
         College), and Bumin Yenmez (Boston College). For more information on the
-        working paper, the basics of a reserve system, and how to contact the
-        authors, please refer to the buttons below. To begin using the reserve
-        system implementation, click the start button.
+        working paper and the basics of a reserve system, please refer to the
+        buttons below. To begin using the reserve system implementation, click
+        the start button.
       </p>
     </div>
     <div class="buttons">

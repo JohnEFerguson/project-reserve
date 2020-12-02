@@ -1,24 +1,12 @@
 <template>
   <div class="modalWrapper">
     <div class="modalInnerWrapper">
-      <h2 v-if="copy.title" class="header">
-        {{ copy.title }}
+      <h2 class="header mb-18">
+        {{ action }}
       </h2>
-      <div class="modalBody">
-        <p v-if="copy.definition" class="mb-18">
-          <strong>Definition: </strong>
-          <span v-html="copy.definition" />
-        </p>
-        <div v-if="copy.faqs">
-          <h4 class="mb-18 fs-20">Frequently Asked Questions (FAQs)</h4>
-          <div v-for="q in copy.faqs" :key="q.question" class="mb-18">
-            <h6 class="fs-16 mb-9">{{ q.question }}</h6>
-            <p>{{ q.answer }}</p>
-          </div>
-        </div>
-      </div>
       <div class="modalButtons">
-        <button class="navButton ml-a" @click="onClose">Close</button>
+        <button class="navButton" @click="() => onClose(false)">No</button>
+        <button class="navButton ml-a" @click="() => onClose(true)">Yes</button>
       </div>
     </div>
   </div>
@@ -27,7 +15,7 @@
 <script>
 export default {
   props: {
-    copy: Object,
+    action: String,
     onClose: Function,
   },
 }
@@ -47,8 +35,8 @@ export default {
   z-index: 100000;
 }
 .modalInnerWrapper {
-  height: calc(100% - 18px);
-  width: 95%;
+  height: fit-content;
+  width: fit-content;
   border: 2px solid var(--dark-blue);
   background: white;
   border-radius: 18px;
@@ -60,14 +48,6 @@ export default {
 }
 .header {
   color: var(--dark-blue);
-}
-.modalBody {
-    flex: 1;
-    overflow: auto;
-    padding: 45px;
-    margin: 27px;
-    background: var(--light-grey);
-    border-radius: 18px;
 }
 .modalButtons {
   width: 100%;

@@ -1,8 +1,18 @@
 <template>
   <div class="container">
+    <CopyModal
+      v-if="copyToShow"
+      :copy="copyToShow"
+      :on-close="closeCopyModal"
+    />
     <h1 class="header">Load Data</h1>
     <div class="flexrow p18 loadBtnWrapper">
-      <span>Please upload a CSV file</span>
+      <span
+        >Please upload a CSV file<font-awesome-icon
+          icon="info-circle"
+          class="icon ml-9"
+          @click="openCopyModal"
+      /></span>
       <button class="navButton ml-a fs-16" @click="downloadCsvTemplate">
         Download Template
       </button>
@@ -38,14 +48,18 @@
 <script>
 import { unparse, parse } from 'papaparse'
 import { downloadCSV, isFloat } from '../plugins/helpers'
+import CopyModal from '../components/CopyModal.vue'
+import { loadDataCopy } from '../components/constants'
 
 export default {
+  components: { CopyModal },
   data() {
     return {
       errorMessage: null,
       successMessage: null,
       sourceFile: null,
       patientObjs: null,
+      copyToShow: null,
     }
   },
   computed: {
@@ -69,6 +83,12 @@ export default {
     })
   },
   methods: {
+    openCopyModal() {
+      this.copyToShow = loadDataCopy
+    },
+    closeCopyModal() {
+      this.copyToShow = null
+    },
     async setReserveInstance() {
       if (this.successMessage) {
         const sourceFileRes = await fetch('/sourceFiles', {

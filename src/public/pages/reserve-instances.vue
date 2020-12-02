@@ -1,14 +1,37 @@
 <template>
   <div class="reserveContainer">
     <h1 class="header">Project Reserve</h1>
+    <CopyModal
+      v-if="copyToShow"
+      :copy="copyToShow"
+      :on-close="closeCopyModal"
+    />
     <ViewConfigModal
       v-if="viewConfigModalOpen"
       :on-close="closeViewConfigModal"
       :config="configToView"
     />
-    <h2 class="tableLabel mb-9 fs-16 fw-n">Database of reserve instances</h2>
+    <ConfirmationModal
+      v-if="confirmationModalOpen"
+      :on-close="handleConfirmationClose"
+      :action="confirmationAction"
+    />
+    <h2 class="tableLabel mb-9 fs-16 fw-n">
+      Database of reserve instances<font-awesome-icon
+        icon="info-circle"
+        class="icon ml-9"
+        @click="openCopyModal"
+      />
+    </h2>
     <div class="reserveTableContainer">
       <div class="reserveTableLabels">
+        <font-awesome-icon
+          v-if="reserveInstances.length"
+          icon="trash"
+          size="sm"
+          class="deleteReserveInstanceButton icon"
+          @click="openDeleteAllConfirm"
+        />
         <label class="label">Date Created</label>
         <label class="label">Name</label>
         <label class="label status">Status</label>
@@ -20,6 +43,12 @@
           :key="`${instance.id}`"
           class="reserveTableRow"
         >
+          <font-awesome-icon
+            icon="trash"
+            size="sm"
+            class="deleteReserveInstanceButton icon"
+            @click="() => openDeleteConfirm(instance)"
+          />
           <span class="rowCell fw-b">{{ instance.dateLoaded }}</span>
           <span class="rowCell fw-b">{{ instance.name }}</span>
           <span class="rowCell status"
@@ -43,8 +72,8 @@
             <button @click="() => viewConfig(instance)">
               View Configuration
             </button>
-            <button class="exportResultsBtn">
-              Export Results ▼
+            <div class="exportResultsButtonWrapper">
+              <button class="exportResultsBtn">Export Results ▼</button>
               <span class="resultsOptions">
                 <button @click="() => exportAll(instance)">
                   Export all participants as CSV
@@ -56,7 +85,7 @@
                   Export list of allocation non-recipients as CSV
                 </button>
               </span>
-            </button>
+            </div>
           </div>
         </div>
         <div class="buttonWrapper">
@@ -83,15 +112,23 @@ import {
   transformCriteriaForDisplay,
   downloadCSV,
   removeIds,
+  toTitleCase,
 } from '../plugins/helpers'
 import ViewConfigModal from '../components/ViewConfigModal.vue'
+import ConfirmationModal from '../components/ConfirmationModal.vue'
+import CopyModal from '../components/CopyModal.vue'
+import { reserveInstancesCopy } from '../components/constants'
 
 export default {
-  components: { ViewConfigModal },
+  components: { ViewConfigModal, ConfirmationModal, CopyModal },
   data() {
     return {
       viewConfigModalOpen: false,
       configToView: null,
+      confirmationModalOpen: false,
+      handleConfirmationClose: null,
+      confirmationAction: null,
+      copyToShow: null,
     }
   },
   computed: {
@@ -112,6 +149,15 @@ export default {
     this.$store.dispatch('getReserveInstances')
   },
   methods: {
+    openCopyModal() {
+      this.copyToShow = reserveInstancesCopy
+    },
+    closeCopyModal() {
+      this.copyToShow = null
+    },
+    toTitleCase(str) {
+      return toTitleCase(str)
+    },
     initConfig() {
       this.$store.commit('resetConfig')
     },
@@ -119,10 +165,29 @@ export default {
       this.viewConfigModalOpen = false
       this.configToView = null
     },
-    toTitleCase(str) {
-      return str.replace(/_/g, ' ').replace(/\w\S*/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-      })
+    openDeleteConfirm(instance) {
+      this.confirmationAction = 'Delete this reserve instance?'
+      this.handleConfirmationClose = (shouldDelete) => {
+        if (shouldDelete) {
+          this.$store.dispatch('deleteReserveInstance', instance.id)
+        }
+        this.confirmationModalOpen = false
+        this.confirmationAction = null
+        this.handleConfirmationClose = null
+      }
+      this.confirmationModalOpen = true
+    },
+    openDeleteAllConfirm() {
+      this.confirmationAction = 'Delete all reserve instances?'
+      this.handleConfirmationClose = (shouldDelete) => {
+        if (shouldDelete) {
+          this.$store.dispatch('deleteAllReserveInstances')
+        }
+        this.confirmationModalOpen = false
+        this.confirmationAction = null
+        this.handleConfirmationClose = null
+      }
+      this.confirmationModalOpen = true
     },
     async fetchConfig(instance) {
       const configRes = await fetch(
@@ -242,11 +307,15 @@ export default {
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: auto;
 }
 .reserveTableContainer {
+  max-height: 65%;
   width: 90%;
   border: 2px solid var(--dark-blue);
   border-radius: 18px;
+  display: flex;
+  flex-direction: column;
 }
 .reserveTableLabels {
   display: grid;
@@ -255,10 +324,12 @@ export default {
   padding: 18px;
   border-bottom: 2px solid var(--dark-blue);
   text-align: center;
+  position: relative;
 }
 .reserveTableRows {
   background: var(--light-grey);
   border-radius: 0 0 18px 18px;
+  overflow: visible;
 }
 .reserveTableRow {
   display: grid;
@@ -267,6 +338,14 @@ export default {
   grid-gap: 18px;
   border-radius: 18px;
   text-align: center;
+  position: relative;
+}
+.deleteReserveInstanceButton {
+  position: absolute;
+  top: 50%;
+  left: 27px;
+  transform: translate3d(-50%, -50%, 0);
+  z-index: 100;
 }
 .rowCell {
   grid-column: span 3;
@@ -353,13 +432,16 @@ export default {
     margin-bottom: 4.5px;
   }
 }
-.exportResultsBtn {
+.exportResultsButtonWrapper {
   position: relative;
   &:hover {
     & > .resultsOptions {
       display: block;
     }
   }
+}
+.exportResultsBtn {
+  height: 100%;
 }
 .addButton {
   border: 1px solid black;
