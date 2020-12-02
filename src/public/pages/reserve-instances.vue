@@ -52,7 +52,8 @@
           <span class="rowCell fw-b">{{ instance.dateLoaded }}</span>
           <span class="rowCell fw-b">{{ instance.name }}</span>
           <span class="rowCell status"
-            ><span
+            ><button
+              @click="() => processSourceFile(instance)"
               :class="[
                 'statusText',
                 {
@@ -62,8 +63,9 @@
                   ready: instance.status === 'READY_TO_PROCESS',
                 },
               ]"
-              >{{ toTitleCase(instance.status) }}</span
-            ></span
+            >
+              {{ toTitleCase(instance.status) }}
+            </button></span
           >
           <div class="actionButtons">
             <button @click="() => startFromOldConfig(instance)">
@@ -170,6 +172,11 @@ export default {
     closeViewConfigModal() {
       this.viewConfigModalOpen = false
       this.configToView = null
+    },
+    processSourceFile(instance) {
+      if (instance.status !== 'FINISHED') {
+        this.$store.dispatch('processSourceFile', instance)
+      }
     },
     openDeleteConfirm(instance) {
       this.confirmationAction = 'Delete this reserve instance?'
@@ -447,19 +454,31 @@ export default {
   padding: 9px 18px;
   border-radius: 9px;
   text-transform: capitalize;
+  &:focus {
+    outline: none;
+  }
   &.finished {
     background-color: #00b456;
     color: white;
+    cursor: default;
   }
   &.error {
     background-color: #ff4242;
     color: white;
+    cursor: pointer;
+    &:hover {
+      opacity: .75;
+    }
   }
   &.inProgress {
     background-color: #ffa947;
   }
   &.ready {
     background-color: #63d4ff;
+    cursor: pointer;
+    &:hover {
+      opacity: .75;
+    }
   }
 }
 .label {
