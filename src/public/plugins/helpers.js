@@ -151,17 +151,34 @@ export function toTitleCase(str) {
 
 export function checkBinRange({ bins, min, max }) {
   let binError = null
-  const rangeCovered = bins.reduce((acc, bin, index) => {
+  const rangeCovered = bins.forEach((bin, index) => {
+    const isFirstBin = index === 0
+    const isLastBin = index === bins.length - 1
     if (!isFloat(bin.min) || !isFloat(bin.max)) {
       binError = `Bin ${index + 1} must have a valid float.`
-      return acc
     } else if (bin.min < min) {
       binError = `Bin ${index + 1} cannot have a min less than ${min}.`
-      return acc
     } else if (bin.max > max) {
       binError = `Bin ${index + 1} cannot have a max greater than ${max}.`
-      return acc
+    } else if (bin.min > bin.max) {
+      binError = `Bin ${index + 1} cannot have a min greater than ${bin.max}.`
+    } else if (bins.length > 1) {
+      if (isFirstBin && bin.max !== bins[index + 1].min) {
+        binError = `The max of Bin 1 should equal the min of Bin 2`
+      } else if (index === bins.length - 1 && bin.min !== bins[index - 1].max) {
+        binError = `The min of Bin ${
+          index + 1
+        } should equal the max of Bin ${index}`
+      } else if (!isFirstBin && bin.min !== bins[index - 1].max) {
+        binError = `The min of Bin ${
+          index + 1
+        } should equal the max of Bin ${index}`
+      } else if (!isLastBin && bin.max !== bins[index + 1].min) {
+        binError = `The max of Bin ${index + 1} should equal the min of Bin ${
+          index + 2
+        }`
+      }
     }
-  }, [])
+  })
   return binError
 }

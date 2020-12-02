@@ -235,36 +235,21 @@ export default {
               }
               break
             case NUMERIC_TYPE:
+              let numericError = {}
               if (criteria.max < criteria.min) {
-                const minMaxError = {
-                  minMax: 'The max must be greater than or equal to the min.',
-                }
-                if (!!errors[index]) {
-                  errors[index] = minMaxError
-                } else {
-                  errors[index] = {
-                    ...errors[index],
-                    ...minMaxError,
-                  }
-                }
+                numericError.minMax =
+                  'The max must be greater than or equal to the min.'
               }
+
               if (criteria.coarsened) {
                 // confirm that Bin 1 has the correct min
-                let binError = null
-                if (!criteria.bins.length) {
-                  binError = {
-                    bins: 'Please enter at least 1 bin.',
-                  }
-                } else if (criteria.bins[0].min !== criteria.min) {
-                  binError = {
-                    bins: `Bin 1 must have a min of ${criteria.min}.`,
-                  }
-                } else if (
-                  criteria.bins[criteria.bins.length - 1].max !== criteria.max
-                ) {
-                  binError = {
-                    bins: `Bin ${criteria.bins.length} must have a max of ${criteria.max}.`,
-                  }
+                const bins = criteria.bins
+                if (!bins.length) {
+                  numericError.bins = 'Please enter at least 1 bin.'
+                } else if (bins[0].min !== criteria.min) {
+                  numericError.bins = `Bin 1 must have a min of ${criteria.min}.`
+                } else if (bins[bins.length - 1].max !== criteria.max) {
+                  numericError.bins = `Bin ${bins.length} must have a max of ${criteria.max}.`
                 } else {
                   const binRangeError = checkBinRange({
                     bins: criteria.bins,
@@ -272,20 +257,12 @@ export default {
                     max: criteria.max,
                   })
                   if (binRangeError) {
-                    binError = {
-                      bins: binRangeError,
-                    }
+                    numericError.bins = binRangeError
                   }
                 }
-
-                if (!!errors[index] && binError) {
-                  errors[index] = binError
-                } else if (binError) {
-                  errors[index] = {
-                    ...errors[index],
-                    ...binError,
-                  }
-                }
+              }
+              if (Object.keys(numericError).length) {
+                errors[index] = { ...(errors[index] || {}), ...numericError }
               }
               break
             default:
@@ -300,9 +277,6 @@ export default {
     },
     setCopyToShow(copyKey) {
       this.copyToShow = editReserveCategoryCopyMap[copyKey]
-    },
-    setHasCriteriaError(hasCriteriaError) {
-      this.hasCriteriaError = hasCriteriaError
     },
     saveCategory() {
       if (!this.hasSizeError && this.reserveCategory.name) {
@@ -338,6 +312,9 @@ export default {
           this.currentCriteria = this.currentCriteria - 1
         })
       }
+      this.$nextTick(() => {
+        this.validatePriorities()
+      })
     },
     validateCategoryName() {
       this.hasNameError = !this.reserveCategory.name
@@ -416,6 +393,7 @@ export default {
   border: 2px solid var(--dark-blue);
   border-radius: 0 0 18px 18px;
   height: fit-content;
+  max-height: 50vh;
   overflow: auto;
   position: relative;
 }
