@@ -11,7 +11,7 @@
         :on-priority-click="goToPrioritySummary"
       />
       <div class="modalButtons">
-        <button class="navButton" @click="handleOnClose">Back</button>
+        <button class="navButton mt-18" @click="handleOnClose">Back</button>
       </div>
     </div>
   </div>

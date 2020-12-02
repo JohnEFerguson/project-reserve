@@ -86,7 +86,7 @@
               +
             </button>
           </div>
-          <div class="modalCriteriaPanels">
+          <div class="modalCriteriaPanels mb-18">
             <font-awesome-icon
               v-if="reserveCategory.priority.length > 1"
               icon="trash"
@@ -320,8 +320,8 @@ export default {
   padding: 18px;
   border: 2px solid var(--dark-blue);
   border-radius: 0 0 18px 18px;
-  max-height: 50vh;
-  overflow: scroll;
+  height: fit-content;
+  overflow: auto;
   position: relative;
 }
 .deleteCriteriaButton {
