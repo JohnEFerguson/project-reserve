@@ -159,7 +159,7 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
   reserveCategoryNames.forEach((cat) => {
     if (!names.has(cat.name)) {
       fieldNames.push({
-        name: "is_" + cat.name.toLowerCase().split(" ").join("_"),
+        name: "is_eligible_for_reserve_cat_" + cat.name.toLowerCase().split(" ").join("_"),
         required: true,
         dataType: "BOOLEAN",
       })
