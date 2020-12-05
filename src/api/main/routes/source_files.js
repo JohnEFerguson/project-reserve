@@ -36,7 +36,7 @@ router.get('/sourceFiles/:id', async (req, res) => {
   return res.json(await db.sourceFile.findOne({ where: { id } }))
 })
 
-// GET one source file id
+// GET nth reserve patients 
 router.get('/sourceFiles/:id/nthReservePatients', async (req, res) => {
   const { db } = req
   const id = req.params.id
@@ -46,6 +46,16 @@ router.get('/sourceFiles/:id/nthReservePatients', async (req, res) => {
     )
   )
 })
+
+// GET the number of left over units for reserve instance 
+router.get('/sourceFiles/:id/leftOver', async (req, res) => {
+  const { db } = req
+  const id = req.params.id
+  return res.json(
+    (await db.sourceFile.findOne({ where: { id } })).left_over
+  )
+})
+
 
 // GET all patients for a source file
 router.get('/sourceFiles/:id/patients', async (req, res) => {
@@ -127,17 +137,6 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
 
       leftOver += f.size - given
     })
-
-    const notSelectedPatientsArray = Array.from(notSelectedPatients)
-    let i = 0
-    // give left over to unallocated patients if there are any
-    while (leftOver > 0 && i < notSelectedPatientsArray.length) {
-      const pat = notSelectedPatientsArray[i]
-      selectedPatients.add(pat)
-      allocatedPatientGroups[pat] = 'None'
-      leftOver -= 1
-      i += 1
-    }
 
     // update patients
     selectedPatients.forEach(async (pId) => {
