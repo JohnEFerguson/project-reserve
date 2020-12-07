@@ -399,11 +399,8 @@ export default {
   display: none;
   position: absolute;
   top: calc(100% + 9px);
-  left: 50%;
-  width: 350px;
+  width: 325px;
   word-break: break-word;
-  transform: translateX(-50%);
-  left: calc(100% + 9px);
   background-color: white;
   border: 2px solid var(--dark-blue);
   padding: 9px;

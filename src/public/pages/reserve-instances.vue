@@ -116,6 +116,7 @@ import {
   downloadCSV,
   removeIds,
   toTitleCase,
+  deepClone,
 } from '../plugins/helpers'
 import ViewConfigModal from '../components/ViewConfigModal.vue'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
@@ -306,6 +307,7 @@ export default {
       outputArray.push([])
       outputArray.push([`Unit Allocated: ${displayConfig.unitType}`])
       outputArray.push([`Number Allocated: ${displayConfig.supply}`])
+      outputArray.push([`Units Left Over: ${leftOver}`])
       outputArray.push([
         [
           `Allocation Timestamp: ${loaded.toLocaleDateString()} ${loaded.toLocaleTimeString()}`,
@@ -325,7 +327,7 @@ export default {
             nthPatient
               ? `, nth recipient id = ${nthPatient.nthRecipientId}`
               : ''
-          }${leftOver ? `, units left over = ${leftOver}` : ''})`,
+          })`,
         ])
         category.priority.forEach((priority, index) => {
           outputArray.push([

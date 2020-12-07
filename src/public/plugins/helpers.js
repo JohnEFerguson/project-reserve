@@ -106,6 +106,7 @@ export function transformCriteriaForDisplay(priority) {
       elements[element.order - 1] = element
     })
     criterias[crit.order - 1] = {
+      ...deepClone(numericFields),
       ...crit,
       elements,
       criteriaType: CATEGORY_TYPE,
@@ -114,6 +115,7 @@ export function transformCriteriaForDisplay(priority) {
   priority.numericCriteria.forEach(
     (crit) =>
       (criterias[crit.order - 1] = {
+        ...deepClone(categoryFields),
         ...crit,
         numBins: crit.bins.length,
         criteriaType: NUMERIC_TYPE,
@@ -136,6 +138,10 @@ export function removeIds(obj) {
       delete obj[prop]
     else if (typeof obj[prop] === 'object') removeIds(obj[prop])
   }
+}
+
+export function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj))
 }
 
 export function isFloat(val) {
