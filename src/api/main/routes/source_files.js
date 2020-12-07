@@ -36,7 +36,7 @@ router.get('/sourceFiles/:id', async (req, res) => {
   return res.json(await db.sourceFile.findOne({ where: { id } }))
 })
 
-// GET nth reserve patients 
+// GET nth reserve patients
 router.get('/sourceFiles/:id/nthReservePatients', async (req, res) => {
   const { db } = req
   const id = req.params.id
@@ -47,15 +47,12 @@ router.get('/sourceFiles/:id/nthReservePatients', async (req, res) => {
   )
 })
 
-// GET the number of left over units for reserve instance 
+// GET the number of left over units for reserve instance
 router.get('/sourceFiles/:id/leftOver', async (req, res) => {
   const { db } = req
   const id = req.params.id
-  return res.json(
-    (await db.sourceFile.findOne({ where: { id } })).left_over
-  )
+  return res.json((await db.sourceFile.findOne({ where: { id } })).left_over)
 })
-
 
 // GET all patients for a source file
 router.get('/sourceFiles/:id/patients', async (req, res) => {
@@ -65,7 +62,7 @@ router.get('/sourceFiles/:id/patients', async (req, res) => {
   if (req.query.givenUnit)
     filterLosers += `and ${
       req.query.givenUnit === 'false' ? 'not' : ''
-      } given_unit`
+    } given_unit`
 
   return res.json(await getPatientsWithAttributes(db, id, filterLosers))
 })
@@ -95,7 +92,6 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       })
     )
 
-
     const patients = await Promise.all(
       (
         await db.patient.findAll({
@@ -115,17 +111,13 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
       let given = 0
       let i = 0
       while (i < f.patients.length) {
-
-
         if (given < f.size && !selectedPatients.has(f.patients[i])) {
-
           selectedPatients.add(f.patients[i])
           allocatedPatientGroups[f.patients[i]] = f.name
           given += 1
           notSelectedPatients.delete(f.patients[i])
 
           if (given == f.size) {
-
             nthReservePatients.push({
               name: f.name,
               nthRecipientPrimaryId: f.patients[i],
@@ -140,7 +132,6 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
 
     // update patients
     selectedPatients.forEach(async (pId) => {
-
       const patient = await db.patient.findOne({ where: { id: pId } })
       patient.given_unit = true
       patient.group_allocated_under = allocatedPatientGroups[pId]
@@ -149,9 +140,9 @@ router.post('/sourceFiles/:id/process', async (req, res) => {
 
     const nthReservePatientsWithNames = await Promise.all(
       nthReservePatients.map(async (f) => {
-        const name = (
-          await db.patient.findOne({ where: { id: f.nthRecipientPrimaryId } })
-        )
+        const name = await db.patient.findOne({
+          where: { id: f.nthRecipientPrimaryId },
+        })
 
         return { name: f.name, nthRecipientId: name.dataValues.recipient_id }
       })

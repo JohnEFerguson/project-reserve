@@ -100,13 +100,17 @@ export function transformCriteriaForDisplay(priority) {
     return null
   }
   const criterias = []
-  priority.categoryCriteria.forEach(
-    (crit) =>
-      (criterias[crit.order - 1] = {
-        ...crit,
-        criteriaType: CATEGORY_TYPE,
-      })
-  )
+  priority.categoryCriteria.forEach((crit) => {
+    const elements = []
+    crit.elements.forEach((element) => {
+      elements[element.order - 1] = element
+    })
+    criterias[crit.order - 1] = {
+      ...crit,
+      elements,
+      criteriaType: CATEGORY_TYPE,
+    }
+  })
   priority.numericCriteria.forEach(
     (crit) =>
       (criterias[crit.order - 1] = {
