@@ -24,6 +24,7 @@ router.get("/configurations/:id", async (req, res) => {
         {
           model: db.reserveCategory,
           as: "reserveCategories",
+          order: [['reserveCatetories.`order`', 'ASC']],
           include: [
             {
               model: db.priority,
@@ -31,6 +32,7 @@ router.get("/configurations/:id", async (req, res) => {
                 {
                   model: db.categoryCriteria,
                   as: "categoryCriteria",
+                  order: [['order', 'ASC']],
                   include: [
                     {
                       model: db.categoryCriteriaElement,
@@ -41,6 +43,7 @@ router.get("/configurations/:id", async (req, res) => {
                 {
                   model: db.numericCriteria,
                   as: "numericCriteria",
+                  order: [['order', 'ASC']],
                   include: [
                     {
                       model: db.numericCriteriaBucket,
@@ -51,6 +54,7 @@ router.get("/configurations/:id", async (req, res) => {
               ],
             },
           ],
+
         },
       ],
     })
