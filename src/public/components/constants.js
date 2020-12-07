@@ -203,7 +203,7 @@ export const editReserveCategoryCopyMap = {
       {
         question: 'In a numeric criteria, what are bins?',
         answer:
-          'Bins are a way to break up the range of the numeric criteria. So if a numeric criteria is age which ranges from 0 to 120, you can define bins as 0-20, 20-40, and 40-120 that will treat individuals in the same age bin identically along this criteria. It is important to know that a bin includes its min in the range but does not include its max. For example, the age bin 20-40 will include all individuals aged 20, 21, ..., 39 but will not include individuals aged 40. The exception is that the last bin will include the max in its range.',
+          'Bins are a way to break up the range of the numeric criteria. So if a numeric criteria is age which ranges from 0 to 120, you can define bins as 0-20, 20-40, and 40-120 that will treat individuals in the same age bin identically along this criteria.',
       },
       {
         question:

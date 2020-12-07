@@ -115,7 +115,7 @@ export default {
   },
 }
 </script>
-<style lang="stylus">
+<style scoped lang="stylus">
 .configSummaryContainer {
   grid-column: span 3;
   margin: auto;
