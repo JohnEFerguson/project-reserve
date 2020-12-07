@@ -47,7 +47,7 @@ router.post("/patients", async (req, res) => {
 
         // add reserve categories
         const reserveCategoryFieldNames = fields
-          .filter((f) => f.startsWith("is_") && rawPat[f])
+          .filter((f) => f.startsWith("is_eligible_for_reserve_cat_") && rawPat[f])
           .map((f) => f.substr(3));
         const reserveCategories = db.reserveCategory.findAll({
           where: {
@@ -76,7 +76,7 @@ router.post("/patients", async (req, res) => {
 
         // add numeric criteria values
         const possibleNumericCriteriaFields = fields.filter(
-          (f) => !f.startsWith("is_")
+          (f) => !f.startsWith("is_eligible_for_reserve_cat_")
         );
         const numericCriteria = db.numericCriteria.findAll({
           where: {
@@ -129,7 +129,7 @@ router.post("/patients", async (req, res) => {
 
         // add category criteria values
         const possibleCategoryCriteriaFields = fields.filter(
-          (f) => !f.startsWith("is_")
+          (f) => !f.startsWith("is_eligible_for_reserve_cat_")
         );
         const categoryCriteria = db.categoryCriteria.findAll({
           where: { name: { [Op.in]: possibleCategoryCriteriaFields } },
