@@ -275,6 +275,8 @@ export default {
               `number_of_bins = ${filteredPriority.bins.length}`
             )
             break
+          case 'numBins':
+            break
           default:
             priorityStringElements.push(`${key} = ${filteredPriority[key]}`)
             break
