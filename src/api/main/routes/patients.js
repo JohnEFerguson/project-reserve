@@ -48,7 +48,7 @@ router.post("/patients", async (req, res) => {
         // add reserve categories
         const reserveCategoryFieldNames = fields
           .filter((f) => f.startsWith("is_eligible_for_reserve_cat_") && rawPat[f])
-          .map((f) => f.substr(3));
+          .map((f) => f.substr(28));
         const reserveCategories = db.reserveCategory.findAll({
           where: {
             configurationId,
