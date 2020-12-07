@@ -174,6 +174,7 @@ export default {
   border-radius: 18px;
   background-color: var(--light-grey);
   padding: 9px 18px;
+  word-break: break-word;
 }
 .iconWrapper {
   position: relative;
