@@ -290,6 +290,8 @@ export default {
         `/sourceFiles/${instance.id}/nthReservePatients`
       )
       const nthReservePatients = await nthReservePatientsRes.json()
+      const leftOverRes = await fetch(`/sourceFiles/${instance.id}/leftOver`)
+      const leftOver = await leftOverRes.json()
 
       const parsedFileName = path.parse(instance.name).name
       const today = new Date()
@@ -323,7 +325,7 @@ export default {
             nthPatient
               ? `, nth recipient id = ${nthPatient.nthRecipientId}`
               : ''
-          })`,
+          }${leftOver ? `, units left over = ${leftOver}` : ''})`,
         ])
         category.priority.forEach((priority, index) => {
           outputArray.push([

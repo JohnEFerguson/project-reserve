@@ -202,9 +202,24 @@
           class="fs-12 mt-9 ml-9 col-error"
           >{{ criteriaErrors.bins }}</span
         >
-        <label class="ml-9" :for="`criteriaNumBins${criteriaIndex}`"
-          >Number of bins</label
-        >
+        <span class="ml-9" :for="`criteriaNumBins${criteriaIndex}`">
+          Number of bins
+          <span class="iconWrapper">
+            <font-awesome-icon
+              icon="info-circle"
+              class="icon ml-9"
+              @mouseenter="() => setShowMinMaxNote(true)"
+              @mouseleave="() => setShowMinMaxNote(false)"
+            />
+            <div :class="['descriptionWrapper', { isVisible: showMinMaxNote }]">
+              It is important to know that a bin includes its min in the range
+              but does not include its max. For example, the age bin 20-40 will
+              include all individuals aged 20, 21, ..., 39 but will not include
+              individuals aged 40. The exception is that the last bin will
+              include the max in its range.
+            </div>
+          </span>
+        </span>
         <input
           v-if="!isReadOnly"
           v-model.number="criteria.numBins"
@@ -288,6 +303,11 @@ export default {
       default: () => {},
     },
   },
+  data() {
+    return {
+      showMinMaxNote: false,
+    }
+  },
   computed: {
     CATEGORY_TYPE() {
       return CATEGORY_TYPE
@@ -297,6 +317,9 @@ export default {
     },
   },
   methods: {
+    setShowMinMaxNote(showNote) {
+      this.showMinMaxNote = showNote
+    },
     runValidations() {
       this.$nextTick(() => {
         this.validatePriorities()
@@ -364,6 +387,30 @@ export default {
 <style scoped lang="stylus">
 .panelWrapper {
   position: relative;
+}
+.iconWrapper {
+  position: relative;
+}
+.icon {
+  cursor: pointer;
+}
+.descriptionWrapper {
+  z-index: 1000;
+  display: none;
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  width: 350px;
+  word-break: break-word;
+  transform: translateX(-50%);
+  left: calc(100% + 9px);
+  background-color: white;
+  border: 2px solid var(--dark-blue);
+  padding: 9px;
+  border-radius: 9px;
+  &.isVisible {
+    display: block;
+  }
 }
 .textInput {
   cursor: pointer;
