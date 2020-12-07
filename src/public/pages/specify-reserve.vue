@@ -91,10 +91,7 @@
 import EditReserveCategoryModal from '../components/EditReserveCategoryModal.vue'
 import ViewPriorityOrderModal from '../components/ViewPriorityOrderModal.vue'
 import ConfigLayout from '../layouts/configuration-screen.vue'
-
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj))
-}
+import { deepClone } from '../plugins/helpers'
 
 export default {
   middleware: 'has-category',

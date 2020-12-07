@@ -143,11 +143,7 @@ import {
   numericFields,
 } from './constants'
 import { editReserveCategoryCopyMap } from './constants'
-import { checkBinRange } from '../plugins/helpers'
-
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj))
-}
+import { checkBinRange, deepClone } from '../plugins/helpers'
 
 const defaultCriteria = {
   name: '',
