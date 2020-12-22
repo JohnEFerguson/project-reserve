@@ -186,92 +186,98 @@ export default {
           {}
         )
         const recipientIds = []
-        patientObjs = patients.map((patient, patientIndex) => {
-          return patient.reduce((acc, field, index) => {
-            const hasCustomRandomNumber =
-              fieldNames[index] === 'random_number' && !!field
-            const { name, dataType, required, possibleValues } = dataTypeMap[
-              index
-            ] || {
-              name: fieldNames[index],
-              dataType: 'STRING',
-              required: false,
-              possibleValues: hasCustomRandomNumber
-                ? { min: 0, max: 100000 }
-                : null,
+        patientObjs = patients
+          .map((patient, patientIndex) => {
+            // edge case filter out patients that don't have any fields
+            if (!patient.some((field) => Boolean(field) || field === 0)) {
+              return null
             }
-            const errorMessage = `Patient ${
-              patientIndex + 1
-            } has an invalid value for ${name}: ${field}.`
-            let realFieldValue = field
-            if (required && !realFieldValue) {
-              throw new Error(
-                `${errorMessage} This field is required but is empty.`
-              )
-            }
-            if (name === 'recipient_id') {
-              if (recipientIds.includes(realFieldValue)) {
+            return patient.reduce((acc, field, index) => {
+              const hasCustomRandomNumber =
+                fieldNames[index] === 'random_number' && !!field
+              const { name, dataType, required, possibleValues } = dataTypeMap[
+                index
+              ] || {
+                name: fieldNames[index],
+                dataType: 'STRING',
+                required: false,
+                possibleValues: hasCustomRandomNumber
+                  ? { min: 0, max: 100000 }
+                  : null,
+              }
+              const errorMessage = `Patient ${
+                patientIndex + 1
+              } has an invalid value for ${name}: ${field}.`
+              let realFieldValue = field
+              if (required && !realFieldValue) {
                 throw new Error(
-                  `${errorMessage} Duplicate recipient ID: ${realFieldValue}`
+                  `${errorMessage} This field is required but is empty.`
                 )
-              } else {
-                recipientIds.push(realFieldValue)
               }
-            }
-            let typeCheck = dataType
-            if (hasCustomRandomNumber) {
-              typeCheck = 'NUMBER'
-            }
+              if (name === 'recipient_id') {
+                if (recipientIds.includes(realFieldValue)) {
+                  throw new Error(
+                    `${errorMessage} Duplicate recipient ID: ${realFieldValue}`
+                  )
+                } else {
+                  recipientIds.push(realFieldValue)
+                }
+              }
+              let typeCheck = dataType
+              if (hasCustomRandomNumber) {
+                typeCheck = 'NUMBER'
+              }
 
-            switch (typeCheck) {
-              case 'BOOLEAN': {
-                const fieldUC = field.toUpperCase()
-                if (!['TRUE', 'FALSE'].includes(fieldUC)) {
-                  throw new Error(
-                    `${errorMessage} Please ensure this is a true/false value.`
-                  )
-                }
-                realFieldValue = fieldUC === 'TRUE'
-                break
-              }
-              case 'NUMBER': {
-                if (field && !isFloat(field)) {
-                  throw new Error(
-                    `${errorMessage} Please ensure this is a real number.`
-                  )
-                }
-                const numberVal = parseFloat(field)
-                if (possibleValues && !isNaN(numberVal)) {
-                  const { min, max } = possibleValues
-                  if (numberVal < min || numberVal > max) {
+              switch (typeCheck) {
+                case 'BOOLEAN': {
+                  const fieldUC = field.toUpperCase()
+                  if (!['TRUE', 'FALSE'].includes(fieldUC)) {
                     throw new Error(
-                      `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
+                      `${errorMessage} Please ensure this is a true/false value.`
                     )
                   }
+                  realFieldValue = fieldUC === 'TRUE'
+                  break
                 }
-                realFieldValue = !isNaN(numberVal) ? numberVal : null
-                break
+                case 'NUMBER': {
+                  if (field && !isFloat(field)) {
+                    throw new Error(
+                      `${errorMessage} Please ensure this is a real number.`
+                    )
+                  }
+                  const numberVal = parseFloat(field)
+                  if (possibleValues && !isNaN(numberVal)) {
+                    const { min, max } = possibleValues
+                    if (numberVal < min || numberVal > max) {
+                      throw new Error(
+                        `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
+                      )
+                    }
+                  }
+                  realFieldValue = !isNaN(numberVal) ? numberVal : null
+                  break
+                }
+                default:
+                case 'STRING':
+                  if (
+                    possibleValues &&
+                    Array.isArray(possibleValues) &&
+                    !possibleValues.includes(field)
+                  ) {
+                    throw new Error(
+                      `${errorMessage} Please ensure value is one of ${possibleValues.join(
+                        ', '
+                      )}.`
+                    )
+                  }
+                  break
               }
-              default:
-              case 'STRING':
-                if (
-                  possibleValues &&
-                  Array.isArray(possibleValues) &&
-                  !possibleValues.includes(field)
-                ) {
-                  throw new Error(
-                    `${errorMessage} Please ensure value is one of ${possibleValues.join(
-                      ', '
-                    )}.`
-                  )
-                }
-                break
-            }
-            acc[name] = realFieldValue === '' ? null : realFieldValue
-            acc.usedGeneratedRandomNumber = !hasCustomRandomNumber
-            return acc
-          }, {})
-        })
+              acc[name] = realFieldValue === '' ? null : realFieldValue
+              acc.usedGeneratedRandomNumber = !hasCustomRandomNumber
+              return acc
+            }, {})
+          })
+          .filter(Boolean)
       } catch (e) {
         this.errorMessage = e
         this.$refs.fileUpload.value = ''
