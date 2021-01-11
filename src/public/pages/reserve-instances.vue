@@ -272,7 +272,9 @@ export default {
             break
           case 'bins':
             priorityStringElements.push(
-              `number_of_bins = ${filteredPriority.bins.length}`
+              `number_of_bins = ${
+                filteredPriority.coarsened ? filteredPriority.bins.length : 1
+              }`
             )
             break
           case 'numBins':
@@ -308,7 +310,7 @@ export default {
       ])
       outputArray.push([])
       outputArray.push([`Unit Allocated: ${displayConfig.unitType}`])
-      outputArray.push([`Number Allocated: ${displayConfig.supply}`])
+      outputArray.push([`Total Supply Rationed: ${displayConfig.supply}`])
       outputArray.push([`Units Left Over: ${leftOver}`])
       outputArray.push([
         [

@@ -205,7 +205,7 @@ export default {
                   ? { min: 0, max: 100000 }
                   : null,
               }
-              const errorMessage = `Patient ${
+              const errorMessage = `Patient in row ${
                 patientIndex + 1
               } has an invalid value for ${name}: ${field}.`
               let realFieldValue = field
@@ -223,54 +223,57 @@ export default {
                   recipientIds.push(realFieldValue)
                 }
               }
-              let typeCheck = dataType
-              if (hasCustomRandomNumber) {
-                typeCheck = 'NUMBER'
-              }
 
-              switch (typeCheck) {
-                case 'BOOLEAN': {
-                  const fieldUC = field.toUpperCase()
-                  if (!['TRUE', 'FALSE'].includes(fieldUC)) {
-                    throw new Error(
-                      `${errorMessage} Please ensure this is a true/false value.`
-                    )
-                  }
-                  realFieldValue = fieldUC === 'TRUE'
-                  break
+              if (required) {
+                let typeCheck = dataType
+                if (hasCustomRandomNumber) {
+                  typeCheck = 'NUMBER'
                 }
-                case 'NUMBER': {
-                  if (field && !isFloat(field)) {
-                    throw new Error(
-                      `${errorMessage} Please ensure this is a real number.`
-                    )
-                  }
-                  const numberVal = parseFloat(field)
-                  if (possibleValues && !isNaN(numberVal)) {
-                    const { min, max } = possibleValues
-                    if (numberVal < min || numberVal > max) {
+
+                switch (typeCheck) {
+                  case 'BOOLEAN': {
+                    const fieldUC = field.toUpperCase()
+                    if (!['TRUE', 'FALSE'].includes(fieldUC)) {
                       throw new Error(
-                        `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
+                        `${errorMessage} Please ensure this is a true/false value.`
                       )
                     }
+                    realFieldValue = fieldUC === 'TRUE'
+                    break
                   }
-                  realFieldValue = !isNaN(numberVal) ? numberVal : null
-                  break
+                  case 'NUMBER': {
+                    if (field && !isFloat(field)) {
+                      throw new Error(
+                        `${errorMessage} Please ensure this is a real number.`
+                      )
+                    }
+                    const numberVal = parseFloat(field)
+                    if (possibleValues && !isNaN(numberVal)) {
+                      const { min, max } = possibleValues
+                      if (numberVal < min || numberVal > max) {
+                        throw new Error(
+                          `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
+                        )
+                      }
+                    }
+                    realFieldValue = !isNaN(numberVal) ? numberVal : null
+                    break
+                  }
+                  default:
+                  case 'STRING':
+                    if (
+                      possibleValues &&
+                      Array.isArray(possibleValues) &&
+                      !possibleValues.includes(field)
+                    ) {
+                      throw new Error(
+                        `${errorMessage} Please ensure value is one of ${possibleValues.join(
+                          ', '
+                        )}.`
+                      )
+                    }
+                    break
                 }
-                default:
-                case 'STRING':
-                  if (
-                    possibleValues &&
-                    Array.isArray(possibleValues) &&
-                    !possibleValues.includes(field)
-                  ) {
-                    throw new Error(
-                      `${errorMessage} Please ensure value is one of ${possibleValues.join(
-                        ', '
-                      )}.`
-                    )
-                  }
-                  break
               }
               acc[name] = realFieldValue === '' ? null : realFieldValue
               acc.usedGeneratedRandomNumber = !hasCustomRandomNumber
