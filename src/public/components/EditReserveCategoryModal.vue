@@ -91,7 +91,6 @@
           </div>
           <div class="modalCriteriaPanels mb-18">
             <font-awesome-icon
-              v-if="reserveCategory.priority.length > 1"
               icon="trash"
               class="deleteCriteriaButton"
               @click="deleteCurrentCriteria"
@@ -304,13 +303,22 @@ export default {
       }
     },
     deleteCurrentCriteria() {
-      const deletedLastCriteria =
-        this.currentCriteria === this.reserveCategory.priority.length - 1
-      this.reserveCategory.priority.splice(this.currentCriteria, 1)
-      if (deletedLastCriteria) {
-        this.$nextTick(() => {
-          this.currentCriteria = this.currentCriteria - 1
-        })
+      // clear form if this is the only criteria
+      if (this.reserveCategory.priority.length === 1) {
+        this.reserveCategory.priority = [
+          {
+            ...deepClone(defaultCriteria),
+          },
+        ]
+      } else {
+        const deletedLastCriteria =
+          this.currentCriteria === this.reserveCategory.priority.length - 1
+        this.reserveCategory.priority.splice(this.currentCriteria, 1)
+        if (deletedLastCriteria) {
+          this.$nextTick(() => {
+            this.currentCriteria = this.currentCriteria - 1
+          })
+        }
       }
       this.$nextTick(() => {
         this.validatePriorities()
