@@ -28,6 +28,16 @@ try {
 
     //  use server for route
     mainWindow.loadURL(`http://localhost:${env.PORT}`)
+
+    mainWindow.webContents.session.on(
+      'will-download',
+      (event, downloadItem, webContents) => {
+        downloadItem.setSaveDialogOptions({
+          filters: [{ name: 'CSV', extensions: ['csv'] }],
+          message: 'Download CSV',
+        })
+      }
+    )
   }
 
   app.on('ready', createWindow)
