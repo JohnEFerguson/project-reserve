@@ -124,7 +124,7 @@
           ]"
           @click="saveCategory"
         >
-          {{ `${mode === 'add' ? 'Add' : 'Edit'}` }}
+          {{ `${mode === 'add' ? 'Add' : 'Save'}` }}
         </button>
       </div>
     </div>
@@ -181,13 +181,20 @@ export default {
   },
   computed: {
     availableSupply() {
-      const defaultCategory = this.$store.state.currentConfig.reserveCategories.find(
-        (cat) => !!cat.isDefault
+      const totalAllocation = this.$store.state.currentConfig.reserveCategories.reduce(
+        (total, cat) => {
+          // we are allowed to take units from the default category
+          if (!cat.isDefault) {
+            return total + parseInt(cat.size)
+          }
+          return total
+        },
+        0
       )
-      if (defaultCategory) {
-        return parseInt(this.initialSize) + parseInt(defaultCategory.size)
-      }
-      return this.$store.state.currentConfig.supply
+      return (
+        parseInt(this.initialSize) +
+        parseInt(this.$store.state.currentConfig.supply - totalAllocation)
+      )
     },
     CATEGORY_TYPE() {
       return CATEGORY_TYPE

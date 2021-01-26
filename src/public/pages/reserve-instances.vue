@@ -74,7 +74,12 @@
             <button @click="() => viewConfig(instance)">
               View Configuration
             </button>
-            <div class="exportResultsButtonWrapper">
+            <div
+              :class="[
+                'exportResultsButtonWrapper',
+                { isDisabled: instance.status !== 'FINISHED' },
+              ]"
+            >
               <button class="exportResultsBtn">Export Results ▼</button>
               <span class="resultsOptions">
                 <button @click="() => exportAll(instance)">
@@ -548,9 +553,16 @@ export default {
 }
 .exportResultsButtonWrapper {
   position: relative;
-  &:hover {
-    & > .resultsOptions {
-      display: block;
+  &.isDisabled {
+    & > .exportResultsBtn {
+      cursor: not-allowed;
+    }
+  }
+  &:not(.isDisabled) {
+    &:hover {
+      & > .resultsOptions {
+        display: block;
+      }
     }
   }
 }
