@@ -57,11 +57,15 @@
         recipient. Please ensure that this data is readily available before
         continuing.
       </p>
-      <p class="mb-27">
+      <p class="mb-18">
         A user can optionally include their own random number for a patient by
         including a field exactly named random_number. If a patient has a blank
         random number or random number not in the range 0 to 100000, the system
         will generate and report its own random number for the patient.
+      </p>
+      <p class="mb-27">
+        As a warning, allocation behavior may not proceed as intended in the
+        presence of missing required data.
       </p>
       <div class="mb-18 fw-b">Required fields:</div>
       <p
