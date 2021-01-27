@@ -8,16 +8,15 @@
   "private": true,
   "build": {
     "productName": "Project Reserve",
-    "appId": "your.id",
+    "appId": "project.reserve",
     "mac": {
-      "category": "your.app.category.type"
     },
     "win": {
       "target": [
         {
           "target": "nsis"
         }
-      ]    
+      ]
     },
     "files": [
       "build/*",
@@ -52,6 +51,8 @@
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "dotenv": "^8.2.0",
+    "electron-builder-squirrel-windows": "^22.10.4",
+    "electron-notarize": "^1.0.0",
     "express": "^4.17.1",
     "http": "^0.0.1-security",
     "isomorphic-fetch": "^3.0.0",

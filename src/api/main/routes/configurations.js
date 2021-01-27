@@ -110,12 +110,37 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
     where: { configurationId, isDefault: false },
   });
 
+
   const categoryCriteriaFields = await db.sequelize.query(
     `
     SELECT id, name FROM category_criteria 
     WHERE priority_id IN (
       SELECT id FROM priority 
       WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
+    );
+    `,
+    { type: SELECT }
+  );
+
+
+  const categoryCriteriaFieldsDefault = await db.sequelize.query(
+    `
+    SELECT id, name FROM category_criteria 
+    WHERE priority_id IN (
+      SELECT id FROM priority 
+      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId} AND is_default)
+    );
+    `,
+    { type: SELECT }
+  );
+
+
+  const categoryCriteriaFieldsNotDefault = await db.sequelize.query(
+    `
+    SELECT id, name FROM category_criteria 
+    WHERE priority_id IN (
+      SELECT id FROM priority 
+      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId} AND NOT is_default)
     );
     `,
     { type: SELECT }
@@ -144,16 +169,28 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
   }, {})
 
 
-  const numericCriteriaFields = await db.sequelize.query(
+  const numericCriteriaFieldsRequired = await db.sequelize.query(
     `
     SELECT name, min, max FROM numeric_criteria 
     WHERE priority_id IN (
       SELECT id FROM priority 
-      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId})
+      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId} AND is_default)
     );
     `,
     { type: SELECT }
   );
+
+const numericCriteriaFieldsNotRequired = await db.sequelize.query(
+    `
+    SELECT name, min, max FROM numeric_criteria 
+    WHERE priority_id IN (
+      SELECT id FROM priority 
+      WHERE reserve_category_id in (SELECT id FROM reserve_category WHERE configuration_id = ${configurationId} AND NOT is_default)
+    );
+    `,
+    { type: SELECT }
+  );
+
 
   const names = new Set()
 
@@ -170,7 +207,20 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
       names.add(cat.name)
     }
   });
-  categoryCriteriaFields[0].forEach((criteria) => {
+
+   categoryCriteriaFieldsDefault[0].forEach((criteria) => {
+    if (!names.has(criteria.name)) {
+      fieldNames.push({
+        name: criteria.name.toLowerCase().split(" ").join("_"),
+        required: true,
+        dataType: "STRING",
+        possibleValues: possibleValuesMap[criteria.id]
+      })
+      names.add(criteria.name)
+    }
+  });
+
+   categoryCriteriaFieldsNotDefault[0].forEach((criteria) => {
     if (!names.has(criteria.name)) {
       fieldNames.push({
         name: criteria.name.toLowerCase().split(" ").join("_"),
@@ -181,7 +231,20 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
       names.add(criteria.name)
     }
   });
-  numericCriteriaFields[0].forEach((criteria) => {
+
+   numericCriteriaFieldsRequired[0].forEach((criteria) => {
+    if (!names.has(criteria.name)) {
+      fieldNames.push({
+        name: criteria.name.toLowerCase().split(" ").join("_"),
+        required: true,
+        dataType: "NUMBER",
+        possibleValues: { min: criteria.min, max: criteria.max }
+      })
+      names.add(criteria.name)
+    }
+  });
+
+   numericCriteriaFieldsNotRequired[0].forEach((criteria) => {
     if (!names.has(criteria.name)) {
       fieldNames.push({
         name: criteria.name.toLowerCase().split(" ").join("_"),
@@ -192,6 +255,9 @@ router.get("/configurations/:id/fieldNames", async (req, res) => {
       names.add(criteria.name)
     }
   });
+
+
+
 
   res.json(fieldNames);
 });
