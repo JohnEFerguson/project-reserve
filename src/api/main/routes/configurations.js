@@ -254,8 +254,14 @@ const numericCriteriaFieldsNotRequired = await db.sequelize.query(
       })
       names.add(criteria.name)
     }
-  });
+   });
 
+  fieldNames.push({
+    name: "random_number", 
+    required: false,
+    dataType: "NUMBER",
+    possibleValues: { min: 0, max: 100000 }
+  })
 
 
 
