@@ -224,7 +224,7 @@ export default {
                 }
               }
 
-              if (required) {
+              if (!!field || field === 0) {
                 let typeCheck = dataType
                 if (hasCustomRandomNumber) {
                   typeCheck = 'NUMBER'
@@ -250,7 +250,9 @@ export default {
                     const numberVal = parseFloat(field)
                     if (possibleValues && !isNaN(numberVal)) {
                       const { min, max } = possibleValues
-                      if (numberVal < min || numberVal > max) {
+                      const parsedMin = parseFloat(min)
+                      const parsedMax = parseFloat(max)
+                      if (numberVal < parsedMin || numberVal > parsedMax) {
                         throw new Error(
                           `${errorMessage} Out of range. Please ensure number is between ${min} and ${max} (inclusive).`
                         )
