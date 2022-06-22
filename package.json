@@ -70,7 +70,7 @@
     "sequelize-auto-migrations": "^1.0.3",
     "socket.io": "^3.0.1",
     "socket.io-client": "^3.0.1",
-    "sqlite3": "^5.0.0",
+    "sqlite3": "^5.0.3",
     "vue": "^2.6.12",
     "vue-router": "^3.4.9",
     "vue-server-renderer": "^2.6.12",
