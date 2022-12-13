@@ -53,7 +53,7 @@
     "dotenv": "^8.2.0",
     "electron-builder-squirrel-windows": "^22.10.4",
     "electron-notarize": "^1.0.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "http": "^0.0.1-security",
     "isomorphic-fetch": "^3.0.0",
     "lodash.get": "^4.4.2",
